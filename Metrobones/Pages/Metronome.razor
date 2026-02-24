@@ -1,0 +1,75 @@
+﻿@page "/metronome"
+@implements IDisposable
+@inject IJSRuntime JS
+
+<PageTitle>Metronome</PageTitle>
+
+<h1>Metronome</h1>
+Beats Per Minute (BPM):
+<input type="number" class="form-control mb-3" @bind="BeatsPerMinute" min="30" max="300" step="1" />
+<div class="mb-3 grid gap-2 grid-cols-3">
+    Metrum (Beats per Bar):
+    <input type="number" class="form-control mb-3" @bind="beatsPerBar" min="1" max="12" step="1" />
+    <input type="number" class="form-control mb-3" @bind="noteValue" min="1" max="16" step="1" />
+</div>
+
+@if (IsRunning)
+{
+    <button class="btn btn-danger" @onclick="Stop">Stop Metronome</button>
+    <button class="btn btn-primary" @onclick="SetBpm">Update</button>
+}
+else
+{
+    <button class="btn btn-primary" @onclick="Start">Start Metronome</button>
+}
+
+<p role="status">Current Beat: @currentBeat</p>
+
+@code {
+    private int BeatsPerMinute = 120;
+    private int currentBeat = 1;
+    private int beatsPerBar = 4;
+    private int noteValue = 4; // Quarter note
+    private DotNetObjectReference<Metronome>? _dotNetRef;
+    private bool IsRunning = false;
+
+    private async Task Start()
+    {
+        await JS.InvokeVoidAsync("metronome.start", BeatsPerMinute, beatsPerBar, noteValue);
+        IsRunning = await JS.InvokeAsync<bool>("metronome.getIsRunning");
+    }
+
+    private async Task Stop()
+    {
+        await JS.InvokeVoidAsync("metronome.stop");
+        IsRunning = await JS.InvokeAsync<bool>("metronome.getIsRunning");
+    }
+
+    private async Task SetBpm()
+    {
+        await JS.InvokeVoidAsync("metronome.setBpm", BeatsPerMinute, beatsPerBar, noteValue);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("metronome.setDotNetReference", _dotNetRef, beatsPerBar);
+        }
+    }
+
+    // This method is called from JavaScript
+    [JSInvokable]
+    public async Task OnBeat(int beatNumber)
+    {
+        currentBeat = beatNumber;
+        await InvokeAsync(StateHasChanged);
+        // Blazor's synchronization context
+    }
+
+    public void Dispose()
+    {
+        _dotNetRef?.Dispose();
+    }
+}
