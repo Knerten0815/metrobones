@@ -4,26 +4,34 @@
 
 <PageTitle>Metronome</PageTitle>
 
-<h1>Metronome</h1>
-Beats Per Minute (BPM):
-<input type="number" class="form-control mb-3" @bind="BeatsPerMinute" min="30" max="300" step="1" />
-<div class="mb-3 grid gap-2 grid-cols-3">
-    Metrum (Beats per Bar):
-    <input type="number" class="form-control mb-3" @bind="beatsPerBar" min="1" max="12" step="1" />
-    <input type="number" class="form-control mb-3" @bind="noteValue" min="1" max="16" step="1" />
-</div>
+<MudText Typo="Typo.h4" Class="mb-4">Metronome</MudText>
 
-@if (IsRunning)
-{
-    <button class="btn btn-danger" @onclick="Stop">Stop Metronome</button>
-    <button class="btn btn-primary" @onclick="SetBpm">Update</button>
-}
-else
-{
-    <button class="btn btn-primary" @onclick="Start">Start Metronome</button>
-}
 
-<p role="status">Current Beat: @currentBeat</p>
+<MudStack Spacing="4">
+    <MudNumericField @bind-Value="BeatsPerMinute" Label="Beats Per Minute (BPM)" Min="30" Max="300" Step="1"
+                     Variant="Variant.Outlined" />
+
+    <MudText Typo="Typo.subtitle1">Metrum (Beats per Bar)</MudText>
+    <MudStack Row="true" Spacing="2">
+        <MudNumericField @bind-Value="beatsPerBar" Label="Beats per Bar" Min="1" Step="1" Variant="Variant.Outlined" />
+        <MudNumericField @bind-Value="noteValue" Label="Note Value" Min="1" Max="64" Step="1"
+                         Variant="Variant.Outlined" />
+    </MudStack>
+
+    <MudStack Row="true" Spacing="2">
+        @if (IsRunning)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="Stop">Stop Metronome</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SetBpm">Update</MudButton>
+        }
+        else
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Start">Start Metronome</MudButton>
+        }
+    </MudStack>
+
+    <MudText Typo="Typo.body1">Current Beat: @currentBeat</MudText>
+</MudStack>
 
 @code {
     private int BeatsPerMinute = 120;

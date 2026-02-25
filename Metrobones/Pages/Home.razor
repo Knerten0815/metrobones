@@ -2,52 +2,31 @@
 @using System;
 @using System.Threading;
 
-@implements IDisposable
-
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+<MudText Typo="Typo.h6">Beat Test</MudText>
+<MudStack Spacing=@Beat>
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="ButtonOnClick">@ButtonText</MudButton>
 
-Welcome to your new app.
+    <MudProgressCircular Rounded="true" Color="Color.Default" Value="@Value">
+        <ChildContent>@(Beat)</ChildContent>
+    </MudProgressCircular>
+</MudStack>
 
-<MudProgressCircular Rounded="true" Color="Color.Default" Value="@Value" Class="mud-progress-circular-disable-shrink">
-    <ChildContent>@(Beat)</ChildContent>
-</MudProgressCircular>
-<MudProgressCircular Rounded="true" Size="Size.Large" StrokeWidth="4" Color="Color.Primary" Value="@Value" />
-<MudProgressCircular Rounded="true" StrokeWidth="4" Color="Color.Secondary" Value="@Value" />
-<MudProgressCircular Color="Color.Success" Value="@Value" />
-<MudProgressCircular Color="Color.Info" Value="@Value" />
 
 @code {
-    private bool _disposed;
-
     public int Beat { get; set; }
     public int Value { get { return Beat * 25; } }
 
-    public async Task SimulateProgressAsync()
+    public string ButtonText { get; set; } = "Beat Me!";
+    public int ButtonClicked { get; set; }
+
+    void ButtonOnClick()
     {
-        Beat = 0;
-        do
+        Beat += 1;
+        if (Beat > 4)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            await Task.Delay(500);
-            Beat += 1;
-            StateHasChanged();
-
-        } while (Beat < 4);
-
-        await SimulateProgressAsync();
+            Beat = 0;
+        }
     }
-
-    protected override async Task OnInitializedAsync()
-    {
-        await base.OnInitializedAsync();
-        await SimulateProgressAsync();
-    }
-
-    public void Dispose() => _disposed = true;
 }
