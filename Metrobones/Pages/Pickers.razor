@@ -1,0 +1,46 @@
+@using MudExtensions
+
+<MudButtonGroup Color="Color.Primary" Variant="Variant.Text" Vertical="true" FullWidth="true">
+    <MudSelect @bind-Value="_beatValue" T="int" Label="Beats per Bar" Dense="false">
+        @foreach (var beat in _beats)
+        {
+            <MudSelectItem Value="beat">@beat</MudSelectItem>
+        }
+    </MudSelect>
+    <MudSelect @bind-Value="_noteValue" T="string" HelperText="Note Value" Dense="false">
+        @foreach (var note in _notes2)
+        {
+            <MudSelectItem Value="note">@note</MudSelectItem>
+        }
+    </MudSelect>
+</MudButtonGroup>
+
+
+<MudWheel T="int" ItemCollection="_numbers" @bind-Value="_val" WheelLevel="_wheelLevel" Dense="_dense"
+          SmoothBorders="_smoothBorders" Color="_color" Editable="_editable" />
+
+@code {
+    private int _beatValue = 4;
+    private string _noteValue = "Quarter";
+    List<int> _beats = new();
+    string[] _notes = { "Whole", "Half", "Quarter", "8th", "16th", "32nd", "64th" };
+    string[] _notes2 = { "1", "2", "4", "8", "16", "32", "64" };
+
+    int _wheelLevel = 2;
+    List<int> _numbers = new();
+    int _val = 120;
+    bool _dense = false;
+    bool _smoothBorders = true;
+    Color _color = Color.Default;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        for (int i = 1; i <= 500; i++)
+        {
+            _numbers.Add(i);
+            if (i < 65)
+                _beats.Add(i);
+        }
+    }
+}
