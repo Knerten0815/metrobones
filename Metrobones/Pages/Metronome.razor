@@ -50,18 +50,18 @@
     private DotNetObjectReference<Metronome>? _dotNetRef;
     private bool _isRunning = false;
 
-    private void SetBpm(int increment)
+    private async Task SetBpm(int increment)
     {
         _tempo += increment;
-        UpdateMetronome();
+        await UpdateMetronome();
     }
 
-    private void SetBeatAccent(int beatNumber, int accent)
+    private async Task SetBeatAccent(int beatNumber, int accent)
     {
         if (beatNumber >= 1 && beatNumber <= _notesPerBar)
         {
             _beatAccents[beatNumber - 1] = accent;
-            UpdateMetronome();
+            await UpdateMetronome();
         }
     }
 
@@ -77,11 +77,11 @@
         _isRunning = await JS.InvokeAsync<bool>("metronome.getIsRunning");
     }
 
-    private void UpdateNotesPerBar()
+    private async Task UpdateNotesPerBar()
     {
         _beatAccents = new int[_notesPerBar];
         _beatAccents[0] = 1;
-        UpdateMetronome();
+        await UpdateMetronome();
     }
 
     private async Task UpdateMetronome()
