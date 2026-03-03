@@ -11,7 +11,7 @@
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => SetBpm(-10)">-10</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => SetBpm(-1)">-1</MudButton>
         <MudNumericField @bind-Value="_tempo" @bind-Value:after="UpdateMetronome" Label="BPM" Min="1"
-                         Max="1000" Step="1" />
+                         Max="1000" Step="1" HideSpinButtons="true" Style="min-width: 2.5rem;" />
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => SetBpm(1)">+1</MudButton>
         <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => SetBpm(10)">+10</MudButton>
     </MudStack>
