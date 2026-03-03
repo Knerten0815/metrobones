@@ -1,0 +1,33 @@
+<MudIconButton Icon="@GetIcon()" Color="@(IsCurrentBeat? Color.Secondary: Color.Primary)" Size="Size.Large"
+               aria-label="cycle beat accent" OnClick=CycleBeatAccent />
+
+@code {
+    [Parameter]
+    public int BeatNumber { get; set; }
+
+    [Parameter]
+    public bool IsCurrentBeat { get; set; }
+
+    [Parameter]
+    public int BeatAccent { get; set; } // 0 = normal, 1 = accented, 2 = silent
+
+    [Parameter]
+    public EventCallback<int> BeatAccentChanged { get; set; }
+
+    private string GetIcon()
+    {
+        return BeatAccent switch
+        {
+            0 => Icons.Material.TwoTone.Circle, // Normal
+            1 => Icons.Material.Filled.Circle, // Accented
+            2 => Icons.Material.Outlined.RemoveCircleOutline, // Silent
+            _ => Icons.Material.Outlined.RemoveCircleOutline
+        };
+    }
+
+    private void CycleBeatAccent()
+    {
+        BeatAccent = (BeatAccent + 1) % 3;
+        BeatAccentChanged.InvokeAsync(BeatAccent);
+    }
+}

@@ -1,4 +1,4 @@
-﻿@page "/metronome"
+﻿@page "/"
 @implements IDisposable
 @inject IJSRuntime JS
 
@@ -6,56 +6,87 @@
 
 <MudText Typo="Typo.h4" Class="mb-4">Metronome</MudText>
 
-
 <MudStack Spacing="4">
-    <MudNumericField @bind-Value="BeatsPerMinute" Label="Beats Per Minute (BPM)" Min="30" Max="300" Step="1"
-                     Variant="Variant.Outlined" />
-
-    <MudText Typo="Typo.subtitle1">Metrum (Beats per Bar)</MudText>
     <MudStack Row="true" Spacing="2">
-        <MudNumericField @bind-Value="beatsPerBar" Label="Beats per Bar" Min="1" Step="1" Variant="Variant.Outlined" />
-        <MudNumericField @bind-Value="noteValue" Label="Note Value" Min="1" Max="64" Step="1"
-                         Variant="Variant.Outlined" />
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => SetBpm(-10)">-10</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => SetBpm(-1)">-1</MudButton>
+        <MudNumericField @bind-Value="_tempo" @bind-Value:after="UpdateMetronome" Label="BPM" Min="1"
+                         Max="1000" Step="1" />
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => SetBpm(1)">+1</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => SetBpm(10)">+10</MudButton>
     </MudStack>
 
-    <MudStack Row="true" Spacing="2">
-        @if (IsRunning)
+    <TimeSignaturePicker @bind-BeatsPerBar="_notesPerBar" @bind-BeatsPerBar:after="UpdateNotesPerBar"
+                         @bind-NoteValue="_noteValue" @bind-NoteValue:after="UpdateMetronome" />
+
+    <MudText Typo="Typo.caption">Beat Accenting</MudText>
+    <MudStack Row="true" Wrap="Wrap.Wrap" Justify="Justify.SpaceEvenly">
+        @for (int i = 1; i <= _beatAccents.Length; i++)
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="Stop">Stop Metronome</MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SetBpm">Update</MudButton>
+            var beat = i;
+            <BeatButton BeatNumber="beat" IsCurrentBeat="(beat == _currentBeat)" BeatAccent="_beatAccents[beat - 1]"
+                        BeatAccentChanged="(x) => SetBeatAccent(beat, x)" />
+        }
+    </MudStack>
+
+    <MudStack Row="true" Spacing="2" Justify="Justify.SpaceEvenly">
+        @if (_isRunning)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="Stop">Stop</MudButton>
         }
         else
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Start">Start Metronome</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Start">Start</MudButton>
         }
     </MudStack>
-
-    <MudText Typo="Typo.body1">Current Beat: @currentBeat</MudText>
 </MudStack>
 
 @code {
-    private int BeatsPerMinute = 120;
-    private int currentBeat = 1;
-    private int beatsPerBar = 4;
-    private int noteValue = 4; // Quarter note
+    private int _tempo = 120;   // in BPM or quarter notes per minute
+    private int _notesPerBar = 4;
+    private int _noteValue = 4; // Quarter note
+    private int _currentBeat = 1;
+    private int[] _beatAccents = new int[]{ 1, 0, 0, 0 };
     private DotNetObjectReference<Metronome>? _dotNetRef;
-    private bool IsRunning = false;
+    private bool _isRunning = false;
+
+    private void SetBpm(int increment)
+    {
+        _tempo += increment;
+        UpdateMetronome();
+    }
+
+    private void SetBeatAccent(int beatNumber, int accent)
+    {
+        if (beatNumber >= 1 && beatNumber <= _notesPerBar)
+        {
+            _beatAccents[beatNumber - 1] = accent;
+            UpdateMetronome();
+        }
+    }
 
     private async Task Start()
     {
-        await JS.InvokeVoidAsync("metronome.start", BeatsPerMinute, beatsPerBar, noteValue);
-        IsRunning = await JS.InvokeAsync<bool>("metronome.getIsRunning");
+        await JS.InvokeVoidAsync("metronome.start", _tempo, _notesPerBar, _noteValue);
+        _isRunning = await JS.InvokeAsync<bool>("metronome.getIsRunning");
     }
 
     private async Task Stop()
     {
         await JS.InvokeVoidAsync("metronome.stop");
-        IsRunning = await JS.InvokeAsync<bool>("metronome.getIsRunning");
+        _isRunning = await JS.InvokeAsync<bool>("metronome.getIsRunning");
     }
 
-    private async Task SetBpm()
+    private void UpdateNotesPerBar()
     {
-        await JS.InvokeVoidAsync("metronome.setBpm", BeatsPerMinute, beatsPerBar, noteValue);
+        _beatAccents = new int[_notesPerBar];
+        _beatAccents[0] = 1;
+        UpdateMetronome();
+    }
+
+    private async Task UpdateMetronome()
+    {
+        await JS.InvokeVoidAsync("metronome.setBpm", _tempo, _notesPerBar, _noteValue, _beatAccents);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -63,7 +94,7 @@
         if (firstRender)
         {
             _dotNetRef = DotNetObjectReference.Create(this);
-            await JS.InvokeVoidAsync("metronome.setDotNetReference", _dotNetRef, beatsPerBar);
+            await JS.InvokeVoidAsync("metronome.setDotNetReference", _dotNetRef, _notesPerBar);
         }
     }
 
@@ -71,9 +102,8 @@
     [JSInvokable]
     public async Task OnBeat(int beatNumber)
     {
-        currentBeat = beatNumber;
+        _currentBeat = beatNumber;
         await InvokeAsync(StateHasChanged);
-        // Blazor's synchronization context
     }
 
     public void Dispose()
