@@ -40,6 +40,7 @@ function scheduleClick(time) {
     }, visualDelayMs);
 }
 
+
 function createClickOscillator(isAccented, time) {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
@@ -125,9 +126,11 @@ function resumeAudio() {
     }
 }
 
+
 function setDotNetReference(ref) {
     dotNetReference = ref;
 }
+
 
 // Expose public API to Blazor's string-based JS interop
 globalThis.metronome = { start, stop, setBpm, getIsRunning, setDotNetReference };

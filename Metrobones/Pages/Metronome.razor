@@ -67,7 +67,7 @@
 
     private async Task Start()
     {
-        await JS.InvokeVoidAsync("metronome.start", _tempo, _notesPerBar, _noteValue);
+        await JS.InvokeVoidAsync("metronome.start", _tempo, _notesPerBar, _noteValue, _beatAccents);
         _isRunning = await JS.InvokeAsync<bool>("metronome.getIsRunning");
     }
 
