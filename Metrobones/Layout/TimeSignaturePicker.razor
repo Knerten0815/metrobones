@@ -1,17 +1,17 @@
-<MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined" Vertical="true">
-    <MudSelect Value="BeatsPerBar" ValueChanged="OnBeatsPerBarChanged" T="int" Label="Time Signature" Dense="false">
+<MudStack>
+    <MudSelect Value="BeatsPerBar" ValueChanged="OnBeatsPerBarChanged" T="int" Label="Time Signature">
         @foreach (var beat in _beats)
         {
             <MudSelectItem Value="beat">@beat</MudSelectItem>
         }
     </MudSelect>
-    <MudSelect Value="NoteValue" ValueChanged="OnNoteValueChanged" T="int" Dense="false">
+    <MudSelect Value="NoteValue" ValueChanged="OnNoteValueChanged" T="int">
         @foreach (var note in _notes)
         {
             <MudSelectItem Value="note">@note</MudSelectItem>
         }
     </MudSelect>
-</MudButtonGroup>
+</MudStack>
 
 @code {
     [Parameter]
