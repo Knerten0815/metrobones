@@ -1,6 +1,14 @@
 self.assetsManifest = {
-  "version": "kFMejj3G",
+  "version": "zzwMHsEt",
   "assets": [
+    {
+      "hash": "sha256-ANCB0MD3MQU8evZYZr5sjCtGrDBvupGGLKLCZTU9snU=",
+      "url": ".gitattributes"
+    },
+    {
+      "hash": "sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
+      "url": ".nojekyll"
+    },
     {
       "hash": "sha256-Dt1snosLbRJOEXZL9+/0rrolG411k8c8/vK1fMs3RbQ=",
       "url": "_content/CodeBeam.MudBlazor.Extensions/MudExtensions.min.css"
@@ -34,8 +42,8 @@ self.assetsManifest = {
       "url": "_content/MudBlazor/MudBlazor.min.js.map"
     },
     {
-      "hash": "sha256-hU6V1H7TPjPsbszjZLp4rN9Mf0CwcEcNDiTDRLmh3Go=",
-      "url": "_framework/Metrobones.rooqe57ljt.wasm"
+      "hash": "sha256-RluxF1nbw9yBTOoTG4vMGpvMOn+y2hPpPUjWlDVTwyU=",
+      "url": "_framework/Metrobones.iie19rbg2j.wasm"
     },
     {
       "hash": "sha256-sC3Ff/Eohifz8jUKCELDwNxLd2e/BCYj2ToAiwv8kI4=",
@@ -194,7 +202,7 @@ self.assetsManifest = {
       "url": "_framework/System.Text.RegularExpressions.vpbl6cf7oy.wasm"
     },
     {
-      "hash": "sha256-K8OLVBBrJR+iut/jYp8NQCOigKYmpndPDt92YLxlIpM=",
+      "hash": "sha256-aYa/akNmz4Wikd1r0XMP2s+u3XX+zxqeP1mssxNEuBY=",
       "url": "_framework/blazor.boot.json"
     },
     {
@@ -254,7 +262,7 @@ self.assetsManifest = {
       "url": "manifest.webmanifest"
     },
     {
-      "hash": "sha256-Ppj1qFEuJlTBVnqq4KgaryPH66Gs9vkKhIKCdW+SY8c=",
+      "hash": "sha256-a6KWnfq17VJN2/BKVgv9gkilWkIUEdCzq/xHdQVuVuE=",
       "url": "metronome.js"
     }
   ]
