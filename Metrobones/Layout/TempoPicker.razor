@@ -1,0 +1,30 @@
+<style>
+    .align-center input {
+        text-align: center;
+    }
+</style>
+
+<MudStack Spacing="2" Justify="Justify.Center">
+    <MudSlider @bind-Value="Tempo" Min="1" Max="420">
+        <MudNumericField Variant="Variant.Filled" DisableUnderLine="true" @bind-Value="Tempo" Class="align-center" Style="font-size: 8rem;" Label="BPM" Min="1" Max="1000" Step="1" HideSpinButtons="true"/>
+    </MudSlider>
+    <MudStack Row="true" Spacing="2" Justify="Justify.Center">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => IncrementTempo(-1)">-</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary">Tap</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => IncrementTempo(+1)">+</MudButton>
+    </MudStack>
+</MudStack>
+
+@code{
+    [Parameter]
+    public int Tempo { get; set; } = 120;
+
+    [Parameter]
+    public EventCallback<int> TempoChanged { get; set; }
+
+    private async Task IncrementTempo(int increment)
+    {
+        Tempo += increment;
+        await TempoChanged.InvokeAsync(Tempo);
+    }
+}

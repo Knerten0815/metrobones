@@ -7,14 +7,7 @@
 <MudText Typo="Typo.h4" Class="mb-4">Metronome</MudText>
 
 <MudStack Spacing="4">
-    <MudStack Row="true" Spacing="2">
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => SetBpm(-10)">-10</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => SetBpm(-1)">-1</MudButton>
-        <MudNumericField @bind-Value="_tempo" @bind-Value:after="UpdateMetronome" Label="BPM" Min="1"
-                         Max="1000" Step="1" HideSpinButtons="true" Style="min-width: 2.5rem;" />
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => SetBpm(1)">+1</MudButton>
-        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => SetBpm(10)">+10</MudButton>
-    </MudStack>
+    <TempoPicker @bind-Tempo="_tempo" @bind-Tempo:after="UpdateMetronome" />
 
     <TimeSignaturePicker @bind-BeatsPerBar="_notesPerBar" @bind-BeatsPerBar:after="UpdateNotesPerBar"
                          @bind-NoteValue="_noteValue" @bind-NoteValue:after="UpdateMetronome" />
