@@ -1,5 +1,6 @@
-<MudStack>
-    <MudSelect Value="BeatsPerBar" ValueChanged="OnBeatsPerBarChanged" T="int" Label="Time Signature">
+<MudText Typo="Typo.caption">Time Signature</MudText>
+<MudStack Style="min-width: 8rem; margin: 0 auto;">
+    <MudSelect Value="BeatsPerBar" ValueChanged="OnBeatsPerBarChanged" T="int">
         @foreach (var beat in _beats)
         {
             <MudSelectItem Value="beat">@beat</MudSelectItem>
