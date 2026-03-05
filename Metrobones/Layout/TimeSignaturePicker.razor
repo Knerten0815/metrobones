@@ -1,12 +1,16 @@
 <MudText Typo="Typo.caption">Time Signature</MudText>
-<MudStack Style="min-width: 8rem; margin: 0 auto;">
-    <MudSelect Value="BeatsPerBar" ValueChanged="OnBeatsPerBarChanged" T="int">
+@* <MudStack Style="min-width: 4rem; margin: 0 auto;"> *@
+<MudStack Row="true" Spacing="1" Justify="Justify.Center">
+    <MudSelect Value="BeatsPerBar" ValueChanged="OnBeatsPerBarChanged" T="int" FitContent="true"
+               Style="text-align: center;">
         @foreach (var beat in _beats)
         {
             <MudSelectItem Value="beat">@beat</MudSelectItem>
         }
     </MudSelect>
-    <MudSelect Value="NoteValue" ValueChanged="OnNoteValueChanged" T="int">
+    <MudText>/</MudText>
+    <MudSelect Value="NoteValue" ValueChanged="OnNoteValueChanged" T="int" FitContent="true"
+               Style="text-align: center;">
         @foreach (var note in _notes)
         {
             <MudSelectItem Value="note">@note</MudSelectItem>
@@ -25,13 +29,12 @@
     public EventCallback<int> NoteValueChanged { get; set; }
 
     List<int> _beats = new();
-    int[] _notes = { 1, 2, 4, 8, 16, 32 };
-    @* string[] _notesNames = { "Whole", "Half", "Quarter", "8th", "16th", "32nd", "64th" }; *@
+    int[] _notes = { 1, 2, 4, 8, 16 };
 
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        for (int i = 1; i <= 64; i++)
+        for (int i = 1; i <= 32; i++)
         {
             _beats.Add(i);
         }
