@@ -1,3 +1,6 @@
+@using System.Diagnostics
+@implements IDisposable
+
 <style>
     .align-center input {
         text-align: center;
@@ -5,12 +8,12 @@
 </style>
 
 <MudStack Spacing="2" Justify="Justify.Center">
-    <MudSlider @bind-Value="Tempo" Min="1" Max="420">
-        <MudNumericField Variant="Variant.Filled" DisableUnderLine="true" @bind-Value="Tempo" Class="align-center" Style="font-size: 8rem;" Label="BPM" Min="1" Max="1000" Step="1" HideSpinButtons="true"/>
-    </MudSlider>
+    <MudText Typo="Typo.caption">BPM</MudText>
+    <MudNumericField Variant="Variant.Text" DisableUnderLine="true" @bind-Value="Tempo" Class="align-center" Style="font-size: 8rem;" Min="1" Max="1000" Step="1" HideSpinButtons="true"/>
+    <MudSlider @bind-Value="Tempo" Min="1" Max="420"/>
     <MudStack Row="true" Spacing="2" Justify="Justify.Center">
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => IncrementTempo(-1)">-</MudButton>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary">Tap</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="HandleTap">Tap</MudButton>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="() => IncrementTempo(+1)">+</MudButton>
     </MudStack>
 </MudStack>
@@ -24,7 +27,55 @@
 
     private async Task IncrementTempo(int increment)
     {
+        if(Tempo + increment < 1 || Tempo + increment > 1000)
+            return;
+        
         Tempo += increment;
         await TempoChanged.InvokeAsync(Tempo);
+    }
+
+    private Stopwatch _tapStopwatch = new();
+    private List<double> _tapIntervals = new();
+    private int MaxTaps = 8;         // average over last 8 intervals
+    private double TapTimeoutMs = 3000; // reset if user pauses > 3 seconds
+    private double elapsed => _tapStopwatch.IsRunning ? _tapStopwatch.Elapsed.TotalMilliseconds : 0;
+    
+
+    private async Task HandleTap()
+    {
+        if (!_tapStopwatch.IsRunning)
+        {
+            _tapStopwatch.Restart();
+            return;
+        }
+
+        double elapsed = _tapStopwatch.Elapsed.TotalMilliseconds;
+
+        if (elapsed > TapTimeoutMs)
+        {
+            _tapIntervals.Clear();
+            _tapStopwatch.Restart();
+            return;
+        }
+
+        _tapStopwatch.Restart();
+
+        _tapIntervals.Add(elapsed);
+
+        if (_tapIntervals.Count > MaxTaps)
+            _tapIntervals.RemoveAt(0);
+
+        double averageIntervalMs = _tapIntervals.Average();
+        int newTempo = (int)Math.Round(60000.0 / averageIntervalMs);
+        newTempo = Math.Clamp(newTempo, 1, 1000);
+
+        Tempo = newTempo;
+        await TempoChanged.InvokeAsync(Tempo);
+    }
+
+    public void Dispose()
+    {
+        _tapStopwatch.Stop();
+        _tapIntervals.Clear();
     }
 }
