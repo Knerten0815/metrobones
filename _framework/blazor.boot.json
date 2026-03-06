@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "Metrobones",
   "resources": {
-    "hash": "sha256-I2Sik0f1dynKOk+1LYI029wgbhRJKj23C6SX6xHjbmM=",
+    "hash": "sha256-9/rnIAMcer1s6J9ldKVRFKp3laIrlCe6ljSpjB/DXPo=",
     "fingerprinting": {
       "Microsoft.AspNetCore.Components.qbku68bdoi.wasm": "Microsoft.AspNetCore.Components.wasm",
       "Microsoft.AspNetCore.Components.Forms.gc94iuciq3.wasm": "Microsoft.AspNetCore.Components.Forms.wasm",
@@ -37,12 +37,12 @@
       "System.Private.Uri.lul1jjfylu.wasm": "System.Private.Uri.wasm",
       "System.Runtime.InteropServices.JavaScript.feozdik0jm.wasm": "System.Runtime.InteropServices.JavaScript.wasm",
       "System.Runtime.Numerics.7w6vmi62me.wasm": "System.Runtime.Numerics.wasm",
-      "System.Runtime.cuto9510v6.wasm": "System.Runtime.wasm",
+      "System.Runtime.4dg2lzjyb4.wasm": "System.Runtime.wasm",
       "System.Text.Encodings.Web.pnw29cwzej.wasm": "System.Text.Encodings.Web.wasm",
       "System.Text.Json.og084zadi0.wasm": "System.Text.Json.wasm",
       "System.Text.RegularExpressions.vpbl6cf7oy.wasm": "System.Text.RegularExpressions.wasm",
       "System.Private.CoreLib.xoyk0o5w5b.wasm": "System.Private.CoreLib.wasm",
-      "Metrobones.ui8zakskke.wasm": "Metrobones.wasm",
+      "Metrobones.4r53z20hmn.wasm": "Metrobones.wasm",
       "dotnet.js": "dotnet.js",
       "dotnet.native.6m0hb3g78a.js": "dotnet.native.js",
       "dotnet.native.zw8ib5pvmp.wasm": "dotnet.native.wasm",
@@ -103,11 +103,11 @@
       "System.Net.Primitives.ky2a7d5ird.wasm": "sha256-hEcQQHk3niX++ZCLAWqYNOJQJYfMHW4/1K0TJhoCNSQ=",
       "System.Private.Uri.lul1jjfylu.wasm": "sha256-I0za7BqccyPBOVmG2B0K85xSpzeW+Yegb5rw5kGeE48=",
       "System.Runtime.Numerics.7w6vmi62me.wasm": "sha256-p3J+2S5wzZM3XEx2Md+wl1bV9ETN5+kwDTTtWBbc92U=",
-      "System.Runtime.cuto9510v6.wasm": "sha256-FJqDDWqBPzIzxCn02TTAcNNiZhXJo9wNUWhDIj06FEo=",
+      "System.Runtime.4dg2lzjyb4.wasm": "sha256-qO+xj07cFMahRK4GN1H0OwkVHa5MMTn8gIiGLecSQYo=",
       "System.Text.Encodings.Web.pnw29cwzej.wasm": "sha256-1Sr3NN1aQOE+1F8G3kwzVbHdwDRQg0a4RktpKJRmuls=",
       "System.Text.Json.og084zadi0.wasm": "sha256-WIRy2c5iClRr9UScV3U/Z0qIbMcHhqbR7OSc7ibGAss=",
       "System.Text.RegularExpressions.vpbl6cf7oy.wasm": "sha256-k1TesSbHBsEe2PR/wGv+MS2emt+1yaBubcDfPMEpY9E=",
-      "Metrobones.ui8zakskke.wasm": "sha256-GhBjwL5iT7Ld1ICcEjAyPzi27HxEYM/MrO5W8ecYLGA="
+      "Metrobones.4r53z20hmn.wasm": "sha256-4MpstOuuw3UeOSI+HLxsyXVyitoxfO6dJbexoyGbTgk="
     }
   },
   "cacheBootResources": true,
