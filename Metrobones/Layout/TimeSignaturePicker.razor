@@ -1,5 +1,4 @@
 <MudText Typo=@Typo.caption>Time Signature</MudText>
-@* <MudStack Style="min-width: 4rem; margin: 0 auto;"> *@
 <MudStack Row=@true Spacing=1 Justify=@Justify.Center>
     <MudSelect Value=@BeatsPerBar ValueChanged=@OnBeatsPerBarChanged T=int FitContent=@true Style="text-align: center;">
         @foreach (var beat in _beats)
@@ -26,8 +25,8 @@
     [Parameter]
     public EventCallback<int> NoteValueChanged { get; set; }
 
-    List<int> _beats = new();
-    int[] _notes = { 1, 2, 4, 8, 16 };
+    private List<int> _beats = new();
+    private int[] _notes = { 1, 2, 4, 8, 16 };
 
     protected override void OnInitialized()
     {

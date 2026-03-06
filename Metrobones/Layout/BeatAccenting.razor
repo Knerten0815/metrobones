@@ -1,0 +1,29 @@
+<MudText Typo=@Typo.caption>Beat Accenting</MudText>
+<MudStack Row=@true Wrap=@Wrap.Wrap Justify=@Justify.SpaceEvenly>
+    @for (int i = 1; i <= BeatAccents.Length; i++)
+    {
+        var beat = i;
+        <BeatButton BeatNumber=@beat IsCurrentBeat=@(beat == CurrentBeat) BeatAccent=@(BeatAccents[beat - 1])
+                    BeatAccentChanged=@((x) => SetBeatAccent(beat, x)) />
+    }
+</MudStack>
+
+@code {
+    [Parameter]
+    public int CurrentBeat { get; set; } = 0;
+    [Parameter]
+    public int[] BeatAccents { get; set; } = new int[] { 1, 0, 0, 0 };
+    [Parameter]
+    public EventCallback<int[]> BeatAccentsChanged { get; set; }
+    [Parameter]
+    public int NotesPerBar { get; set; } = 4;
+
+    private async Task SetBeatAccent(int beatNumber, int accent)
+    {
+        if (beatNumber >= 1 && beatNumber <= NotesPerBar)
+        {
+            BeatAccents[beatNumber - 1] = accent;
+            await BeatAccentsChanged.InvokeAsync(BeatAccents);
+        }
+    }
+}

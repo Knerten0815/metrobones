@@ -10,15 +10,8 @@
     <TimeSignaturePicker @bind-BeatsPerBar=_notesPerBar @bind-BeatsPerBar:after=UpdateNotesPerBar
                          @bind-NoteValue=_noteValue @bind-NoteValue:after=UpdateMetronome />
 
-    <MudText Typo=@Typo.caption>Beat Accenting</MudText>
-    <MudStack Row=@true Wrap=@Wrap.Wrap Justify=@Justify.SpaceEvenly>
-        @for (int i = 1; i <= _beatAccents.Length; i++)
-        {
-            var beat = i;
-            <BeatButton BeatNumber=@beat IsCurrentBeat=@(beat == _currentBeat) BeatAccent=@(_beatAccents[beat - 1])
-                        BeatAccentChanged=@((x) => SetBeatAccent(beat, x)) />
-        }
-    </MudStack>
+    <BeatAccenting @bind-BeatAccents=_beatAccents @bind-BeatAccents:after=UpdateMetronome CurrentBeat=_currentBeat
+                   NotesPerBar=_notesPerBar />
 
     <MudStack Row=@true Spacing=2 Justify=@Justify.SpaceEvenly>
         @if (_isRunning)
@@ -41,19 +34,16 @@
     private DotNetObjectReference<Metronome>? _dotNetRef;
     private bool _isRunning = false;
 
-    private async Task SetBpm(int increment)
+    private async Task UpdateNotesPerBar()
     {
-        _tempo += increment;
+        _beatAccents = new int[_notesPerBar];
+        _beatAccents[0] = 1;
         await UpdateMetronome();
     }
 
-    private async Task SetBeatAccent(int beatNumber, int accent)
+    private async Task UpdateMetronome()
     {
-        if (beatNumber >= 1 && beatNumber <= _notesPerBar)
-        {
-            _beatAccents[beatNumber - 1] = accent;
-            await UpdateMetronome();
-        }
+        await JS.InvokeVoidAsync("metronome.setBpm", _tempo, _notesPerBar, _noteValue, _beatAccents);
     }
 
     private async Task Start()
@@ -67,18 +57,6 @@
         _currentBeat = 0;
         await JS.InvokeVoidAsync("metronome.stop");
         _isRunning = await JS.InvokeAsync<bool>("metronome.getIsRunning");
-    }
-
-    private async Task UpdateNotesPerBar()
-    {
-        _beatAccents = new int[_notesPerBar];
-        _beatAccents[0] = 1;
-        await UpdateMetronome();
-    }
-
-    private async Task UpdateMetronome()
-    {
-        await JS.InvokeVoidAsync("metronome.setBpm", _tempo, _notesPerBar, _noteValue, _beatAccents);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)

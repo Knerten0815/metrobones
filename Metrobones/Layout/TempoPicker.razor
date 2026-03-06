@@ -9,9 +9,9 @@
 
 <MudStack Spacing=2 Justify=@Justify.Center>
     <MudText Typo=@Typo.caption>BPM</MudText>
-    <MudNumericField Variant=@Variant.Text DisableUnderLine=@true @bind-Value=Tempo Class="align-center"
-                     Style="font-size: 8rem;" Min=1 Max=1000 Step=1 HideSpinButtons=@true />
-    <MudSlider @bind-Value=Tempo Min=1 Max=420 />
+    <MudNumericField Value=@Tempo ValueChanged=@OnTempoChanged T=int Min=1 Max=1000 Step=1 Variant=@Variant.Text
+                     DisableUnderLine=@true HideSpinButtons=@true Class="align-center" Style="font-size: 8rem;" />
+    <MudSlider Value=@Tempo ValueChanged=@OnTempoChanged T=int Min=1 Max=420 />
     <MudStack Row=@true Spacing=2 Justify=@Justify.Center>
         <MudButton Variant=@Variant.Filled Color=@Color.Primary OnClick=@(() => IncrementTempo(-1))>-</MudButton>
         <MudButton Variant=@Variant.Filled Color=@Color.Primary OnClick=@HandleTap>Tap</MudButton>
@@ -26,20 +26,24 @@
     [Parameter]
     public EventCallback<int> TempoChanged { get; set; }
 
+    private Stopwatch _tapStopwatch = new();
+    private List<double> _tapIntervals = new();
+    private int _maxTaps = 8; // average over last 8 intervals
+    private double _tapTimeoutMs = 3000; // reset if user pauses > 3 seconds
+
+    private async Task OnTempoChanged(int value)
+    {
+        Tempo = value;
+        await TempoChanged.InvokeAsync(value);
+    }
+
     private async Task IncrementTempo(int increment)
     {
         if (Tempo + increment < 1 || Tempo + increment > 1000)
             return;
 
-        Tempo += increment;
-        await TempoChanged.InvokeAsync(Tempo);
+        await OnTempoChanged(Tempo + increment);
     }
-
-    private Stopwatch _tapStopwatch = new();
-    private List<double> _tapIntervals = new();
-    private int MaxTaps = 8; // average over last 8 intervals
-    private double TapTimeoutMs = 3000; // reset if user pauses > 3 seconds
-    private double elapsed => _tapStopwatch.IsRunning ? _tapStopwatch.Elapsed.TotalMilliseconds : 0;
 
 
     private async Task HandleTap()
@@ -52,7 +56,7 @@
 
         double elapsed = _tapStopwatch.Elapsed.TotalMilliseconds;
 
-        if (elapsed > TapTimeoutMs)
+        if (elapsed > _tapTimeoutMs)
         {
             _tapIntervals.Clear();
             _tapStopwatch.Restart();
@@ -63,7 +67,7 @@
 
         _tapIntervals.Add(elapsed);
 
-        if (_tapIntervals.Count > MaxTaps)
+        if (_tapIntervals.Count > _maxTaps)
             _tapIntervals.RemoveAt(0);
 
         double averageIntervalMs = _tapIntervals.Average();
