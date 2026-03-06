@@ -1,5 +1,5 @@
-<MudIconButton Icon="@GetIcon()" Color="@(IsCurrentBeat? Color.Secondary: Color.Primary)" Size="Size.Large"
-               aria-label="cycle beat accent" OnClick=CycleBeatAccent />
+<MudIconButton Icon=@GetIcon() Color=@(IsCurrentBeat? Color.Secondary: Color.Primary) Size=@Size.Large
+               aria-label="cycle beat accent" OnClick=@CycleBeatAccent />
 
 @code {
     [Parameter]

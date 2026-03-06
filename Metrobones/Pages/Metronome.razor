@@ -4,30 +4,30 @@
 
 <PageTitle>Metronome</PageTitle>
 
-<MudStack Spacing="4">
-    <TempoPicker @bind-Tempo="_tempo" @bind-Tempo:after="UpdateMetronome" />
+<MudStack Spacing=4>
+    <TempoPicker @bind-Tempo=_tempo @bind-Tempo:after=UpdateMetronome />
 
-    <TimeSignaturePicker @bind-BeatsPerBar="_notesPerBar" @bind-BeatsPerBar:after="UpdateNotesPerBar"
-                         @bind-NoteValue="_noteValue" @bind-NoteValue:after="UpdateMetronome" />
+    <TimeSignaturePicker @bind-BeatsPerBar=_notesPerBar @bind-BeatsPerBar:after=UpdateNotesPerBar
+                         @bind-NoteValue=_noteValue @bind-NoteValue:after=UpdateMetronome />
 
-    <MudText Typo="Typo.caption">Beat Accenting</MudText>
-    <MudStack Row="true" Wrap="Wrap.Wrap" Justify="Justify.SpaceEvenly">
+    <MudText Typo=@Typo.caption>Beat Accenting</MudText>
+    <MudStack Row=@true Wrap=@Wrap.Wrap Justify=@Justify.SpaceEvenly>
         @for (int i = 1; i <= _beatAccents.Length; i++)
         {
             var beat = i;
-            <BeatButton BeatNumber="beat" IsCurrentBeat="(beat == _currentBeat)" BeatAccent="_beatAccents[beat - 1]"
-                        BeatAccentChanged="(x) => SetBeatAccent(beat, x)" />
+            <BeatButton BeatNumber=@beat IsCurrentBeat=@(beat == _currentBeat) BeatAccent=@(_beatAccents[beat - 1])
+                        BeatAccentChanged=@((x) => SetBeatAccent(beat, x)) />
         }
     </MudStack>
 
-    <MudStack Row="true" Spacing="2" Justify="Justify.SpaceEvenly">
+    <MudStack Row=@true Spacing=2 Justify=@Justify.SpaceEvenly>
         @if (_isRunning)
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Error" OnClick="Stop">Stop</MudButton>
+            <MudButton Variant=@Variant.Filled Color=@Color.Error OnClick=@Stop>Stop</MudButton>
         }
         else
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Start">Start</MudButton>
+            <MudButton Variant=@Variant.Filled Color=@Color.Primary OnClick=@Start>Start</MudButton>
         }
     </MudStack>
 </MudStack>
