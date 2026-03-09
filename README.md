@@ -12,7 +12,7 @@ A precision metronome Progressive Web App built with Blazor WebAssembly, MudBlaz
 
 ## Overview
 
-Metrobones is designed for my drummer "Bones", who complained at rehearsal, that there are so many metronome apps in the iOS app store, but not a single one features clicktracks (which musicians use for songs with varying tempo or time signatures). I saw it as a good excuse to deepen my knowledge in cross-platform mobile app development, while simultaneously creating something that might actually be used by people. Soon after I learned about Apples annual developer fee and decided to deepen my knowledge in web development and Progressive Web Apps instead...
+Metrobones is designed for my drummer "Bones", who complained at rehearsal, that there are so many metronome apps in the iOS app store, but not a single one features clicktracks (which musicians use for songs with varying tempo or time signatures). I saw it as a good excuse to deepen my knowledge in fullstack web development, while simultaneously creating something that might actually be used by people.
 
 ---
 
@@ -36,15 +36,17 @@ Metrobones is designed for my drummer "Bones", who complained at rehearsal, that
 
 ---
 
+## Installation
+
+1. Visit [knerten0815.github.io/metrobones](https://knerten0815.github.io/metrobones/)
+2. Open your browsers menu (3 dots) on the website
+3. Click "add to home screen" (or "install" depending on browser)
+4. Use the app offline
+
+
 ## Tech Stack
 
 - [Blazor WebAssembly](https://dotnet.microsoft.com/en-us/apps/aspnet/web-apps/blazor) (.NET 9)
 - Web Audio API — audio scheduling and click synthesis
 - [MudBlazor UI](https://mudblazor.com/)
 - Hosted on [Github Pages](https://knerten0815.github.io/metrobones/)
-
----
-
-## License
-
-MIT
