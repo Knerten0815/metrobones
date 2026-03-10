@@ -8,13 +8,11 @@
 A precision metronome Progressive Web App built with Blazor WebAssembly, MudBlazor and the Web Audio API.  
 **Live app: [knerten0815.github.io/metrobones](https://knerten0815.github.io/metrobones/)**
 
----
 
 ## Overview
 
 Metrobones is designed for my drummer "Bones", who complained at rehearsal, that there are so many metronome apps in the iOS app store, but not a single one features clicktracks (which musicians use for songs with varying tempo or time signatures). I saw it as a good excuse to deepen my knowledge in fullstack web development, while simultaneously creating something that might actually be used by people.
 
----
 
 ## Features
 
@@ -34,7 +32,6 @@ Metrobones is designed for my drummer "Bones", who complained at rehearsal, that
 - Native Android app
 - Setlists
 
----
 
 ## Installation
 

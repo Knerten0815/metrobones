@@ -1,4 +1,6 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+@implements IDisposable
 
 <MudThemeProvider />
 <MudPopoverProvider />
@@ -7,15 +9,15 @@
 
 <MudLayout>
     <MudAppBar Elevation=1 Dense=@true>
-        @* <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
-                       OnClick="@((e) => DrawerToggle())" /> *@
-        <MudText Typo=@Typo.h5 Class="ml-3">Metrobones</MudText>
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start"
+                       OnClick="@((e) => DrawerToggle())" />
+        <MudText Typo=@Typo.h5 Class="ml-3">@_pageTitle</MudText>
         <MudSpacer />
         @* <MudIconButton Icon="@Icons.Material.Filled.MoreVert" Color="Color.Inherit" Edge="Edge.End" /> *@
     </MudAppBar>
-    @* <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
+    <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always" Elevation="2">
         <NavMenu />
-    </MudDrawer> *@
+    </MudDrawer>
     <MudMainContent>
         <MudContainer MaxWidth=@MaxWidth.ExtraSmall>
             @Body
@@ -25,9 +27,40 @@
 
 @code {
     bool _drawerOpen = false;
+    string _pageTitle = "Metronome";
+
+    static readonly Dictionary<string, string> _pageTitles = new(StringComparer.OrdinalIgnoreCase)
+    {
+        [""] = "Metronome",
+        ["clicktracks"] = "Click Tracks",
+        ["setlists"] = "Setlists",
+    };
+
+    protected override void OnInitialized()
+    {
+        _pageTitle = GetPageTitle(Navigation.Uri);
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        _pageTitle = GetPageTitle(e.Location);
+        InvokeAsync(StateHasChanged);
+    }
+
+    string GetPageTitle(string uri)
+    {
+        var relativePath = Navigation.ToBaseRelativePath(uri).Trim('/');
+        return _pageTitles.TryGetValue(relativePath, out var title) ? title : relativePath;
+    }
 
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
     }
 }
