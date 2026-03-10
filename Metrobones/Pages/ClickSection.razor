@@ -1,35 +1,36 @@
-<MudExpansionPanel @bind-Expanded=_open>
+@using Metrobones.Models;
+@using System.ComponentModel.DataAnnotations
+@inject Services.Metronome Met
+
+<MudExpansionPanel @bind-Expanded=Section.Open Disabled=@(Met.IsRunning && Section.Open == false)>
     <TitleContent>
         <MudStack AlignItems=@AlignItems.Center Row="true">
-            @if (_open)
+            @if (Section.Open)
             {
-                <MudTextField @bind-Value=_sectionName T="string" @onclick:stopPropagation
-                                @onkeydown:stopPropagation />
+                <MudTextField @bind-Value=Section.Title @bind-Value:after=OnSectionChanged T="string" @onclick:stopPropagation @onkeydown:stopPropagation />
             }
             else
             {
                 <MudIconButton Icon="@Icons.Material.Filled.DragHandle" Size=@Size.Small aria-label="drag" />
-                <MudChip Variant="Variant.Text" Size=@Size.Small T="string">@(_sectionLength)x</MudChip>
-                <MudText>@_sectionName</MudText>
+                <MudChip Variant="Variant.Text" Size=@Size.Small T="string">@(Section.Length)x</MudChip>
+                <MudText>@Section.Title</MudText>
             }
         </MudStack>
     </TitleContent>
     <ChildContent><MudStack Spacing=4>                
         <MudStack Justify=@Justify.SpaceEvenly AlignItems=@AlignItems.Center Row="true">
-            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(_sectionLength)bars</MudChip>
-            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(_notesPerBar)/@(_noteValue)</MudChip>
-            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(_tempo)bpm</MudChip>
+            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.Length)bars</MudChip>
+            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.MetData.NotesPerBar)/@(Section.MetData.NoteValue)</MudChip>
+            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.MetData.Tempo)bpm</MudChip>
         </MudStack>
 
-        <BeatAccenting @bind-BeatAccents=_beatAccents NotesPerBar=_notesPerBar />
+        <BeatAccenting @bind-BeatAccents=Section.MetData.BeatAccents  @bind-BeatAccents:after=OnSectionChanged
+                   CurrentBeat=Met.CurrentBeat NotesPerBar=Section.MetData.NotesPerBar/>
 
-        <MudStack Justify=@Justify.SpaceEvenly AlignItems=@AlignItems.Center Row="true">
-            <MudIconButton Color=@Color.Primary Icon="@Icons.Material.Filled.SkipPrevious" Size=@Size.Large
-                            aria-label="Previous Section" />
-            <MudIconButton Color=@Color.Primary Icon="@Icons.Material.Filled.PlayCircleOutline" Size=@Size.Large
-                            aria-label="Play" />
-            <MudIconButton Color=@Color.Primary Icon="@Icons.Material.Filled.SkipNext" Size=@Size.Large
-                            aria-label="Next Section" />
+        <MudStack Justify=@Justify.Center AlignItems=@AlignItems.Center Row="true" Style="position:relative">
+            <PlayButton OnPlay=OnPlaySection/>
+            <MudIconButton OnClick=OnDeleteSection Color=@Color.Primary Icon="@Icons.Material.Outlined.Delete" Size=@Size.Medium
+                            Style="position:absolute;right:0" aria-label="delete section" />
         </MudStack>
 
     </MudStack></ChildContent>
@@ -37,16 +38,28 @@
 
 
 @code {
-    private int[] _beatAccents = new int[] { 1, 0, 0, 0 };
+    [Parameter, Required]
+    public required ClickTrackSection Section {get; set;}
 
-    private bool _open, _countIn;
-    private string _sectionName = "Intro";
-    private int _tempo = 120;
-    private int _notesPerBar = 7;
-    private int _noteValue = 8;
-    private int _sectionLength = 16;
-    private void OnChipClicked()
+    [Parameter]
+    public EventCallback<ClickTrackSection> SectionChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<int> DeleteSection{ get; set; }
+
+    private async Task OnSectionChanged()
     {
-        _sectionLength++;
+        await SectionChanged.InvokeAsync(Section);
+    }
+
+    private async Task OnDeleteSection()
+    {
+        await DeleteSection.InvokeAsync(Section.ID);
+    }
+
+    private async Task OnPlaySection()
+    {
+        Met.UpdateSettings(Section.MetData);
+        Met.Start();
     }
 }

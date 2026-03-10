@@ -1,5 +1,5 @@
 ﻿@* @page "/" *@
-@page "/metronome"
+@page "/clicktracks"
 
 @implements IDisposable
 @inject Services.Metronome Met
@@ -15,16 +15,7 @@
     <BeatAccenting @bind-BeatAccents=Met.Data.BeatAccents @bind-BeatAccents:after=Met.UpdateSettings
                    CurrentBeat=Met.CurrentBeat NotesPerBar=Met.Data.NotesPerBar Label="Edit Accenting"/>
 
-    <MudStack Row=@true Spacing=2 Justify=@Justify.SpaceEvenly>
-        @if (Met.IsRunning)
-        {
-            <MudButton Variant=@Variant.Filled Color=@Color.Error OnClick=@Met.Stop>Stop</MudButton>
-        }
-        else
-        {
-            <MudButton Variant=@Variant.Filled Color=@Color.Primary OnClick=@Met.Start>Start</MudButton>
-        }
-    </MudStack>
+    <PlayButton OnPlay=Met.Start/>
 </MudStack>
 
 @code {
@@ -33,6 +24,7 @@
         if (firstRender)
         {
             Met.BeatCallback += OnStateChanged;
+            Met.StopCallback += OnStateChanged;
             await Met.Initialize();
         }
     }

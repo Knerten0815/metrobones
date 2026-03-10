@@ -1,5 +1,6 @@
 using Microsoft.JSInterop;
 using Metrobones.Models;
+using Metrobones.Pages;
 
 namespace Metrobones.Services;
 
@@ -8,11 +9,14 @@ public class Metronome : IAsyncDisposable
     private readonly IJSRuntime _js;
     private DotNetObjectReference<Metronome>? _dotNetRef;
 
+    public ClickTrackSection Section { get; set; } = new(-1);
+
     public MetronomeData Data { get; set; } = new();
     public bool IsRunning { get; private set; }
     public int CurrentBeat { get; private set; }
 
     public event Action? BeatCallback;
+    public event Action? StopCallback;
 
     public Metronome(IJSRuntime js)
     {
@@ -34,6 +38,7 @@ public class Metronome : IAsyncDisposable
     public async Task Stop()
     {
         CurrentBeat = 0;
+        StopCallback?.Invoke();
         await _js.InvokeVoidAsync("metronome.stop");
         IsRunning = await _js.InvokeAsync<bool>("metronome.getIsRunning");
     }
@@ -41,6 +46,15 @@ public class Metronome : IAsyncDisposable
     public async Task UpdateSettings()
     {
         await _js.InvokeVoidAsync("metronome.setBpm", Data.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents);
+    }
+
+    public async Task UpdateSettings(MetronomeData data)
+    {
+        Data.Tempo = data.Tempo;
+        Data.NotesPerBar = data.NotesPerBar;
+        Data.NoteValue = data.NoteValue;
+        Data.BeatAccents = data.BeatAccents;
+        await UpdateSettings();
     }
 
     public async Task UpdateNotesPerBar()

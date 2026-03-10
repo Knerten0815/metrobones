@@ -1,14 +1,57 @@
+@implements IDisposable
+@inject Services.Metronome Met
+
 <MudStack Spacing=3 AlignItems=AlignItems.Center>
     <MudSwitch Size=@Size.Large Color=@Color.Primary @bind-Value=_countIn Label="Count In" />
     <MudExpansionPanels Class="mud-width-full">
-        <ClickSection/>
+        @foreach (var section in Sections)
+        {
+            <ClickSection Section=section DeleteSection=DeleteSection/>
+        }
     </MudExpansionPanels>
 
     <MudStack Row=true Justify=@Justify.SpaceAround>
-        <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline" aria-label="add section" />
+        <MudIconButton OnClick=AddSection Icon="@Icons.Material.Filled.AddCircleOutline" aria-label="add section" />
     </MudStack>
 </MudStack>
 
 @code {
     private bool _countIn;
+    private List<ClickTrackSection> Sections = new List<ClickTrackSection>
+        {new (1) { Title = "Intro", Length = 4, MetData = new(6)},
+         new (2) { Title = "Verse", Length = 8 },
+         new (3) { Title = "Chorus", Length = 8, MetData = new() { Tempo = 140 }}};
+    
+    private void AddSection()
+    {
+        int newID = Sections.Count > 0 ? Sections.Max(s => s.ID) + 1 : 1;
+        Sections.Add(new ClickTrackSection(newID));
+        OnStateChanged();
+    }
+
+    private void DeleteSection(int id)
+    {
+        Sections.RemoveAll(s => s.ID == id);
+        OnStateChanged();
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Met.BeatCallback += OnStateChanged;
+            Met.StopCallback += OnStateChanged;
+            await Met.Initialize();
+        }
+    }
+
+    private async void OnStateChanged()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Met.BeatCallback -= OnStateChanged;
+    }
 }
