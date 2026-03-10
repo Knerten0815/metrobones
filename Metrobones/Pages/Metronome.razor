@@ -1,4 +1,6 @@
-﻿@page "/"
+﻿@* @page "/" *@
+@page "/metronome"
+
 @implements IDisposable
 @inject IJSRuntime JS
 
@@ -11,7 +13,7 @@
                          @bind-NoteValue=_noteValue @bind-NoteValue:after=UpdateMetronome />
 
     <BeatAccenting @bind-BeatAccents=_beatAccents @bind-BeatAccents:after=UpdateMetronome CurrentBeat=_currentBeat
-                   NotesPerBar=_notesPerBar />
+                   NotesPerBar=_notesPerBar Label="Edit Accenting"/>
 
     <MudStack Row=@true Spacing=2 Justify=@Justify.SpaceEvenly>
         @if (_isRunning)

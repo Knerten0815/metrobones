@@ -1,4 +1,7 @@
-<MudText Typo=@Typo.caption>Edit Accenting</MudText>
+@if(string.IsNullOrEmpty(Label) == false)
+{
+    <MudText Typo=@Typo.caption>@Label</MudText>
+}
 <MudStack Row=@true Wrap=@Wrap.Wrap Justify=@Justify.SpaceEvenly>
     @for (int i = 1; i <= BeatAccents.Length; i++)
     {
@@ -9,6 +12,8 @@
 </MudStack>
 
 @code {
+    [Parameter]
+    public string? Label { get; set; }
     [Parameter]
     public int CurrentBeat { get; set; } = 0;
     [Parameter]

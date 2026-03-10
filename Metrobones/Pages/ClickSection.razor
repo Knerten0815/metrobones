@@ -1,0 +1,52 @@
+<MudExpansionPanel @bind-Expanded=_open>
+    <TitleContent>
+        <MudStack AlignItems=@AlignItems.Center Row="true">
+            @if (_open)
+            {
+                <MudTextField @bind-Value=_sectionName T="string" @onclick:stopPropagation
+                                @onkeydown:stopPropagation />
+            }
+            else
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.DragHandle" Size=@Size.Small aria-label="drag" />
+                <MudChip Variant="Variant.Text" Size=@Size.Small T="string">@(_sectionLength)x</MudChip>
+                <MudText>@_sectionName</MudText>
+            }
+        </MudStack>
+    </TitleContent>
+    <ChildContent><MudStack Spacing=4>                
+        <MudStack Justify=@Justify.SpaceEvenly AlignItems=@AlignItems.Center Row="true">
+            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(_sectionLength)bars</MudChip>
+            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(_notesPerBar)/@(_noteValue)</MudChip>
+            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(_tempo)bpm</MudChip>
+        </MudStack>
+
+        <BeatAccenting @bind-BeatAccents=_beatAccents NotesPerBar=_notesPerBar />
+
+        <MudStack Justify=@Justify.SpaceEvenly AlignItems=@AlignItems.Center Row="true">
+            <MudIconButton Color=@Color.Primary Icon="@Icons.Material.Filled.SkipPrevious" Size=@Size.Large
+                            aria-label="Previous Section" />
+            <MudIconButton Color=@Color.Primary Icon="@Icons.Material.Filled.PlayCircleOutline" Size=@Size.Large
+                            aria-label="Play" />
+            <MudIconButton Color=@Color.Primary Icon="@Icons.Material.Filled.SkipNext" Size=@Size.Large
+                            aria-label="Next Section" />
+        </MudStack>
+
+    </MudStack></ChildContent>
+</MudExpansionPanel>
+
+
+@code {
+    private int[] _beatAccents = new int[] { 1, 0, 0, 0 };
+
+    private bool _open, _countIn;
+    private string _sectionName = "Intro";
+    private int _tempo = 120;
+    private int _notesPerBar = 7;
+    private int _noteValue = 8;
+    private int _sectionLength = 16;
+    private void OnChipClicked()
+    {
+        _sectionLength++;
+    }
+}
