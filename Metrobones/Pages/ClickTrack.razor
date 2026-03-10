@@ -1,0 +1,81 @@
+<MudStack Spacing=3>
+    <MudExpansionPanels>
+
+        <MudExpansionPanel @bind-Expanded=open>
+            <TitleContent>
+                <MudStack AlignItems=@AlignItems.Center Row="true">
+
+                    @if (open)
+                    {
+                        <div @onclick:stopPropagation @onclick="OnChipClicked">
+                            <MudChip Variant="Variant.Text" Size=@_iconSize T="string">@(_sectionLength)x</MudChip>
+                        </div>
+                        <MudTextField @bind-Value=_sectionName T="string" @onclick:stopPropagation
+                                      @onkeydown:stopPropagation />
+                    }
+                    else
+                    {
+                        <MudIconButton Icon="@Icons.Material.Filled.DragHandle" Size=@_iconSize aria-label="drag" />
+                        <MudChip Variant="Variant.Text" Size=@_iconSize T="string">@(_sectionLength)x</MudChip>
+                        <MudText>@_sectionName</MudText>
+                    }
+
+                </MudStack>
+            </TitleContent>
+            <ChildContent>
+                Panel Content
+            </ChildContent>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel>
+            <TitleContent>
+                <MudStack AlignItems=@AlignItems.Center Row="true">
+                    <MudIconButton Icon="@Icons.Material.Filled.DragHandle" Size=@_iconSize aria-label="drag" />
+                    <MudStack Row="true" Spacing=-1>
+                        <MudChip Variant="Variant.Text" Size=@_iconSize T="string">@(_sectionLength)x</MudChip>
+                    </MudStack>
+                    <MudText>@_sectionName</MudText>
+                </MudStack>
+            </TitleContent>
+            <ChildContent>
+                Panel Content
+            </ChildContent>
+        </MudExpansionPanel>
+
+        <MudExpansionPanel>
+            <TitleContent>
+                <MudStack AlignItems=@AlignItems.Center Row="true">
+                    <MudIconButton Icon="@Icons.Material.Filled.DragHandle" Size=@_iconSize aria-label="drag" />
+                    <MudStack Row="true" Spacing=-1>
+                        <MudChip Variant="Variant.Text" Size=@_iconSize T="string">@(_sectionLength)x</MudChip>
+                    </MudStack>
+                    <MudText>@_sectionName</MudText>
+                </MudStack>
+            </TitleContent>
+            <ChildContent>
+                Panel Content
+            </ChildContent>
+        </MudExpansionPanel>
+
+    </MudExpansionPanels>
+
+    <MudStack Row=true Justify=@Justify.SpaceAround>
+        <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline" aria-label="add section" />
+    </MudStack>
+</MudStack>
+
+
+@code {
+    bool open;
+    private string _sectionName = "Intro";
+    private int _tempo = 120;
+    private int _notesPerBar = 7;
+    private int _noteValue = 8;
+    private int _sectionLength = 16;
+    private Size _iconSize = Size.Small;
+
+    private void OnChipClicked()
+    {
+        _sectionLength++;
+    }
+}
