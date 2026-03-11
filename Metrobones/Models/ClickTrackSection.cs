@@ -7,7 +7,6 @@ public class ClickTrackSection
     public MetronomeData MetData {get; set;} = new();
 
     public string Title {get; set;} = "Verse";
-    public bool Open {get; set;} = false;
 
     public ClickTrackSection(int id)
     {

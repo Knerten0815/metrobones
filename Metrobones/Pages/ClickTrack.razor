@@ -3,9 +3,10 @@
 <MudStack Spacing=3 AlignItems=AlignItems.Center>
     <MudSwitch Size=@Size.Large Color=@Color.Primary @bind-Value=_countIn Label="Count In" />
     <MudExpansionPanels Class="mud-width-full">
-        @foreach (var section in Sections)
+        @for(int i = 0; i < Sections.Count; i++)
         {
-            <ClickSection CurrentSectionID=_currentSectionID Section=section StartClicktrack=StartClickTrack DeleteSection=DeleteSection/>
+            int index = i; // capture for closure
+            <ClickSection @bind-Section=Sections[index] CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection/>
         }
     </MudExpansionPanels>
 
@@ -17,10 +18,12 @@
 @code {
     private bool _countIn;
     private int _currentSectionID = -1;
+    private int _remainingBeats = -1;
     private List<ClickTrackSection> Sections = new List<ClickTrackSection>
-        {new (1) { Title = "Intro", Length = 4, MetData = new(6)},
-         new (2) { Title = "Verse", Length = 8 },
-         new (3) { Title = "Chorus", Length = 8, MetData = new() { Tempo = 140 }}};
+        {new (1) { Title = "Intro", Length = 2, MetData = new MetronomeData(notesPerBar: 6) { Tempo = 140 }},
+
+         new (2) { Title = "Verse", Length = 2 },
+         new (3) { Title = "Chorus", Length = 2, MetData = new MetronomeData() { Tempo = 140 }}};
     
     private void AddSection()
     {
@@ -41,9 +44,35 @@
             return;
         
         _currentSectionID = startSection.ID;
+        _remainingBeats = startSection.Length * startSection.MetData.NotesPerBar - 1;
         await Met.UpdateSettings(startSection.MetData);
         await Met.Start();
     }
 
-
+    protected override async void OnStateChanged()
+    {
+        if (_remainingBeats > 0)
+        {
+            _remainingBeats--;
+        }
+        else
+        {
+            int nextSectionIndex = Sections.FindIndex(s => s.ID == _currentSectionID) + 1;
+            if (nextSectionIndex < Sections.Count)
+            {
+                var nextSection = Sections[nextSectionIndex];
+                _currentSectionID = nextSection.ID;
+                _remainingBeats = nextSection.Length * nextSection.MetData.NotesPerBar - 1;
+                await Met.UpdateSettings(nextSection.MetData);
+            }
+            else
+            {
+                _currentSectionID = -1;
+                _remainingBeats = -1;
+                await Met.Stop();
+            }
+        }
+        
+        base.OnStateChanged();
+    }
 }

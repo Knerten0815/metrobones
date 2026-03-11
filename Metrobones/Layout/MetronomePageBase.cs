@@ -24,7 +24,7 @@ public abstract class MetronomePageBase : ComponentBase, IAsyncDisposable
         }
     }
 
-    private async void OnStateChanged()
+    protected virtual async void OnStateChanged()
     {
         await InvokeAsync(StateHasChanged);
     }

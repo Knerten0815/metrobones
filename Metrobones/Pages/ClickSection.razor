@@ -1,11 +1,10 @@
-@using Metrobones.Models;
 @using System.ComponentModel.DataAnnotations
-@inject Services.Metronome Met
+@inherits Layout.MetronomePageBase
 
-<MudExpansionPanel @bind-Expanded=Section.Open Disabled=@(Met.IsRunning && CurrentSectionID != Section.ID) Elevation=0>
+<MudExpansionPanel Expanded=@_openSection ExpandedChanged=@OpenSection Disabled=@(Met.IsRunning && CurrentSectionID != Section.ID)>
     <TitleContent>
         <MudStack AlignItems=@AlignItems.Center Row="true">
-            @if (Section.Open)
+            @if (_openSection)
             {
                 <MudTextField @bind-Value=Section.Title @bind-Value:after=OnSectionChanged T="string" @onclick:stopPropagation @onkeydown:stopPropagation />
             }
@@ -19,9 +18,9 @@
     </TitleContent>
     <ChildContent><MudStack Spacing=4>                
         <MudStack Justify=@Justify.SpaceEvenly AlignItems=@AlignItems.Center Row="true">
-            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.Length)bars</MudChip>
+            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.Length) bars</MudChip>
             <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.MetData.NotesPerBar)/@(Section.MetData.NoteValue)</MudChip>
-            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.MetData.Tempo)bpm</MudChip>
+            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.MetData.Tempo) bpm</MudChip>
         </MudStack>
 
         <BeatAccenting @bind-BeatAccents=Section.MetData.BeatAccents  @bind-BeatAccents:after=OnSectionChanged
@@ -52,6 +51,28 @@
     
     [Parameter]
     public EventCallback<ClickTrackSection> StartClicktrack{ get; set; }
+    
+    
+    private bool _openSection;
+
+    protected override void OnParametersSet()
+    {
+        if (Met.IsRunning)
+        {
+            _openSection = CurrentSectionID == Section.ID;
+        }
+    }
+    
+    private void OpenSection(bool shouldOpen){
+        if (Met.IsRunning)
+        {
+            _openSection = CurrentSectionID == Section.ID;
+        }
+        else
+        {
+            _openSection = shouldOpen;
+        }
+    }
 
     private async Task OnSectionChanged()
     {
