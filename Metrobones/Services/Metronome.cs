@@ -1,6 +1,5 @@
 using Microsoft.JSInterop;
 using Metrobones.Models;
-using Metrobones.Pages;
 
 namespace Metrobones.Services;
 
@@ -38,9 +37,9 @@ public class Metronome : IAsyncDisposable
     public async Task Stop()
     {
         CurrentBeat = 0;
-        StopCallback?.Invoke();
         await _js.InvokeVoidAsync("metronome.stop");
         IsRunning = await _js.InvokeAsync<bool>("metronome.getIsRunning");
+        StopCallback?.Invoke();
     }
 
     public async Task UpdateSettings()
