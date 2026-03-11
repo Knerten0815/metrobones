@@ -32,6 +32,7 @@
         <MudStack Justify=@Justify.Center AlignItems=@AlignItems.Center Row="true" Style="position:relative">
             @* TODO: Add remaining beats indicator. Maybe progress bar? *@
             <PlayButton OnPlay=OnPlaySection/>
+            @* TODO: Add confirm deletion dialog *@
             <MudIconButton OnClick=OnDeleteSection Color=@Color.Primary Icon="@Icons.Material.Outlined.Delete" Size=@Size.Medium
                             Disabled=@Met.IsRunning Style="position:absolute;right:0" aria-label="delete section" />
         </MudStack>
