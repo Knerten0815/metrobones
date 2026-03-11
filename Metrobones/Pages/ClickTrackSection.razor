@@ -51,9 +51,8 @@
     
     [Parameter]
     public EventCallback<Models.ClickTrackSection> StartClicktrack{ get; set; }
-    
-    
-    private bool _openSection;
+
+    private bool _openSection = true;
 
     protected override void OnParametersSet()
     {
