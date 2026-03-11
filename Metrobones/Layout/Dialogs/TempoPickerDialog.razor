@@ -1,0 +1,22 @@
+@using System.ComponentModel.DataAnnotations
+<MudDialog>
+    <DialogContent>
+        <TempoPicker @bind-Tempo=Tempo/>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">OK</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter, Required]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public int Tempo { get; set; }
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(result: Tempo));
+
+    private void Cancel() => MudDialog.Cancel();
+}

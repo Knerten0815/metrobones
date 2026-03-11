@@ -1,12 +1,14 @@
-@using System.ComponentModel.DataAnnotations
 @inherits Layout.MetronomePageBase
+@using System.ComponentModel.DataAnnotations
+@using Metrobones.Layout.Dialogs
+@inject IDialogService DialogService
 
 <MudExpansionPanel Expanded=@_openSection ExpandedChanged=@OpenSection Disabled=@(Met.IsRunning && CurrentSectionID != Section.ID)>
     <TitleContent>
         <MudStack AlignItems=@AlignItems.Center Row="true">
             @if (_openSection)
             {
-                <MudTextField @bind-Value=Section.Title @bind-Value:after=OnSectionChanged T="string" @onclick:stopPropagation @onkeydown:stopPropagation />
+                <MudTextField @bind-Value=Section.Title T="string" @onclick:stopPropagation @onkeydown:stopPropagation />
             }
             else
             {
@@ -19,12 +21,12 @@
 
     <ChildContent><MudStack Spacing=4>                
         <MudStack Justify=@Justify.SpaceEvenly AlignItems=@AlignItems.Center Row="true">
-            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.Length) bars</MudChip>
-            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.MetData.NotesPerBar)/@(Section.MetData.NoteValue)</MudChip>
-            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.MetData.Tempo) bpm</MudChip>
+            <MudChip OnClick=OpenLengthDialogAsync Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.Length) bars</MudChip>
+            <MudChip OnClick=OpenTimeSignatureDialogAsync Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.MetData.NotesPerBar)/@(Section.MetData.NoteValue)</MudChip>
+            <MudChip OnClick=OpenTempoDialogAsync Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.MetData.Tempo) bpm</MudChip>
         </MudStack>
 
-        <BeatAccenting @bind-BeatAccents=Section.MetData.BeatAccents  @bind-BeatAccents:after=OnSectionChanged
+        <BeatAccenting @bind-BeatAccents=Section.MetData.BeatAccents
                    CurrentBeat=Met.CurrentBeat NotesPerBar=Section.MetData.NotesPerBar/>
 
         <MudStack Justify=@Justify.Center AlignItems=@AlignItems.Center Row="true" Style="position:relative">
@@ -75,11 +77,6 @@
         }
     }
 
-    private async Task OnSectionChanged()
-    {
-        await SectionChanged.InvokeAsync(Section);
-    }
-
     private async Task OnDeleteSection()
     {
         await DeleteSection.InvokeAsync(Section.ID);
@@ -88,5 +85,58 @@
     private async Task OnPlaySection()
     {
         await StartClicktrack.InvokeAsync(Section);
+    }
+
+    @* ------- Dialog Stuff ------- *@
+
+    private DialogOptions? _options = new DialogOptions { CloseOnEscapeKey = true };
+
+    private async Task OpenTempoDialogAsync()
+    {
+        DialogParameters<TempoPickerDialog>? parameters = new DialogParameters<TempoPickerDialog>{
+            { x => x.Tempo, Section.MetData.Tempo },
+        };
+
+        IDialogReference? dialog = await DialogService.ShowAsync<TempoPickerDialog>(title: "Edit Tempo", parameters, _options);
+        DialogResult? result = await dialog.Result;
+        
+        if (result?.Canceled == false)
+        {
+            Section.MetData.Tempo = (int)(result.Data ?? Section.MetData.Tempo);
+        }
+    }
+
+    private async Task OpenTimeSignatureDialogAsync()
+    {
+        DialogParameters<TimeSignatureDialog>? parameters = new DialogParameters<TimeSignatureDialog>{
+            { x => x.BeatsPerBar, Section.MetData.NotesPerBar },
+            { x => x.NoteValue, Section.MetData.NoteValue }
+        };
+
+        IDialogReference? dialog = await DialogService.ShowAsync<TimeSignatureDialog>(title: "Edit Time Signature", parameters, _options);
+        DialogResult? result = await dialog.Result;
+
+        if (result?.Canceled == false)
+        {
+            MetronomeData resultData = (MetronomeData)(result.Data ?? Section.MetData);
+            Section.MetData.NotesPerBar = resultData.NotesPerBar;
+            Section.MetData.NoteValue = resultData.NoteValue;
+            Section.MetData.BeatAccents = resultData.BeatAccents;
+        }
+    }
+
+    private async Task OpenLengthDialogAsync()
+    {
+        DialogParameters<SectionLengthDialog>? parameters = new DialogParameters<SectionLengthDialog>{
+            { x => x.Length, Section.Length },
+        };
+
+        IDialogReference? dialog = await DialogService.ShowAsync<SectionLengthDialog>(title: "Edit Section Length", parameters, _options);
+        DialogResult? result = await dialog.Result;
+        
+        if (result?.Canceled == false)
+        {
+            Section.Length = (int)(result.Data ?? Section.Length);
+        }
     }
 }
