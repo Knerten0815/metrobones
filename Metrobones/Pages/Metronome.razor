@@ -1,8 +1,7 @@
 ﻿@* @page "/" *@
 @page "/clicktracks"
 
-@implements IAsyncDisposable
-@inject Services.Metronome Met
+@inherits Layout.MetronomePageBase
 
 <PageTitle>Metronome</PageTitle>
 
@@ -18,32 +17,3 @@
     <PlayButton OnPlay=Met.Start/>
 </MudStack>
 
-@code {
-    protected override async Task OnInitializedAsync()
-    {
-        if(Met.IsRunning)
-            await Met.Stop();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            Met.BeatCallback += OnStateChanged;
-            Met.StopCallback += OnStateChanged;
-            await Met.Initialize();
-        }
-    }
-
-    private async void OnStateChanged()
-    {
-        await InvokeAsync(StateHasChanged);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        Met.StopCallback -= OnStateChanged;
-        Met.BeatCallback -= OnStateChanged;
-        await Met.Stop();
-    }
-}
