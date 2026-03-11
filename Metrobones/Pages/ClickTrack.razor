@@ -1,4 +1,4 @@
-@implements IDisposable
+@implements IAsyncDisposable
 @inject Services.Metronome Met
 
 <MudStack Spacing=3 AlignItems=AlignItems.Center>
@@ -34,6 +34,12 @@
         Sections.RemoveAll(s => s.ID == id);
         OnStateChanged();
     }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if(Met.IsRunning)
+            await Met.Stop();
+    }
     
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -50,8 +56,10 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
+        Met.StopCallback -= OnStateChanged;
         Met.BeatCallback -= OnStateChanged;
+        await Met.Stop();
     }
 }

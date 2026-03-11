@@ -1,7 +1,7 @@
 ﻿@* @page "/" *@
 @page "/clicktracks"
 
-@implements IDisposable
+@implements IAsyncDisposable
 @inject Services.Metronome Met
 
 <PageTitle>Metronome</PageTitle>
@@ -19,6 +19,12 @@
 </MudStack>
 
 @code {
+    protected override async Task OnInitializedAsync()
+    {
+        if(Met.IsRunning)
+            await Met.Stop();
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -34,8 +40,10 @@
         await InvokeAsync(StateHasChanged);
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
+        Met.StopCallback -= OnStateChanged;
         Met.BeatCallback -= OnStateChanged;
+        await Met.Stop();
     }
 }
