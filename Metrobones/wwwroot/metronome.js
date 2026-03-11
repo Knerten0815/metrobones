@@ -107,11 +107,16 @@ function stop() {
 }
 
 
-function setBpm(newTempo, bpb, noteVal, newBeatAccents) {
+function setBpm(newTempo, bpb, noteVal, newBeatAccents, resetBeat = false) {
     tempo = newTempo || 120;
     clicksPerBar = bpb || 4;
     noteValue = noteVal || 4;
     beatAccents = newBeatAccents || [1, 0, 0, 0];
+
+    if (resetBeat) 
+    {
+        currentBeat = 0;
+    }
 }
 
 

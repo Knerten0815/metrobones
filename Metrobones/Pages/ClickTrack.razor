@@ -2,10 +2,11 @@
 
 <MudStack Spacing=3 AlignItems=AlignItems.Center>
     <MudStack Row=true Spacing=1 AlignItems=AlignItems.Center>
-        <MudSwitch Size=@Size.Large Color=@(_countInActive ? Color.Secondary : Color.Primary) @bind-Value=_countIn Label="Count in" />
+        <MudSwitch Size=@Size.Large Color=@(_countInActive ? Color.Secondary : Color.Primary) @bind-Value=_countIn Class="@(_countInActive ? "no-interact" : "")" Label="Count in" />
         <MudNumericField @bind-Value=_countInBars Min=1 Max=10 Disabled=@(!_countIn) Class="input-center-text" Style="max-width: 3rem"/>
         <MudText> bars.</MudText>
     </MudStack>
+    @* <MudText>Remaining=@_remainingBeats Current=@Met.CurrentBeat</MudText> *@
     <MudExpansionPanels Class="mud-width-full">
         @for(int i = 0; i < Sections.Count; i++)
         {
@@ -27,15 +28,25 @@
     private int _remainingBeats = -1;
     private List<Models.ClickTrackSection> Sections = new List<Models.ClickTrackSection>
         {
-            new Models.ClickTrackSection (id: 1) { Title = "Intro", Length = 2, MetData = new MetronomeData(notesPerBar: 6) { Tempo = 140 }},
-            new Models.ClickTrackSection (id: 2) { Title = "Verse", Length = 2 },
-            new Models.ClickTrackSection (id: 3) { Title = "Chorus", Length = 2, MetData = new MetronomeData() { Tempo = 140 }}
+            new Models.ClickTrackSection (id: 1) { Title = "Intro", Length = 1, MetData = new MetronomeData(notesPerBar: 6) { Tempo = 10 }},
+            new Models.ClickTrackSection (id: 2) { Title = "Verse", Length = 2 , MetData = new MetronomeData(notesPerBar: 3) { Tempo = 100 }},
+            new Models.ClickTrackSection (id: 3) { Title = "Chorus", Length = 2, MetData = new MetronomeData() { Tempo = 100 }}
         };
+    
+    protected override void OnInitialized()
+    {
+        Met.StopCallback += ResetCountInActive;
+    }
+
+    private void ResetCountInActive()
+    {
+        _countInActive = false;
+    }
 
     private void AddSection()
     {
         int newID = Sections.Count > 0 ? Sections.Max(s => s.ID) + 1 : 1;
-            Sections.Add(item: new Models.ClickTrackSection(newID));
+        Sections.Add(item: new Models.ClickTrackSection(newID));
         StateHasChanged();
     }
 
@@ -52,19 +63,21 @@
         
         _currentSectionID = startSection.ID;
         _remainingBeats = startSection.Length * startSection.MetData.NotesPerBar - 1;
+
         if(_countIn)
         {
             _countInActive = true;
             _countInBeats = _countInBars * startSection.MetData.NotesPerBar + 1;
             _remainingBeats += _countInBeats;
         }
+
         await Met.UpdateSettings(startSection.MetData);
         await Met.Start();
     }
 
     protected override async void OnStateChanged()
     {
-        if (_remainingBeats > 0)
+        if (_remainingBeats > 1)
         {
             _remainingBeats--;
             _countInBeats--;
@@ -73,12 +86,14 @@
         }
         else
         {
+            _remainingBeats--;
             int nextSectionIndex = Sections.FindIndex(s => s.ID == _currentSectionID) + 1;
+
             if (nextSectionIndex < Sections.Count)
             {
                 var nextSection = Sections[nextSectionIndex];
                 _currentSectionID = nextSection.ID;
-                _remainingBeats = nextSection.Length * nextSection.MetData.NotesPerBar - 1;
+                _remainingBeats = nextSection.Length * nextSection.MetData.NotesPerBar;
                 await Met.UpdateSettings(nextSection.MetData);
             }
             else

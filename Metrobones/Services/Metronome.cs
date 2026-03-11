@@ -42,18 +42,25 @@ public class Metronome : IAsyncDisposable
         StopCallback?.Invoke();
     }
 
+    /// <summary>
+    /// Used by Metronome. Updates the metronome on the next beat, without stopping or resetting the beat.
+    /// </summary>
+    /// <returns></returns>
     public async Task UpdateSettings()
     {
         await _js.InvokeVoidAsync("metronome.setBpm", Data.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents);
     }
 
+    /// <summary>
+    /// Used by clicktracks. Updates the running metronome on the next beat  without stopping. Sets the next beat as the 1.
+    /// </summary>
     public async Task UpdateSettings(MetronomeData data)
     {
         Data.Tempo = data.Tempo;
         Data.NotesPerBar = data.NotesPerBar;
         Data.NoteValue = data.NoteValue;
         Data.BeatAccents = data.BeatAccents;
-        await UpdateSettings();
+        await _js.InvokeVoidAsync("metronome.setBpm", Data.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents, true);
     }
 
     public async Task UpdateNotesPerBar()

@@ -2,6 +2,10 @@
     text-align: center;
 }
 
+.no-interact {
+    pointer-events: none;
+}
+
 #blazor-error-ui {
     color-scheme: light only;
     background: lightyellow;
