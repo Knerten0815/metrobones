@@ -1,7 +1,11 @@
 @inherits Layout.MetronomePageBase
 
 <MudStack Spacing=3 AlignItems=AlignItems.Center>
-    <MudSwitch Size=@Size.Large Color=@Color.Primary @bind-Value=_countIn Label="Count In" />
+    <MudStack Row=true Spacing=1 AlignItems=AlignItems.Center>
+        <MudSwitch Size=@Size.Large Color=@(_countInActive ? Color.Secondary : Color.Primary) @bind-Value=_countIn Label="Count in" />
+        <MudNumericField @bind-Value=_countInBars Min=1 Max=10 Disabled=@(!_countIn) Class="input-center-text" Style="max-width: 3rem"/>
+        <MudText> bars.</MudText>
+    </MudStack>
     <MudExpansionPanels Class="mud-width-full">
         @for(int i = 0; i < Sections.Count; i++)
         {
@@ -16,19 +20,22 @@
 </MudStack>
 
 @code {
-    private bool _countIn;
+    private bool _countIn, _countInActive;
+    private int _countInBars = 2;
+    private int _countInBeats = 8;
     private int _currentSectionID = -1;
     private int _remainingBeats = -1;
     private List<ClickTrackSection> Sections = new List<ClickTrackSection>
-        {new (1) { Title = "Intro", Length = 2, MetData = new MetronomeData(notesPerBar: 6) { Tempo = 140 }},
+        {
+            new ClickTrackSection (id: 1) { Title = "Intro", Length = 2, MetData = new MetronomeData(notesPerBar: 6) { Tempo = 140 }},
+            new ClickTrackSection (id: 2) { Title = "Verse", Length = 2 },
+            new ClickTrackSection (id: 3) { Title = "Chorus", Length = 2, MetData = new MetronomeData() { Tempo = 140 }}
+        };
 
-         new (2) { Title = "Verse", Length = 2 },
-         new (3) { Title = "Chorus", Length = 2, MetData = new MetronomeData() { Tempo = 140 }}};
-    
     private void AddSection()
     {
         int newID = Sections.Count > 0 ? Sections.Max(s => s.ID) + 1 : 1;
-        Sections.Add(new ClickTrackSection(newID));
+        Sections.Add(item: new ClickTrackSection(newID));
         StateHasChanged();
     }
 
@@ -45,6 +52,12 @@
         
         _currentSectionID = startSection.ID;
         _remainingBeats = startSection.Length * startSection.MetData.NotesPerBar - 1;
+        if(_countIn)
+        {
+            _countInActive = true;
+            _countInBeats = _countInBars * startSection.MetData.NotesPerBar + 1;
+            _remainingBeats += _countInBeats;
+        }
         await Met.UpdateSettings(startSection.MetData);
         await Met.Start();
     }
@@ -54,6 +67,9 @@
         if (_remainingBeats > 0)
         {
             _remainingBeats--;
+            _countInBeats--;
+            if (_countInBeats <= 0)
+                _countInActive = false;
         }
         else
         {
