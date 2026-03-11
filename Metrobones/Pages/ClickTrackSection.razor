@@ -16,6 +16,7 @@
             }
         </MudStack>
     </TitleContent>
+
     <ChildContent><MudStack Spacing=4>                
         <MudStack Justify=@Justify.SpaceEvenly AlignItems=@AlignItems.Center Row="true">
             <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.Length) bars</MudChip>
@@ -27,6 +28,7 @@
                    CurrentBeat=Met.CurrentBeat NotesPerBar=Section.MetData.NotesPerBar/>
 
         <MudStack Justify=@Justify.Center AlignItems=@AlignItems.Center Row="true" Style="position:relative">
+            @* TODO: Add remaining beats indicator. Maybe progress bar? *@
             <PlayButton OnPlay=OnPlaySection/>
             <MudIconButton OnClick=OnDeleteSection Color=@Color.Primary Icon="@Icons.Material.Outlined.Delete" Size=@Size.Medium
                             Disabled=@Met.IsRunning Style="position:absolute;right:0" aria-label="delete section" />
