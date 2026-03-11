@@ -41,16 +41,16 @@
     public int CurrentSectionID { get; set; }
 
     [Parameter, Required]
-    public required ClickTrackSection Section {get; set;}
+    public required Models.ClickTrackSection Section {get; set;}
 
     [Parameter]
-    public EventCallback<ClickTrackSection> SectionChanged { get; set; }
+    public EventCallback<Models.ClickTrackSection> SectionChanged { get; set; }
 
     [Parameter]
     public EventCallback<int> DeleteSection{ get; set; }
     
     [Parameter]
-    public EventCallback<ClickTrackSection> StartClicktrack{ get; set; }
+    public EventCallback<Models.ClickTrackSection> StartClicktrack{ get; set; }
     
     
     private bool _openSection;

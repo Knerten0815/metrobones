@@ -10,7 +10,7 @@
         @for(int i = 0; i < Sections.Count; i++)
         {
             int index = i; // capture for closure
-            <ClickSection @bind-Section=Sections[index] CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection/>
+            <ClickTrackSection @bind-Section=Sections[index] CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection/>
         }
     </MudExpansionPanels>
 
@@ -25,17 +25,17 @@
     private int _countInBeats = 8;
     private int _currentSectionID = -1;
     private int _remainingBeats = -1;
-    private List<ClickTrackSection> Sections = new List<ClickTrackSection>
+    private List<Models.ClickTrackSection> Sections = new List<Models.ClickTrackSection>
         {
-            new ClickTrackSection (id: 1) { Title = "Intro", Length = 2, MetData = new MetronomeData(notesPerBar: 6) { Tempo = 140 }},
-            new ClickTrackSection (id: 2) { Title = "Verse", Length = 2 },
-            new ClickTrackSection (id: 3) { Title = "Chorus", Length = 2, MetData = new MetronomeData() { Tempo = 140 }}
+            new Models.ClickTrackSection (id: 1) { Title = "Intro", Length = 2, MetData = new MetronomeData(notesPerBar: 6) { Tempo = 140 }},
+            new Models.ClickTrackSection (id: 2) { Title = "Verse", Length = 2 },
+            new Models.ClickTrackSection (id: 3) { Title = "Chorus", Length = 2, MetData = new MetronomeData() { Tempo = 140 }}
         };
 
     private void AddSection()
     {
         int newID = Sections.Count > 0 ? Sections.Max(s => s.ID) + 1 : 1;
-        Sections.Add(item: new ClickTrackSection(newID));
+            Sections.Add(item: new Models.ClickTrackSection(newID));
         StateHasChanged();
     }
 
@@ -45,7 +45,7 @@
         StateHasChanged();
     }
 
-    private async Task StartClickTrack(ClickTrackSection startSection)
+    private async Task StartClickTrack(Models.ClickTrackSection startSection)
     {
         if(startSection == null)
             return;
