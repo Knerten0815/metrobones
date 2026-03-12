@@ -13,8 +13,8 @@
     [CascadingParameter, Required]
     private IMudDialogInstance MudDialog { get; set; } = default!;
 
-    [Parameter]
-    public string SectionTitle { get; set; }
+    [Parameter, Required]
+    public required string SectionTitle { get; set; } = default!;
 
     private void Submit() => MudDialog.Close(DialogResult.Ok(result: true));
 
