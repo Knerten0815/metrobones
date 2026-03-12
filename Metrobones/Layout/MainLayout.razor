@@ -50,6 +50,7 @@
     void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
     {
         _pageTitle = GetPageTitle(e.Location);
+        // flip the pendulum logo on each page change for fun
         _currentLogoSvgText = _currentLogoSvgText == logoSvgText ? logoFlippedSvgText : logoSvgText;
         InvokeAsync(StateHasChanged);
     }

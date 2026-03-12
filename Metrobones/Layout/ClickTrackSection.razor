@@ -33,7 +33,7 @@
             @* TODO: Add remaining beats indicator. Maybe progress bar? *@
             <PlayButton OnPlay=OnPlaySection/>
             @* TODO: Add confirm deletion dialog *@
-            <MudIconButton OnClick=OnDeleteSection Color=@Color.Primary Icon="@Icons.Material.Outlined.Delete" Size=@Size.Medium
+            <MudIconButton OnClick=OpenDeleteSectionDialogAsync Color=@Color.Primary Icon="@Icons.Material.Outlined.Delete" Size=@Size.Medium
                             Disabled=@Met.IsRunning Style="position:absolute;right:0" aria-label="delete section" />
         </MudStack>
 
@@ -76,11 +76,6 @@
         {
             _openSection = shouldOpen;
         }
-    }
-
-    private async Task OnDeleteSection()
-    {
-        await DeleteSection.InvokeAsync(Section.ID);
     }
 
     private async Task OnPlaySection()
@@ -138,6 +133,21 @@
         if (result?.Canceled == false)
         {
             Section.Length = (int)(result.Data ?? Section.Length);
+        }
+    }
+
+    private async Task OpenDeleteSectionDialogAsync()
+    {
+        DialogParameters<DeleteSectionDialog>? parameters = new DialogParameters<DeleteSectionDialog>{
+            { x => x.SectionTitle, Section.Title }
+        };
+
+        IDialogReference? dialog = await DialogService.ShowAsync<DeleteSectionDialog>(title: "Delete Section", parameters, _options);
+        DialogResult? result = await dialog.Result;
+        
+        if (result?.Canceled == false)
+        {
+            await DeleteSection.InvokeAsync(Section.ID);
         }
     }
 }
