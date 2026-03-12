@@ -59,6 +59,11 @@
 
     private bool _openSection = true;
 
+    private void UpdateSection()
+    {
+        SectionChanged.InvokeAsync(Section);
+    }
+
     protected override void OnParametersSet()
     {
         if (Met.IsRunning)

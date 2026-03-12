@@ -16,7 +16,7 @@
         @for(int i = 0; i < Track.Sections.Count; i++)
         {
             int index = i; // capture for closure
-            <ClickTrackSection @bind-Section=Track.Sections[index] CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection/>
+            <ClickTrackSection Section=Track.Sections[index] SectionChanged=@SectionChanged CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection/>
         }
     </MudExpansionPanels>
 
@@ -46,17 +46,30 @@
         _countInActive = false;
     }
 
-    private void AddSection()
+    private async Task AddSection()
     {
         int newID = Track.Sections.Count > 0 ? Track.Sections.Max(s => s.ID) + 1 : 1;
         Track.Sections.Add(item: new Models.ClickTrackSection(newID));
         StateHasChanged();
+        await TrackStore.UpdateAsync(Track);
     }
 
-    private void DeleteSection(int id)
+    private async Task DeleteSection(int id)
     {
         Track.Sections.RemoveAll(s => s.ID == id);
         StateHasChanged();
+        await TrackStore.UpdateAsync(Track);
+    }
+
+    private async Task SectionChanged(Models.ClickTrackSection section)
+    {
+        int index = Track.Sections.FindIndex(s => s.ID == section.ID);
+        if (index != -1)
+        {
+            Track.Sections[index] = section;
+            StateHasChanged();
+            await TrackStore.UpdateAsync(Track);
+        }
     }
 
     private async Task StartClickTrack(Models.ClickTrackSection startSection)
