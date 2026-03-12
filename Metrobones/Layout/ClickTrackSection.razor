@@ -33,7 +33,7 @@
             @* TODO: Add remaining beats indicator. Maybe progress bar? *@
             <PlayButton OnPlay=OnPlaySection/>
             @* TODO: Add confirm deletion dialog *@
-            <MudIconButton OnClick=OpenDeleteSectionDialogAsync Color=@Color.Primary Icon="@Icons.Material.Outlined.Delete" Size=@Size.Medium
+            <MudIconButton OnClick=OpenDeleteSectionDialogAsync Icon="@Icons.Material.Outlined.Delete" Size=@Size.Medium
                             Disabled=@Met.IsRunning Style="position:absolute;right:0" aria-label="delete section" />
         </MudStack>
 
@@ -84,16 +84,13 @@
     }
 
     @* ------- Dialog Stuff ------- *@
-
-    private DialogOptions? _options = new DialogOptions { CloseOnEscapeKey = true };
-
     private async Task OpenTempoDialogAsync()
     {
         DialogParameters<TempoPickerDialog>? parameters = new DialogParameters<TempoPickerDialog>{
             { x => x.Tempo, Section.MetData.Tempo },
         };
 
-        IDialogReference? dialog = await DialogService.ShowAsync<TempoPickerDialog>(title: "Edit Tempo", parameters, _options);
+        IDialogReference? dialog = await DialogService.ShowAsync<TempoPickerDialog>(title: "Edit Tempo", parameters);
         DialogResult? result = await dialog.Result;
         
         if (result?.Canceled == false)
@@ -109,7 +106,7 @@
             { x => x.NoteValue, Section.MetData.NoteValue }
         };
 
-        IDialogReference? dialog = await DialogService.ShowAsync<TimeSignatureDialog>(title: "Edit Time Signature", parameters, _options);
+        IDialogReference? dialog = await DialogService.ShowAsync<TimeSignatureDialog>(title: "Edit Time Signature", parameters);
         DialogResult? result = await dialog.Result;
 
         if (result?.Canceled == false)
@@ -127,7 +124,7 @@
             { x => x.Length, Section.Length },
         };
 
-        IDialogReference? dialog = await DialogService.ShowAsync<SectionLengthDialog>(title: "Edit Section Length", parameters, _options);
+        IDialogReference? dialog = await DialogService.ShowAsync<SectionLengthDialog>(title: "Edit Section Length", parameters);
         DialogResult? result = await dialog.Result;
         
         if (result?.Canceled == false)
@@ -142,7 +139,7 @@
             { x => x.SectionTitle, Section.Title }
         };
 
-        IDialogReference? dialog = await DialogService.ShowAsync<DeleteSectionDialog>(title: "Delete Section", parameters, _options);
+        IDialogReference? dialog = await DialogService.ShowAsync<DeleteSectionDialog>(title: "Delete Section", parameters);
         DialogResult? result = await dialog.Result;
         
         if (result?.Canceled == false)

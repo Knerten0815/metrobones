@@ -1,5 +1,9 @@
+@page "/track"
+
 @using System.ComponentModel.DataAnnotations
 @inherits Layout.MetronomePageBase
+@inject ClickTrackStore TrackStore
+@inject NavigationManager Navigation
 
 <MudStack Spacing=3 AlignItems=AlignItems.Center>
     <MudStack Row=true Spacing=1 AlignItems=AlignItems.Center>
@@ -17,7 +21,7 @@
     </MudExpansionPanels>
 
     <MudStack Row=true Justify=@Justify.SpaceAround>
-        <MudIconButton OnClick=AddSection Icon="@Icons.Material.Filled.AddCircleOutline" aria-label="add section" />
+        <MudIconButton OnClick=AddSection Size=@Size.Large Color=@Color.Primary Icon="@Icons.Material.Filled.AddCircleOutline" aria-label="add section" />
     </MudStack>
 </MudStack>
 
@@ -28,9 +32,12 @@
     private int _countInBeats = 8;
     private int _currentSectionID = -1;
     private int _remainingBeats = -1;
-    
-    protected override void OnInitialized()
+
+    protected override async Task OnInitializedAsync()
     {
+        int trackID = int.Parse(Navigation.Uri.Split("=").Last());
+        Track = TrackStore.GetAsync(trackID).Result ?? new Models.ClickTrack();
+
         Met.StopCallback += ResetCountInActive;
     }
 

@@ -14,5 +14,6 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddMudServices();
 builder.Services.AddScoped<Metronome>();
 builder.Services.AddScoped<LocalStorage>();
+builder.Services.AddScoped<ClickTrackStore>();
 
 await builder.Build().RunAsync();

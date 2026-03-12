@@ -1,0 +1,51 @@
+@using System.ComponentModel.DataAnnotations
+@inject IDialogService DialogService
+@inject ClickTrackStore TrackStore
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing=1 Style="margin-bottom:1rem" Justify=@Justify.Center>
+            <MudTextField @bind-Value=ClickTrackTitle T="string" Label="Rename Click Track" AutoFocus=true/>
+            <MudStack Row=true Justify=@Justify.SpaceBetween AlignItems=@AlignItems.Center>
+                <MudText>Delete click track:</MudText>
+                <MudIconButton OnClick=@(() => OpenDeleteClickTrackDialogAsync(ClickTrackTitle, ClickTrackID)) Color=@Color.Error Icon="@Icons.Material.Outlined.Delete" Size=@Size.Medium aria-label="edit click track" />
+            </MudStack>
+        </MudStack>
+        <MudText Typo=@Typo.caption>Tempo, timing and sections are edited in the click track itself.</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">Ok</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter, Required]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter, Required]
+    public required string ClickTrackTitle { get; set; } = default!;
+    [Parameter, Required]
+    public required int ClickTrackID { get; set; } = default!;
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(result: ClickTrackTitle));
+
+    private void Cancel() => MudDialog.Cancel();
+
+    
+    private async Task OpenDeleteClickTrackDialogAsync(string trackTitle, int trackID)
+    {
+        DialogParameters<DeleteClickTrackDialog>? parameters = new DialogParameters<DeleteClickTrackDialog>{
+            { x => x.ClickTrackTitle, trackTitle }
+        };
+
+        IDialogReference? dialog = await DialogService.ShowAsync<DeleteClickTrackDialog>(title: "Delete Click Track", parameters);
+        DialogResult? result = await dialog.Result;
+        
+        if (result?.Canceled == false)
+        {
+            Cancel();
+            await TrackStore.RemoveAsync(trackID);
+        }
+    }
+}
