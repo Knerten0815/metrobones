@@ -30,7 +30,7 @@
         Tracks = await TrackStore.GetAllAsync();
     }
 
-    private async Task OpenClickTrack(int trackID)
+    private void OpenClickTrack(int trackID)
     {
         Navigation.NavigateTo($"/track?id={trackID}");
     }

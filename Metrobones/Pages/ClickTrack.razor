@@ -37,7 +37,7 @@
     protected override async Task OnInitializedAsync()
     {
         int trackID = int.Parse(Navigation.Uri.Split("=").Last());
-        Track = TrackStore.GetAsync(trackID).Result ?? new Models.ClickTrack();
+        Track = await TrackStore.GetAsync(trackID) ?? new Models.ClickTrack();
 
         Met.StopCallback += ResetCountInActive;
     }
