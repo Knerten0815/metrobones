@@ -1,0 +1,54 @@
+﻿@page "/"
+@using Metrobones.Layout.Dialogs
+@inject ClickTrackStore TrackStore
+@inject NavigationManager Navigation
+@inject IDialogService DialogService
+
+<PageTitle>Click Tracks</PageTitle>
+
+<MudList T="string">
+    @foreach(Models.ClickTrack track in Tracks)
+    {
+        <MudListItem Text=@track.Title Icon=@Icons.Material.Filled.ArrowForwardIos OnClick=@(() => OpenClickTrack(track.ID))>
+            <MudStack Row=true Justify=@Justify.SpaceBetween AlignItems=@AlignItems.Center Style="overflow: hidden;">
+                <MudText Style="overflow: hidden; text-overflow: ellipsis;">@track.Title</MudText>
+                <MudIconButton OnClick=@(() => OpenEditTrackDialogAsync(track)) Color=@Color.Primary Icon="@Icons.Material.Outlined.Edit" Size=@Size.Medium aria-label="edit click track" Style="flex-shrink: 0;" />
+            </MudStack>
+        </MudListItem>
+    }
+</MudList>
+
+<MudStack Row=true Justify=@Justify.SpaceAround>
+    <MudIconButton OnClick=TrackStore.AddAsync Icon="@Icons.Material.Filled.AddCircleOutline" Size=@Size.Large aria-label="add click track" />
+</MudStack>
+
+@code{
+    public List<Models.ClickTrack> Tracks { get; set; } = new();
+    
+    protected override async Task OnInitializedAsync()
+    {
+        Tracks = await TrackStore.GetAllAsync();
+    }
+
+    private async Task OpenClickTrack(int trackID)
+    {
+        Navigation.NavigateTo($"/track?id={trackID}");
+    }
+
+    private async Task OpenEditTrackDialogAsync(Models.ClickTrack track)
+    {
+        DialogParameters<EditClickTrackDialog>? parameters = new DialogParameters<EditClickTrackDialog>{
+            { x => x.ClickTrackTitle, track.Title },
+            { x => x.ClickTrackID, track.ID }
+        };
+
+        IDialogReference? dialog = await DialogService.ShowAsync<EditClickTrackDialog>(title: "Edit Click Track", parameters);
+        DialogResult? result = await dialog.Result;
+        
+        if (result?.Canceled == false)
+        {
+            track.Title = (string?)result.Data ?? track.Title;
+            await TrackStore.UpdateAsync(track);
+        }
+    }
+}

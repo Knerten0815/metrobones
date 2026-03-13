@@ -1,0 +1,29 @@
+@using System.ComponentModel.DataAnnotations
+<MudDialog>
+    <DialogContent>
+        <TimeSignaturePicker @bind-BeatsPerBar=BeatsPerBar @bind-NoteValue=NoteValue/>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit">OK</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter, Required]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public int BeatsPerBar { get; set; }
+
+    [Parameter]
+    public int NoteValue { get; set; }
+
+    private void Submit()
+    {
+        MetronomeData data = new MetronomeData(notesPerBar: BeatsPerBar) { NoteValue = NoteValue };
+        MudDialog.Close(DialogResult.Ok(result: data));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+}

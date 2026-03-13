@@ -1,0 +1,19 @@
+@inject Services.Metronome Met
+
+<MudStack Row=@true Spacing=2 Justify=@Justify.SpaceEvenly>
+    @if (Met.IsRunning)
+    {
+        <MudIconButton OnClick=@Met.Stop Color=@Color.Secondary Icon="@Icons.Material.Outlined.StopCircle" Size=@Size.Large
+                        aria-label="Stop" />
+    }
+    else
+    {
+        <MudIconButton OnClick=@OnPlay Color=@Color.Primary Icon="@Icons.Material.Filled.PlayCircleOutline" Size=@Size.Large
+                        aria-label="Start" />
+    }
+</MudStack>
+
+@code {
+    [Parameter]
+    public EventCallback OnPlay { get; set; }
+}

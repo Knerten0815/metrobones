@@ -1,3 +1,24 @@
+.tiny-icon-btn {
+    min-width: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0;
+    margin: 0;
+}
+
+ .tiny-icon-btn .mud-icon-root {
+    font-size: 0.75rem ;
+    padding: 0.25rem 0;
+}
+
+.input-center-text input {
+    text-align: center;
+}
+
+.no-interact {
+    pointer-events: none;
+}
+
 #blazor-error-ui {
     color-scheme: light only;
     background: lightyellow;

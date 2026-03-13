@@ -1,0 +1,173 @@
+@inherits Layout.MetronomePageBase
+@using System.ComponentModel.DataAnnotations
+@using Metrobones.Layout.Dialogs
+@inject IDialogService DialogService
+
+<MudExpansionPanel Expanded=@_openSection ExpandedChanged=@OpenSection Disabled=@(Met.IsRunning && CurrentSectionID != Section.ID)>
+    <TitleContent>
+        <MudStack AlignItems=@AlignItems.Center Row="true">
+            @if (_openSection)
+            {
+                <MudTextField @bind-Value=Section.Title T="string" @onclick:stopPropagation @onkeydown:stopPropagation />
+            }
+            else
+            {
+                <MudButtonGroup  Variant="Variant.Text" Vertical="true">
+                    <MudIconButton OnClick=@(() => OnMoveSection(-1)) Class="tiny-icon-btn" Icon="@Icons.Material.Filled.KeyboardDoubleArrowUp" aria-label="move section up" />
+                    <MudIconButton OnClick=@(() => OnMoveSection(+1)) Class="tiny-icon-btn" Icon="@Icons.Material.Filled.KeyboardDoubleArrowDown" aria-label="move section down" />
+                </MudButtonGroup>
+                @* <MudIconButton Icon="@Icons.Material.Filled.DragHandle" Size=@Size.Small aria-label="drag" /> *@
+                <MudChip Variant="Variant.Text" Size=@Size.Small T="string">@(Section.Length)x</MudChip>
+                <MudText>@Section.Title</MudText>
+            }
+        </MudStack>
+    </TitleContent>
+
+    <ChildContent><MudStack Spacing=4>
+        <MudStack Justify=@Justify.SpaceEvenly AlignItems=@AlignItems.Center Row="true">
+            <MudChip OnClick=OpenLengthDialogAsync Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.Length) bars</MudChip>
+            <MudChip OnClick=OpenTimeSignatureDialogAsync Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.MetData.NotesPerBar)/@(Section.MetData.NoteValue)</MudChip>
+            <MudChip OnClick=OpenTempoDialogAsync Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.MetData.Tempo) bpm</MudChip>
+        </MudStack>
+
+        <BeatAccenting @bind-BeatAccents=Section.MetData.BeatAccents
+                   CurrentBeat=Met.CurrentBeat NotesPerBar=Section.MetData.NotesPerBar/>
+
+        <MudStack Justify=@Justify.Center AlignItems=@AlignItems.Center Row="true" Style="position:relative">
+            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T=string Style="position: absolute; left: 0; text-align: center">@RemainingBars bars<br/>remaining</MudChip>
+            <PlayButton OnPlay=OnPlaySection/>
+            <MudIconButton OnClick=OpenDeleteSectionDialogAsync Color=@Color.Error Icon="@Icons.Material.Outlined.Delete" Size=@Size.Medium
+                            Disabled=@Met.IsRunning Style="position: absolute; right: 0" aria-label="delete section" />
+        </MudStack>
+
+    </MudStack></ChildContent>
+</MudExpansionPanel>
+
+
+@code {
+    [Parameter]
+    public int CurrentSectionID { get; set; }
+    [Parameter]
+    public int RemainingBars { get; set; }
+
+    [Parameter, Required]
+    public required Models.ClickTrackSection Section {get; set;}
+
+    [Parameter]
+    public EventCallback<Models.ClickTrackSection> SectionChanged { get; set; }
+    
+    [Parameter]
+    public EventCallback<Models.ClickTrackSection> StartClicktrack{ get; set; }
+
+    [Parameter]
+    public EventCallback<int> DeleteSection{ get; set; }
+    
+    [Parameter]
+    public EventCallback<(int, int)> MoveSection{ get; set; }
+
+    private bool _openSection = true;
+
+    protected override async void OnInitialized()
+    {
+        RemainingBars = Section.Length;
+    }
+
+    private void OnSectionChanged()
+    {
+        SectionChanged.InvokeAsync(Section);
+    }
+
+    private void OnMoveSection(int indexIncrement)
+    {
+        MoveSection.InvokeAsync((Section.ID, indexIncrement));
+    }
+
+    protected override void OnParametersSet()
+    {
+        if (Met.IsRunning)
+        {
+            _openSection = CurrentSectionID == Section.ID;
+        }
+    }
+    
+    private void OpenSection(bool shouldOpen){
+        if (Met.IsRunning)
+        {
+            _openSection = CurrentSectionID == Section.ID;
+        }
+        else
+        {
+            _openSection = shouldOpen;
+        }
+    }
+
+    private async Task OnPlaySection()
+    {
+        await StartClicktrack.InvokeAsync(Section);
+    }
+
+    @* ------- Dialog Stuff ------- *@
+    private async Task OpenTempoDialogAsync()
+    {
+        DialogParameters<TempoPickerDialog>? parameters = new DialogParameters<TempoPickerDialog>{
+            { x => x.Tempo, Section.MetData.Tempo },
+        };
+
+        IDialogReference? dialog = await DialogService.ShowAsync<TempoPickerDialog>(title: "Edit Tempo", parameters);
+        DialogResult? result = await dialog.Result;
+        
+        if (result?.Canceled == false)
+        {
+            Section.MetData.Tempo = (int)(result.Data ?? Section.MetData.Tempo);
+        }
+    }
+
+    private async Task OpenTimeSignatureDialogAsync()
+    {
+        DialogParameters<TimeSignatureDialog>? parameters = new DialogParameters<TimeSignatureDialog>{
+            { x => x.BeatsPerBar, Section.MetData.NotesPerBar },
+            { x => x.NoteValue, Section.MetData.NoteValue }
+        };
+
+        IDialogReference? dialog = await DialogService.ShowAsync<TimeSignatureDialog>(title: "Edit Time Signature", parameters);
+        DialogResult? result = await dialog.Result;
+
+        if (result?.Canceled == false)
+        {
+            MetronomeData resultData = (MetronomeData)(result.Data ?? Section.MetData);
+            Section.MetData.NotesPerBar = resultData.NotesPerBar;
+            Section.MetData.NoteValue = resultData.NoteValue;
+            Section.MetData.BeatAccents = resultData.BeatAccents;
+        }
+    }
+
+    private async Task OpenLengthDialogAsync()
+    {
+        DialogParameters<SectionLengthDialog>? parameters = new DialogParameters<SectionLengthDialog>{
+            { x => x.Length, Section.Length },
+        };
+
+        IDialogReference? dialog = await DialogService.ShowAsync<SectionLengthDialog>(title: "Edit Section Length", parameters);
+        DialogResult? result = await dialog.Result;
+        
+        if (result?.Canceled == false)
+        {
+            Section.Length = (int)(result.Data ?? Section.Length);
+        }
+    }
+
+    private async Task OpenDeleteSectionDialogAsync()
+    {
+        DialogParameters<DeleteSectionDialog>? parameters = new DialogParameters<DeleteSectionDialog>{
+            { x => x.SectionTitle, Section.Title }
+        };
+
+        IDialogReference? dialog = await DialogService.ShowAsync<DeleteSectionDialog>(title: "Delete Section", parameters);
+        DialogResult? result = await dialog.Result;
+        
+        if (result?.Canceled == false)
+        {
+            await DeleteSection.InvokeAsync(Section.ID);
+        }
+    }
+}
