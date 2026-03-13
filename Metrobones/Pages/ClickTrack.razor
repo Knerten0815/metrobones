@@ -17,7 +17,7 @@
         {
             int index = i; // capture for closure
             Track.Sections[index].ID = index;
-            <ClickTrackSection Section=Track.Sections[index] SectionChanged=@SectionChanged CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection MoveSection=MoveSection/>
+            <ClickTrackSection Section=Track.Sections[index] RemainingBars=@(Met.IsRunning ? _remainingBeats / Track.Sections[index].MetData.NotesPerBar : Track.Sections[index].Length) SectionChanged=@SectionChanged CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection MoveSection=MoveSection/>
         }
     </MudExpansionPanels>
 

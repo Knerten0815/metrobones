@@ -34,10 +34,10 @@
                    CurrentBeat=Met.CurrentBeat NotesPerBar=Section.MetData.NotesPerBar/>
 
         <MudStack Justify=@Justify.Center AlignItems=@AlignItems.Center Row="true" Style="position:relative">
-            @* TODO: Add remaining beats indicator. Maybe progress bar? *@
+            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T=string Style="position: absolute; left: 0; text-align: center">@RemainingBars bars<br/>remaining</MudChip>
             <PlayButton OnPlay=OnPlaySection/>
-            <MudIconButton OnClick=OpenDeleteSectionDialogAsync Icon="@Icons.Material.Outlined.Delete" Size=@Size.Medium
-                            Disabled=@Met.IsRunning Style="position:absolute;right:0" aria-label="delete section" />
+            <MudIconButton OnClick=OpenDeleteSectionDialogAsync Color=@Color.Error Icon="@Icons.Material.Outlined.Delete" Size=@Size.Medium
+                            Disabled=@Met.IsRunning Style="position: absolute; right: 0" aria-label="delete section" />
         </MudStack>
 
     </MudStack></ChildContent>
@@ -47,6 +47,8 @@
 @code {
     [Parameter]
     public int CurrentSectionID { get; set; }
+    [Parameter]
+    public int RemainingBars { get; set; }
 
     [Parameter, Required]
     public required Models.ClickTrackSection Section {get; set;}
@@ -64,6 +66,11 @@
     public EventCallback<(int, int)> MoveSection{ get; set; }
 
     private bool _openSection = true;
+
+    protected override async void OnInitialized()
+    {
+        RemainingBars = Section.Length;
+    }
 
     private void OnSectionChanged()
     {
