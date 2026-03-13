@@ -1,5 +1,5 @@
 self.assetsManifest = {
-  "version": "orPpKoff",
+  "version": "ZAtokd4Y",
   "assets": [
     {
       "hash": "sha256-ANCB0MD3MQU8evZYZr5sjCtGrDBvupGGLKLCZTU9snU=",
@@ -8,6 +8,10 @@ self.assetsManifest = {
     {
       "hash": "sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=",
       "url": ".nojekyll"
+    },
+    {
+      "hash": "sha256-RTcAmh563ENC1odl7rbUZRkDvoG0tqmBtXGeQetMPD4=",
+      "url": "404.html"
     },
     {
       "hash": "sha256-Dt1snosLbRJOEXZL9+/0rrolG411k8c8/vK1fMs3RbQ=",
