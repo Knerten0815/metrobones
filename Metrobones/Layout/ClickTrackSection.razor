@@ -12,14 +12,18 @@
             }
             else
             {
-                <MudIconButton Icon="@Icons.Material.Filled.DragHandle" Size=@Size.Small aria-label="drag" />
+                <MudButtonGroup  Variant="Variant.Text" Vertical="true">
+                    <MudIconButton OnClick=@(() => OnMoveSection(-1)) Class="tiny-icon-btn" Icon="@Icons.Material.Filled.KeyboardDoubleArrowUp" aria-label="move section up" />
+                    <MudIconButton OnClick=@(() => OnMoveSection(+1)) Class="tiny-icon-btn" Icon="@Icons.Material.Filled.KeyboardDoubleArrowDown" aria-label="move section down" />
+                </MudButtonGroup>
+                @* <MudIconButton Icon="@Icons.Material.Filled.DragHandle" Size=@Size.Small aria-label="drag" /> *@
                 <MudChip Variant="Variant.Text" Size=@Size.Small T="string">@(Section.Length)x</MudChip>
                 <MudText>@Section.Title</MudText>
             }
         </MudStack>
     </TitleContent>
 
-    <ChildContent><MudStack Spacing=4>                
+    <ChildContent><MudStack Spacing=4>
         <MudStack Justify=@Justify.SpaceEvenly AlignItems=@AlignItems.Center Row="true">
             <MudChip OnClick=OpenLengthDialogAsync Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.Length) bars</MudChip>
             <MudChip OnClick=OpenTimeSignatureDialogAsync Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.MetData.NotesPerBar)/@(Section.MetData.NoteValue)</MudChip>
@@ -32,7 +36,6 @@
         <MudStack Justify=@Justify.Center AlignItems=@AlignItems.Center Row="true" Style="position:relative">
             @* TODO: Add remaining beats indicator. Maybe progress bar? *@
             <PlayButton OnPlay=OnPlaySection/>
-            @* TODO: Add confirm deletion dialog *@
             <MudIconButton OnClick=OpenDeleteSectionDialogAsync Icon="@Icons.Material.Outlined.Delete" Size=@Size.Medium
                             Disabled=@Met.IsRunning Style="position:absolute;right:0" aria-label="delete section" />
         </MudStack>
@@ -50,18 +53,26 @@
 
     [Parameter]
     public EventCallback<Models.ClickTrackSection> SectionChanged { get; set; }
+    
+    [Parameter]
+    public EventCallback<Models.ClickTrackSection> StartClicktrack{ get; set; }
 
     [Parameter]
     public EventCallback<int> DeleteSection{ get; set; }
     
     [Parameter]
-    public EventCallback<Models.ClickTrackSection> StartClicktrack{ get; set; }
+    public EventCallback<(int, int)> MoveSection{ get; set; }
 
     private bool _openSection = true;
 
-    private void UpdateSection()
+    private void OnSectionChanged()
     {
         SectionChanged.InvokeAsync(Section);
+    }
+
+    private void OnMoveSection(int indexIncrement)
+    {
+        MoveSection.InvokeAsync((Section.ID, indexIncrement));
     }
 
     protected override void OnParametersSet()
