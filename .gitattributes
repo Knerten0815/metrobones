@@ -2,3 +2,4 @@
 *.json binary
 *.css binary
 *.html binary* -text
+* -text
