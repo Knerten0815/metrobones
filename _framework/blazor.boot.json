@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "Metrobones",
   "resources": {
-    "hash": "sha256-pcdOzFDrYBsCIYiQUhetFE09rzRcHSTa6ObVhwpCG/s=",
+    "hash": "sha256-lCMjGdPPNybVVVjcAxrsdYmOLW6gMk7RKDjfqJwMaxQ=",
     "fingerprinting": {
       "Microsoft.AspNetCore.Components.d979kd12iw.wasm": "Microsoft.AspNetCore.Components.wasm",
       "Microsoft.AspNetCore.Components.Forms.gc94iuciq3.wasm": "Microsoft.AspNetCore.Components.Forms.wasm",
@@ -48,7 +48,7 @@
       "System.Threading.ow2a2gfb9v.wasm": "System.Threading.wasm",
       "System.f0t8bkq7p2.wasm": "System.wasm",
       "System.Private.CoreLib.zv3tgb35gl.wasm": "System.Private.CoreLib.wasm",
-      "Metrobones.skal7av8wl.wasm": "Metrobones.wasm",
+      "Metrobones.yof2v8q5cy.wasm": "Metrobones.wasm",
       "dotnet.js": "dotnet.js",
       "dotnet.native.6m0hb3g78a.js": "dotnet.native.js",
       "dotnet.native.zw8ib5pvmp.wasm": "dotnet.native.wasm",
@@ -119,7 +119,7 @@
       "System.Text.RegularExpressions.tyse8qo65a.wasm": "sha256-JTroVqrZRvENCvShAoyTSWmSzU+QBnv418cfYzSWUK8=",
       "System.Threading.ow2a2gfb9v.wasm": "sha256-OF/YQnurBwBG0iF3YYkYBEJItm+XN3EO3P8HOV80yXQ=",
       "System.f0t8bkq7p2.wasm": "sha256-319B7WIXJ7ZD6SZ1l7es3CoglOLgv5lKWx0Ew9mli1c=",
-      "Metrobones.skal7av8wl.wasm": "sha256-NBhqJWfr3nG2iUHByE1hanKJayb7Gj9+vVbTEbblSwM="
+      "Metrobones.yof2v8q5cy.wasm": "sha256-DsWrmlhc6bqDbQAfG9MdW4cnsPxH2HLdqofvGs4SdlM="
     }
   },
   "cacheBootResources": true,
