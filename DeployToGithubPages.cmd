@@ -29,7 +29,7 @@ if "%MESSAGE%"=="" (
 
 :: --- Build ---
 echo Building Release publish...
-dotnet publish "%REPO_ROOT%\Metrobones" --configuration Release
+dotnet publish "%REPO_ROOT%\Metrobones" --configuration Release -p:GHPages=true
 if errorlevel 1 (
     echo ERROR: dotnet publish failed.
     exit /b 1
