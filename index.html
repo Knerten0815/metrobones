@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Metrobones</title>
-    <!-- <base href="/" /> <-- Bad for PWA -->
+    <!-- <base href="/metrobones/" /> <-- Bad for PWA -->
     <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
@@ -35,13 +35,14 @@
         <a href="." class="reload">Reload</a>
         <span class="dismiss">🗙</span>
     </div>
-    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="_framework/blazor.webassembly.js" autostart="false"></script>
 
     <!-- Important: Increment the version parameter whenever you update MudBlazor to prevent caching issues -->
     <script src="_content/MudBlazor/MudBlazor.min.js?v=1"></script>
     <script type="module" src="metronome.js"></script>
 
     <script>navigator.serviceWorker.register('service-worker.js');</script>
+    <script src="brotliloader.min.js" type="module"></script>
 </body>
 
 </html>
