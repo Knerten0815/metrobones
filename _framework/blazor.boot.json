@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "Metrobones",
   "resources": {
-    "hash": "sha256-GY5zu+gor9Ct5ImCzLQnSH/BX9zpbveErP34G3eDMfY=",
+    "hash": "sha256-pcdOzFDrYBsCIYiQUhetFE09rzRcHSTa6ObVhwpCG/s=",
     "fingerprinting": {
       "Microsoft.AspNetCore.Components.d979kd12iw.wasm": "Microsoft.AspNetCore.Components.wasm",
       "Microsoft.AspNetCore.Components.Forms.gc94iuciq3.wasm": "Microsoft.AspNetCore.Components.Forms.wasm",
@@ -47,8 +47,8 @@
       "System.Text.RegularExpressions.tyse8qo65a.wasm": "System.Text.RegularExpressions.wasm",
       "System.Threading.ow2a2gfb9v.wasm": "System.Threading.wasm",
       "System.f0t8bkq7p2.wasm": "System.wasm",
-      "System.Private.CoreLib.eep7rprsbf.wasm": "System.Private.CoreLib.wasm",
-      "Metrobones.7g0uqwfuly.wasm": "Metrobones.wasm",
+      "System.Private.CoreLib.zv3tgb35gl.wasm": "System.Private.CoreLib.wasm",
+      "Metrobones.skal7av8wl.wasm": "Metrobones.wasm",
       "dotnet.js": "dotnet.js",
       "dotnet.native.6m0hb3g78a.js": "dotnet.native.js",
       "dotnet.native.zw8ib5pvmp.wasm": "dotnet.native.wasm",
@@ -73,7 +73,7 @@
     },
     "coreAssembly": {
       "System.Runtime.InteropServices.JavaScript.feozdik0jm.wasm": "sha256-uaQxBfWt1JSSdhLoBZWOTpho06FVn25VSjCwnXvCR7k=",
-      "System.Private.CoreLib.eep7rprsbf.wasm": "sha256-VitwiuEw/jFnCB9eKeIZ4uEykgq7CUlSLGhvpRWrYbI="
+      "System.Private.CoreLib.zv3tgb35gl.wasm": "sha256-Ebvj2tc7pduB0R/xFuSb4ZLDXe2XPWvxA8R6m/w0bhM="
     },
     "assembly": {
       "Microsoft.AspNetCore.Components.d979kd12iw.wasm": "sha256-//ogvmiePcnzp+OCS/rJay/FwQEzQ7UaGiIBv+ytAZs=",
@@ -119,7 +119,7 @@
       "System.Text.RegularExpressions.tyse8qo65a.wasm": "sha256-JTroVqrZRvENCvShAoyTSWmSzU+QBnv418cfYzSWUK8=",
       "System.Threading.ow2a2gfb9v.wasm": "sha256-OF/YQnurBwBG0iF3YYkYBEJItm+XN3EO3P8HOV80yXQ=",
       "System.f0t8bkq7p2.wasm": "sha256-319B7WIXJ7ZD6SZ1l7es3CoglOLgv5lKWx0Ew9mli1c=",
-      "Metrobones.7g0uqwfuly.wasm": "sha256-OVhR5acZROqzK+9dIft+NAI/ZV9IFqpkFeyQ+Q8DxKM="
+      "Metrobones.skal7av8wl.wasm": "sha256-NBhqJWfr3nG2iUHByE1hanKJayb7Gj9+vVbTEbblSwM="
     }
   },
   "cacheBootResources": true,
