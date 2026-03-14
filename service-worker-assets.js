@@ -41,8 +41,8 @@
       "url": "_content\/MudBlazor\/MudBlazor.min.js.map"
     },
     {
-      "hash": "sha256-4R7BDIGwvNDCorqxQM6pczprw+vZa+1XvNAzoB7W3dE=",
-      "url": "_framework\/Metrobones.vj7vp09jx9.wasm.br"
+      "hash": "sha256-dzCWhZX5djMoAxPdTJTStZAHyHEYjfTxQsyn5Bc7J\/Y=",
+      "url": "_framework\/Metrobones.xe7gzy8ly1.wasm.br"
     },
     {
       "hash": "sha256-r1QR9kJl2hqb7z1of3VsQBpENn7RxNBEWD2DNaAfgt0=",
@@ -225,7 +225,7 @@
       "url": "_framework\/System.f0t8bkq7p2.wasm.br"
     },
     {
-      "hash": "sha256-ju+kAOzuDmNK606fj6cS9HRaJn\/53h5kV3UHFx2BrPI=",
+      "hash": "sha256-4jTnHWhPFDJSdoea+z22KRrdKxwOZ7H\/BRzBsM1MGSk=",
       "url": "_framework\/blazor.boot.json.br"
     },
     {
@@ -313,5 +313,5 @@
       "url": "brotliloader.min.js"
     }
   ],
-  "version": "MitWGiV4"
+  "version": "TP5nTOxG"
 };
