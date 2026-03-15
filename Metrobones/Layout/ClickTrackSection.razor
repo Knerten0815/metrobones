@@ -2,13 +2,14 @@
 @using System.ComponentModel.DataAnnotations
 @using Metrobones.Layout.Dialogs
 @inject IDialogService DialogService
+@inject IScrollManager ScrollManager
 
 <MudExpansionPanel Expanded=@_openSection ExpandedChanged=@OpenSection Disabled=@(Met.IsRunning && CurrentSectionID != Section.ID)>
     <TitleContent>
         <MudStack AlignItems=@AlignItems.Center Row="true">
             @if (_openSection)
             {
-                <MudTextField @bind-Value=Section.Title T="string" @onclick:stopPropagation @onkeydown:stopPropagation />
+                <MudTextField @bind-Value=Section.Title T="string" @onclick:stopPropagation @onkeydown:stopPropagation id=@("section" + Section.ID)/>
             }
             else
             {
@@ -31,7 +32,7 @@
         </MudStack>
 
         <BeatAccenting @bind-BeatAccents=Section.MetData.BeatAccents
-                   CurrentBeat=Met.CurrentBeat NotesPerBar=Section.MetData.NotesPerBar/>
+                        CurrentBeat=Met.CurrentBeat NotesPerBar=Section.MetData.NotesPerBar/>
 
         <MudStack Justify=@Justify.Center AlignItems=@AlignItems.Center Row="true" Style="position:relative">
             <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T=string Style="position: absolute; left: 0; text-align: center">@RemainingBars bars<br/>remaining</MudChip>
@@ -84,9 +85,27 @@
 
     protected override void OnParametersSet()
     {
-        if (Met.IsRunning)
+        if(Met.IsRunning == false)
+            return;
+        
+        _openSection = CurrentSectionID == Section.ID;
+
+        if(_openSection == false)
+            return;
+        
+        if (Met.CurrentBeat != 1)
+            return;
+        
+        ScrollManager.ScrollIntoViewAsync(selector: $"#section{Section.ID}", ScrollBehavior.Smooth);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        base.OnAfterRenderAsync(firstRender);
+
+        if (Met.IsRunning && Met.CurrentBeat == 1 && CurrentSectionID == Section.ID)
         {
-            _openSection = CurrentSectionID == Section.ID;
+            ScrollManager.ScrollIntoViewAsync(selector: $"#section{Section.ID}", ScrollBehavior.Smooth);
         }
     }
     
