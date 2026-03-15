@@ -16,6 +16,7 @@ Metrobones is designed for my drummer "Bones", who complained at rehearsal, that
 
 ## Features
 
+- **Create Click Tracks** with different tempi and time signatures throughout the track. Start the click at any section. 
 - **Precise click playback** via Web Audio API lookahead scheduling
 - **Visual feedback** highlighting the current beat
 - **Tap tempo** with rolling average over the last 8 taps
@@ -25,11 +26,12 @@ Metrobones is designed for my drummer "Bones", who complained at rehearsal, that
 
 ### Planned
 
-- Creating and saving clicktracks
+- Agogics: acceleration and slowdown over some amount of bars
 - Alternative click sounds
-- Export clicktracks as MIDI
+- Export and import clicktracks as MIDI
 - Notification controls via Media Session API
 - Native Android app
+- Color themes
 - Setlists
 
 
@@ -39,7 +41,6 @@ Metrobones is designed for my drummer "Bones", who complained at rehearsal, that
 2. Open your browsers menu (3 dots) on the website
 3. Click "add to home screen" (or "install" depending on browser)
 4. Use the app offline
-
 
 ## Tech Stack
 
