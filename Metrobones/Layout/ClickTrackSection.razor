@@ -4,20 +4,20 @@
 @inject IDialogService DialogService
 @inject IScrollManager ScrollManager
 
-<MudExpansionPanel Expanded=@_openSection ExpandedChanged=@OpenSection Disabled=@(Met.IsRunning && CurrentSectionID != Section.ID)>
+<MudExpansionPanel Expanded=@Section.IsOpen ExpandedChanged=@OpenSection Disabled=@(Met.IsRunning && CurrentSectionID != Section.ID)>
     <TitleContent>
         <MudStack AlignItems=@AlignItems.Center Row="true">
-            @if (_openSection)
+            @if (Section.IsOpen)
             {
                 <MudTextField @bind-Value=Section.Title T="string" @onclick:stopPropagation @onkeydown:stopPropagation id=@("section" + Section.ID)/>
             }
             else
             {
-                <MudButtonGroup  Variant="Variant.Text" Vertical="true">
+                @* <MudButtonGroup  Variant="Variant.Text" Vertical="true">
                     <MudIconButton OnClick=@(() => OnMoveSection(-1)) Class="tiny-icon-btn" Icon="@Icons.Material.Filled.KeyboardDoubleArrowUp" aria-label="move section up" />
                     <MudIconButton OnClick=@(() => OnMoveSection(+1)) Class="tiny-icon-btn" Icon="@Icons.Material.Filled.KeyboardDoubleArrowDown" aria-label="move section down" />
-                </MudButtonGroup>
-                @* <MudIconButton Icon="@Icons.Material.Filled.DragHandle" Size=@Size.Small aria-label="drag" /> *@
+                </MudButtonGroup> *@
+                <MudIconButton Icon="@Icons.Material.Filled.DragHandle" Size=@Size.Small aria-label="drag" />
                 <MudChip Variant="Variant.Text" Size=@Size.Small T="string">@(Section.Length)x</MudChip>
                 <MudText>@Section.Title</MudText>
             }
@@ -66,7 +66,7 @@
     [Parameter]
     public EventCallback<(int, int)> MoveSection{ get; set; }
 
-    private bool _openSection = true;
+    @* private bool Section.IsOpen = true; *@
 
     protected override void OnInitialized()
     {
@@ -88,9 +88,9 @@
         if(Met.IsRunning == false)
             return;
         
-        _openSection = CurrentSectionID == Section.ID;
+        Section.IsOpen = CurrentSectionID == Section.ID;
 
-        if(_openSection == false)
+        if(Section.IsOpen == false)
             return;
         
         if (Met.CurrentBeat != 1)
@@ -112,11 +112,11 @@
     private void OpenSection(bool shouldOpen){
         if (Met.IsRunning)
         {
-            _openSection = CurrentSectionID == Section.ID;
+            Section.IsOpen = CurrentSectionID == Section.ID;
         }
         else
         {
-            _openSection = shouldOpen;
+            Section.IsOpen = shouldOpen;
         }
     }
 

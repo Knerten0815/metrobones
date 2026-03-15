@@ -12,14 +12,16 @@
         <MudText> bars.</MudText>
     </MudStack>
     @* <MudText>Remaining=@_remainingBeats Current=@Met.CurrentBeat</MudText> *@
-    <MudExpansionPanels Class="mud-width-full">
-        @for(int i = 0; i < Track.Sections.Count; i++)
-        {
-            int index = i; // capture for closure
-            Track.Sections[index].ID = index;
-            <ClickTrackSection Section=Track.Sections[index] RemainingBars=@(Met.IsRunning ? _remainingBeats / Track.Sections[index].MetData.NotesPerBar : Track.Sections[index].Length) SectionChanged=@SectionChanged CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection MoveSection=MoveSection/>
-        }
-    </MudExpansionPanels>
+    <MudDropContainer @ref=_dropContainer T=@Models.ClickTrackSection Items=@Track.Sections ItemsSelector="@((item,dropzone) => true)" Class="d-flex flex-wrap flex-grow-1">
+        <ChildContent>
+            <MudExpansionPanels Class="mud-width-full">
+                <MudDropZone T=@Models.ClickTrackSection Class="flex-grow-1" AllowReorder="true" ItemsClassSelector=@((item) => item.IsOpen ? "drop-item-disabled" : "")/>
+            </MudExpansionPanels>
+        </ChildContent>
+        <ItemRenderer>
+            <ClickTrackSection Section=@context RemainingBars=@(Met.IsRunning ? _remainingBeats / context.MetData.NotesPerBar : context.Length) SectionChanged=@SectionChanged CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection MoveSection=MoveSection/>
+        </ItemRenderer>
+    </MudDropContainer>
 
     <MudStack Row=true Justify=@Justify.SpaceAround>
         @* TODO: duplicate sections or duplicate last section or choose section as template *@
@@ -35,6 +37,8 @@
     private int _countInBeats = 8;
     private int _currentSectionID = -1;
     private int _remainingBeats = -1;
+
+    private MudDropContainer<Models.ClickTrackSection>? _dropContainer;
 
     protected override async Task OnInitializedAsync()
     {
@@ -66,6 +70,7 @@
 
     private async Task SectionChanged(Models.ClickTrackSection section)
     {
+        _dropContainer?.Refresh();
         int index = Track.Sections.FindIndex(s => s.ID == section.ID);
         if (index != -1)
         {
@@ -111,6 +116,7 @@
 
     protected override async void OnStateChanged()
     {
+        _dropContainer?.Refresh();
         if (_remainingBeats > 1)
         {
             _remainingBeats--;
