@@ -101,11 +101,11 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        base.OnAfterRenderAsync(firstRender);
+        await base.OnAfterRenderAsync(firstRender);
 
         if (Met.IsRunning && Met.CurrentBeat == 1 && CurrentSectionID == Section.ID)
         {
-            ScrollManager.ScrollIntoViewAsync(selector: $"#section{Section.ID}", ScrollBehavior.Smooth);
+            await ScrollManager.ScrollIntoViewAsync(selector: $"#section{Section.ID}", ScrollBehavior.Smooth);
         }
     }
     
