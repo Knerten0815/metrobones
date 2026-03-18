@@ -12,14 +12,14 @@
         <MudText> bars.</MudText>
     </MudStack>
     @* <MudText>Remaining=@_remainingBeats Current=@Met.CurrentBeat</MudText> *@
-    <MudDropContainer @ref=_dropContainer T=@Models.ClickTrackSection Items=@Track.Sections ItemsSelector="@((item,dropzone) => true)" Class="d-flex flex-wrap flex-grow-1">
+    <MudDropContainer @ref=_dropContainer T=@Models.ClickTrackSection Items=@Track.Sections ItemsSelector="@((item,dropzone) => true)" ItemDropped=@MoveSection Class="d-flex flex-wrap flex-grow-1">
         <ChildContent>
             <MudExpansionPanels Class="mud-width-full">
                 <MudDropZone T=@Models.ClickTrackSection Class="flex-grow-1" AllowReorder="true" ItemsClassSelector=@((item) => item.IsOpen ? "drop-item-disabled" : "")/>
             </MudExpansionPanels>
         </ChildContent>
         <ItemRenderer>
-            <ClickTrackSection Section=@context RemainingBars=@(Met.IsRunning ? _remainingBeats / context.MetData.NotesPerBar : context.Length) SectionChanged=@SectionChanged CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection MoveSection=MoveSection/>
+            <ClickTrackSection Section=@context RemainingBars=@(Met.IsRunning ? _remainingBeats / context.MetData.NotesPerBar : context.Length) SectionChanged=@SectionChanged CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection/>
         </ItemRenderer>
     </MudDropContainer>
 
@@ -80,14 +80,14 @@
         }
     }
 
-    private async Task MoveSection((int sectionIndex, int indexIncrement) moveInfo)
+    private async Task MoveSection(MudItemDropInfo<Models.ClickTrackSection> dropItem)
     {
-        int currentIndex = Track.Sections.FindIndex(s => s.ID == moveInfo.sectionIndex);
-        int newIndex = currentIndex + moveInfo.indexIncrement;
+        int currentIndex = Track.Sections.FindIndex(s => s.ID == dropItem.Item?.ID);
+        int newIndex = dropItem.IndexInZone;
 
-        if (currentIndex != -1 && newIndex >= 0 && newIndex < Track.Sections.Count)
+        if (currentIndex != -1)
         {
-            var temp = Track.Sections[currentIndex];
+            Models.ClickTrackSection? temp = Track.Sections[currentIndex];
             Track.Sections[currentIndex] = Track.Sections[newIndex];
             Track.Sections[newIndex] = temp;
             StateHasChanged();
