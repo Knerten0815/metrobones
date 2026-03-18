@@ -45,31 +45,36 @@
         ["setlists"] = "Set Lists",
     };
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        _pageTitle = GetPageTitle(Navigation.Uri);
-        Navigation.LocationChanged += OnLocationChanged;
+        Navigation.LocationChanged += OnLocationChangedAsync;
+        _pageTitle = await GetPageTitleAsync(Navigation.Uri);
     }
 
-    void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    private async void OnLocationChangedAsync(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
     {
-        _pageTitle = GetPageTitle(e.Location);
+        _pageTitle = await GetPageTitleAsync(e.Location);
         // flip the pendulum logo on each page change for fun
         _currentLogoSvgText = _currentLogoSvgText == logoSvgText ? logoFlippedSvgText : logoSvgText;
-        InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged);
     }
 
-    string GetPageTitle(string uri)
+    private async Task<string> GetPageTitleAsync(string uri)
     {
-        var relativePath = Navigation.ToBaseRelativePath(uri).Trim('/');
-        if(_pageTitles.TryGetValue(relativePath, out var title))
-        {
+        var relativePath = Navigation.ToBaseRelativePath(uri);
+
+        if (_pageTitles.TryGetValue(relativePath.Trim('/'), out var title))
             return title;
+
+        // Extract the ID from the path or query string, e.g. /metronome?id=5
+        if (int.TryParse(relativePath.Split("/").Last(), out int trackId))
+        {
+            ClickTrack? track = await TrackStore.GetAsync(trackId);
+            if (track != null)
+                return track.Title;
         }
 
-        int trackID = int.Parse(Navigation.Uri.Split("=").Last());
-        string trackTitle = TrackStore.GetAsync(trackID).Result?.Title ?? "Click Track";
-        return trackTitle;
+        return "Metrobones";
     }
 
     void DrawerToggle()
@@ -79,6 +84,6 @@
 
     public void Dispose()
     {
-        Navigation.LocationChanged -= OnLocationChanged;
+        Navigation.LocationChanged -= OnLocationChangedAsync;
     }
 }

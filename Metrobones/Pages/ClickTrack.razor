@@ -7,39 +7,52 @@
 
 <MudStack Spacing=3 AlignItems=AlignItems.Center>
     <MudStack Row=true Spacing=1 AlignItems=AlignItems.Center>
-        <MudSwitch Size=@Size.Large Color=@(_countInActive ? Color.Secondary : Color.Primary) @bind-Value=Track.CountIn Class="@(_countInActive ? "no-interact" : "")" Label="Count in" />
-        <MudNumericField @bind-Value=Track.CountInBars Min=1 Max=10 Disabled=@(!Track.CountIn) Class="input-center-text" Style="max-width: 3rem"/>
+        <MudSwitch Size=@Size.Large Color=@(_countInActive ? Color.Secondary : Color.Primary) @bind-Value=_track.CountIn Class="@(_countInActive ? "no-interact" : "")" Label="Count in" />
+        <MudNumericField @bind-Value=_track.CountInBars Min=1 Max=10 Disabled=@(_track.CountIn) Class="input-center-text" Style="max-width: 3rem"/>
         <MudText> bars.</MudText>
     </MudStack>
     @* <MudText>Remaining=@_remainingBeats Current=@Met.CurrentBeat</MudText> *@
-    <MudExpansionPanels Class="mud-width-full">
-        @for(int i = 0; i < Track.Sections.Count; i++)
-        {
-            int index = i; // capture for closure
-            Track.Sections[index].ID = index;
-            <ClickTrackSection Section=Track.Sections[index] RemainingBars=@(Met.IsRunning ? _remainingBeats / Track.Sections[index].MetData.NotesPerBar : Track.Sections[index].Length) SectionChanged=@SectionChanged CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection MoveSection=MoveSection/>
-        }
-    </MudExpansionPanels>
+    <MudDropContainer T=@Models.ClickTrackSection Items=@_track.Sections ItemsSelector="@((item,dropzone) => true)" ItemDropped=@MoveSection Class="d-flex flex-wrap flex-grow-1">
+        <ChildContent>
+            <MudExpansionPanels Class="mud-width-full">
+                <MudDropZone T=@Models.ClickTrackSection Class="flex-grow-1" AllowReorder="true" ItemsClassSelector=@((item) => item.IsOpen ? "drop-item-disabled" : "")/>
+            </MudExpansionPanels>
+        </ChildContent>
+        <ItemRenderer>
+            <ClickTrackSection Section=@context RemainingBars=@(Met.IsRunning ? _remainingBeats / context.MetData.NotesPerBar : context.Length) SectionChanged=@SectionChanged CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection/>
+        </ItemRenderer>
+    </MudDropContainer>
 
     <MudStack Row=true Justify=@Justify.SpaceAround>
+        @* TODO: duplicate sections or duplicate last section or choose section as template *@
+        @* TODO: Automatically open newly added section with FocusTrap on title*@
         <MudIconButton OnClick=AddSection Size=@Size.Large Color=@Color.Primary Icon="@Icons.Material.Filled.AddCircleOutline" aria-label="add section" />
     </MudStack>
 </MudStack>
 
 @code {
-    [Parameter, Required]
-    public Models.ClickTrack Track { get; set; } = new Models.ClickTrack();
+    [Parameter, SupplyParameterFromQuery]
+    public int Id { get; set; }
+    public Models.ClickTrack _track { get; set; } = new Models.ClickTrack();
     private bool _countInActive;
     private int _countInBeats = 8;
     private int _currentSectionID = -1;
     private int _remainingBeats = -1;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        int trackID = int.Parse(Navigation.Uri.Split("=").Last());
-        Track = await TrackStore.GetAsync(trackID) ?? new Models.ClickTrack();
-
         Met.StopCallback += ResetCountInActive;
+    }
+
+    // Validation in OnParametersSet, because OnInitialized is not called when navigating from /track/1 to /track/2
+    protected override async Task OnParametersSetAsync()
+    {
+        _track = await TrackStore.GetAsync(Id);
+        if (_track == null)
+        {
+            Navigation.NavigateTo("/clicktracks", true);
+            await Task.FromCanceled(new CancellationToken());
+        }
     }
 
     private void ResetCountInActive()
@@ -49,43 +62,46 @@
 
     private async Task AddSection()
     {
-        int newID = Track.Sections.Count > 0 ? Track.Sections.Max(s => s.ID) + 1 : 1;
-        Track.Sections.Add(item: new Models.ClickTrackSection(newID));
+        int newID = _track.Sections.Count > 0 ? _track.Sections.Max(s => s.ID) + 1 : 0;
+        _track.Sections.Add(item: new Models.ClickTrackSection(newID));
         StateHasChanged();
-        await TrackStore.UpdateAsync(Track);
+        await TrackStore.UpdateAsync(_track);
     }
 
     private async Task DeleteSection(int id)
     {
-        Track.Sections.RemoveAll(s => s.ID == id);
+        _track.Sections.RemoveAll(s => s.ID == id);
         StateHasChanged();
-        await TrackStore.UpdateAsync(Track);
+        await TrackStore.UpdateAsync(_track);
     }
 
     private async Task SectionChanged(Models.ClickTrackSection section)
     {
-        int index = Track.Sections.FindIndex(s => s.ID == section.ID);
+        int index = _track.Sections.FindIndex(s => s.ID == section.ID);
         if (index != -1)
         {
-            Track.Sections[index] = section;
+            _track.Sections[index] = section;
             StateHasChanged();
-            await TrackStore.UpdateAsync(Track);
+            await TrackStore.UpdateAsync(_track);
         }
     }
 
-    private async Task MoveSection((int sectionIndex, int indexIncrement) moveInfo)
+    private async Task MoveSection(MudItemDropInfo<Models.ClickTrackSection> dropItem)
     {
-        int currentIndex = Track.Sections.FindIndex(s => s.ID == moveInfo.sectionIndex);
-        int newIndex = currentIndex + moveInfo.indexIncrement;
+        Models.ClickTrackSection? section = _track.Sections.FirstOrDefault(s => s.ID == dropItem.Item?.ID);
+        if(section == null)
+            return;
+        
+        _track.Sections.Remove(section);
+        _track.Sections.Insert(dropItem.IndexInZone, section);
 
-        if (currentIndex != -1 && newIndex >= 0 && newIndex < Track.Sections.Count)
+        // Reassign IDs
+        for (int i = 0; i < _track.Sections.Count; i++)
         {
-            var temp = Track.Sections[currentIndex];
-            Track.Sections[currentIndex] = Track.Sections[newIndex];
-            Track.Sections[newIndex] = temp;
-            StateHasChanged();
-            await TrackStore.UpdateAsync(Track);
+            _track.Sections[i].ID = i;
         }
+
+        await TrackStore.UpdateAsync(_track);
     }
 
     private async Task StartClickTrack(Models.ClickTrackSection startSection)
@@ -96,10 +112,10 @@
         _currentSectionID = startSection.ID;
         _remainingBeats = startSection.Length * startSection.MetData.NotesPerBar;
 
-        if(Track.CountIn)
+        if(_track.CountIn)
         {
             _countInActive = true;
-            _countInBeats = Track.CountInBars * startSection.MetData.NotesPerBar;
+            _countInBeats = _track.CountInBars * startSection.MetData.NotesPerBar;
             _remainingBeats += _countInBeats;
         }
 
@@ -119,11 +135,11 @@
         else
         {
             _remainingBeats--;
-            int nextSectionIndex = Track.Sections.FindIndex(s => s.ID == _currentSectionID) + 1;
+            int nextSectionIndex = _track.Sections.FindIndex(s => s.ID == _currentSectionID) + 1;
 
-            if (nextSectionIndex < Track.Sections.Count)
+            if (nextSectionIndex < _track.Sections.Count)
             {
-                var nextSection = Track.Sections[nextSectionIndex];
+                var nextSection = _track.Sections[nextSectionIndex];
                 _currentSectionID = nextSection.ID;
                 _remainingBeats = nextSection.Length * nextSection.MetData.NotesPerBar;
                 await Met.UpdateSettings(nextSection.MetData);

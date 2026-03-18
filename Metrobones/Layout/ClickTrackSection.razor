@@ -2,21 +2,20 @@
 @using System.ComponentModel.DataAnnotations
 @using Metrobones.Layout.Dialogs
 @inject IDialogService DialogService
+@inject IScrollManager ScrollManager
 
-<MudExpansionPanel Expanded=@_openSection ExpandedChanged=@OpenSection Disabled=@(Met.IsRunning && CurrentSectionID != Section.ID)>
+<MudExpansionPanel Expanded=@Section.IsOpen ExpandedChanged=@OpenSection Disabled=@(Met.IsRunning && CurrentSectionID != Section.ID)>
     <TitleContent>
         <MudStack AlignItems=@AlignItems.Center Row="true">
-            @if (_openSection)
+            <MudDragHandle T=@Models.ClickTrackSection>
+                <MudIcon Icon="@Icons.Material.Filled.DragHandle" Color="Color.Inherit" Class="mr-2" aria-label="drag"/>
+            </MudDragHandle>
+            @if (Section.IsOpen)
             {
-                <MudTextField @bind-Value=Section.Title T="string" @onclick:stopPropagation @onkeydown:stopPropagation />
+                <MudTextField @bind-Value=Section.Title T="string" @onclick:stopPropagation @onkeydown:stopPropagation id=@("section" + Section.ID)/>
             }
             else
             {
-                <MudButtonGroup  Variant="Variant.Text" Vertical="true">
-                    <MudIconButton OnClick=@(() => OnMoveSection(-1)) Class="tiny-icon-btn" Icon="@Icons.Material.Filled.KeyboardDoubleArrowUp" aria-label="move section up" />
-                    <MudIconButton OnClick=@(() => OnMoveSection(+1)) Class="tiny-icon-btn" Icon="@Icons.Material.Filled.KeyboardDoubleArrowDown" aria-label="move section down" />
-                </MudButtonGroup>
-                @* <MudIconButton Icon="@Icons.Material.Filled.DragHandle" Size=@Size.Small aria-label="drag" /> *@
                 <MudChip Variant="Variant.Text" Size=@Size.Small T="string">@(Section.Length)x</MudChip>
                 <MudText>@Section.Title</MudText>
             }
@@ -31,7 +30,7 @@
         </MudStack>
 
         <BeatAccenting @bind-BeatAccents=Section.MetData.BeatAccents
-                   CurrentBeat=Met.CurrentBeat NotesPerBar=Section.MetData.NotesPerBar/>
+                        CurrentBeat=Met.CurrentBeat NotesPerBar=Section.MetData.NotesPerBar/>
 
         <MudStack Justify=@Justify.Center AlignItems=@AlignItems.Center Row="true" Style="position:relative">
             <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T=string Style="position: absolute; left: 0; text-align: center">@RemainingBars bars<br/>remaining</MudChip>
@@ -61,11 +60,6 @@
 
     [Parameter]
     public EventCallback<int> DeleteSection{ get; set; }
-    
-    [Parameter]
-    public EventCallback<(int, int)> MoveSection{ get; set; }
-
-    private bool _openSection = true;
 
     protected override void OnInitialized()
     {
@@ -77,27 +71,40 @@
         SectionChanged.InvokeAsync(Section);
     }
 
-    private void OnMoveSection(int indexIncrement)
-    {
-        MoveSection.InvokeAsync((Section.ID, indexIncrement));
-    }
-
     protected override void OnParametersSet()
     {
-        if (Met.IsRunning)
+        if(Met.IsRunning == false)
+            return;
+        
+        Section.IsOpen = CurrentSectionID == Section.ID;
+
+        if(Section.IsOpen == false)
+            return;
+        
+        if (Met.CurrentBeat != 1)
+            return;
+        
+        ScrollManager.ScrollIntoViewAsync(selector: $"#section{Section.ID}", ScrollBehavior.Smooth);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (Met.IsRunning && Met.CurrentBeat == 1 && CurrentSectionID == Section.ID)
         {
-            _openSection = CurrentSectionID == Section.ID;
+            await ScrollManager.ScrollIntoViewAsync(selector: $"#section{Section.ID}", ScrollBehavior.Smooth);
         }
     }
     
     private void OpenSection(bool shouldOpen){
         if (Met.IsRunning)
         {
-            _openSection = CurrentSectionID == Section.ID;
+            Section.IsOpen = CurrentSectionID == Section.ID && shouldOpen;
         }
         else
         {
-            _openSection = shouldOpen;
+            Section.IsOpen = shouldOpen;
         }
     }
 
