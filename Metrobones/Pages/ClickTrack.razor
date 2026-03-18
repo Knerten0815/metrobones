@@ -12,7 +12,7 @@
         <MudText> bars.</MudText>
     </MudStack>
     @* <MudText>Remaining=@_remainingBeats Current=@Met.CurrentBeat</MudText> *@
-    <MudDropContainer @ref=_dropContainer T=@Models.ClickTrackSection Items=@Track.Sections ItemsSelector="@((item,dropzone) => true)" ItemDropped=@MoveSection Class="d-flex flex-wrap flex-grow-1">
+    <MudDropContainer T=@Models.ClickTrackSection Items=@Track.Sections ItemsSelector="@((item,dropzone) => true)" ItemDropped=@MoveSection Class="d-flex flex-wrap flex-grow-1">
         <ChildContent>
             <MudExpansionPanels Class="mud-width-full">
                 <MudDropZone T=@Models.ClickTrackSection Class="flex-grow-1" AllowReorder="true" ItemsClassSelector=@((item) => item.IsOpen ? "drop-item-disabled" : "")/>
@@ -38,8 +38,6 @@
     private int _currentSectionID = -1;
     private int _remainingBeats = -1;
 
-    private MudDropContainer<Models.ClickTrackSection>? _dropContainer;
-
     protected override async Task OnInitializedAsync()
     {
         int trackID = int.Parse(Navigation.Uri.Split("=").Last());
@@ -55,7 +53,7 @@
 
     private async Task AddSection()
     {
-        int newID = Track.Sections.Count > 0 ? Track.Sections.Max(s => s.ID) + 1 : 1;
+        int newID = Track.Sections.Count > 0 ? Track.Sections.Max(s => s.ID) + 1 : 0;
         Track.Sections.Add(item: new Models.ClickTrackSection(newID));
         StateHasChanged();
         await TrackStore.UpdateAsync(Track);
@@ -70,7 +68,6 @@
 
     private async Task SectionChanged(Models.ClickTrackSection section)
     {
-        _dropContainer?.Refresh();
         int index = Track.Sections.FindIndex(s => s.ID == section.ID);
         if (index != -1)
         {
@@ -82,17 +79,20 @@
 
     private async Task MoveSection(MudItemDropInfo<Models.ClickTrackSection> dropItem)
     {
-        int currentIndex = Track.Sections.FindIndex(s => s.ID == dropItem.Item?.ID);
-        int newIndex = dropItem.IndexInZone;
+        Models.ClickTrackSection? section = Track.Sections.FirstOrDefault(s => s.ID == dropItem.Item?.ID);
+        if(section == null)
+            return;
+        
+        Track.Sections.Remove(section);
+        Track.Sections.Insert(dropItem.IndexInZone, section);
 
-        if (currentIndex != -1)
+        // Reassign IDs
+        for (int i = 0; i < Track.Sections.Count; i++)
         {
-            Models.ClickTrackSection? temp = Track.Sections[currentIndex];
-            Track.Sections[currentIndex] = Track.Sections[newIndex];
-            Track.Sections[newIndex] = temp;
-            StateHasChanged();
-            await TrackStore.UpdateAsync(Track);
+            Track.Sections[i].ID = i;
         }
+
+        await TrackStore.UpdateAsync(Track);
     }
 
     private async Task StartClickTrack(Models.ClickTrackSection startSection)
@@ -116,7 +116,6 @@
 
     protected override async void OnStateChanged()
     {
-        _dropContainer?.Refresh();
         if (_remainingBeats > 1)
         {
             _remainingBeats--;
