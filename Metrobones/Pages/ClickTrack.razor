@@ -19,7 +19,7 @@
             </MudExpansionPanels>
         </ChildContent>
         <ItemRenderer>
-            <ClickTrackSection Section=@context RemainingBars=@(Met.IsRunning ? _remainingBeats / context.MetData.NotesPerBar : context.Length) SectionChanged=@SectionChanged CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection/>
+            <ClickTrackSection Section=@context CurrentBar=@(Met.IsRunning ? context.Length - (_remainingBeats / context.MetData.NotesPerBar) : 0) SectionChanged=@SectionChanged CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection/>
         </ItemRenderer>
     </MudDropContainer>
 

@@ -33,7 +33,7 @@
                         CurrentBeat=Met.CurrentBeat NotesPerBar=Section.MetData.NotesPerBar/>
 
         <MudStack Justify=@Justify.Center AlignItems=@AlignItems.Center Row="true" Style="position:relative">
-            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T=string Style="position: absolute; left: 0; text-align: center">@RemainingBars bars<br/>remaining</MudChip>
+            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T=string Style="position: absolute; left: 0; text-align: center">@(CurrentBar). bar</MudChip>
             <PlayButton OnPlay=OnPlaySection/>
             <MudIconButton OnClick=OpenDeleteSectionDialogAsync Color=@Color.Error Icon="@Icons.Material.Outlined.Delete" Size=@Size.Medium
                             Disabled=@Met.IsRunning Style="position: absolute; right: 0" aria-label="delete section" />
@@ -47,7 +47,7 @@
     [Parameter]
     public int CurrentSectionID { get; set; }
     [Parameter]
-    public int RemainingBars { get; set; }
+    public int CurrentBar { get; set; }
 
     [Parameter, Required]
     public required Models.ClickTrackSection Section {get; set;}
@@ -63,7 +63,7 @@
 
     protected override void OnInitialized()
     {
-        RemainingBars = Section.Length;
+        CurrentBar = Section.Length;
     }
 
     private void OnSectionChanged()
