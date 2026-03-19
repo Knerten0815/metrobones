@@ -4,20 +4,15 @@ let schedulerHandle = null;
 let nextBeatTime = 0;
 let tempo = 120;        // I avoid naming it BPM, because Beats Per Minute is misleading. As BPM is actually quarter notes per minute. See clicksPerSecond()
 let clicksPerBar = 4;
-let noteValue = 4;
 let isRunning = false;
 let currentBeat = 0;
 let beatAccents = [1, 0, 0, 0];
+
 
 const LOOKAHEAD_SEC = 0.1;
 const SCHEDULER_INTERVAL_MS = 25;
 const CLICK_FREQUENCY_HZ = 1000;
 const CLICK_DURATION_SEC = 0.025;
-
-
-function clicksPerSecond() {
-    return 240 / (tempo * noteValue);  // <- 60 / (tempo * (noteValue / 4))
-}
 
 
 function scheduleClick(time) {
@@ -66,7 +61,7 @@ function createClickOscillator(isAccented, time) {
 
 
 function scheduler() {
-    const intervalSec = clicksPerSecond();
+    const intervalSec = 60 / tempo;
     while (nextBeatTime < audioCtx.currentTime + LOOKAHEAD_SEC) {
         scheduleClick(nextBeatTime);
         nextBeatTime += intervalSec; // Advance from last scheduled time, not from now — prevents drift
@@ -74,10 +69,10 @@ function scheduler() {
 }
 
 
-function start(newTempo, bpb, noteVal, newBeatAccents) {
+function start(newTempo, bpb, newBeatAccents) {
     if (isRunning) return;
 
-    setBpm(newTempo, bpb, noteVal, newBeatAccents);
+    setBpm(newTempo, bpb, newBeatAccents);
 
     if (!audioCtx) {
         audioCtx = new AudioContext();
@@ -107,10 +102,9 @@ function stop() {
 }
 
 
-function setBpm(newTempo, bpb, noteVal, newBeatAccents, resetBeat = false) {
+function setBpm(newTempo, bpb, newBeatAccents, resetBeat = false) {
     tempo = newTempo || 120;
     clicksPerBar = bpb || 4;
-    noteValue = noteVal || 4;
     beatAccents = newBeatAccents || [1, 0, 0, 0];
 
     if (resetBeat) 

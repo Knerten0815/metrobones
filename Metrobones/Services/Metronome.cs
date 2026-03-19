@@ -30,7 +30,7 @@ public class Metronome : IAsyncDisposable
 
     public async Task Start()
     {
-        await _js.InvokeVoidAsync("metronome.start", Data.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents);
+        await _js.InvokeVoidAsync("metronome.start", Data.Tempo, Data.NotesPerBar, Data.BeatAccents);
         IsRunning = await _js.InvokeAsync<bool>("metronome.getIsRunning");
     }
 
@@ -48,7 +48,7 @@ public class Metronome : IAsyncDisposable
     /// <returns></returns>
     public async Task UpdateSettings()
     {
-        await _js.InvokeVoidAsync("metronome.setBpm", Data.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents);
+        await _js.InvokeVoidAsync("metronome.setBpm", Data.Tempo, Data.NotesPerBar, Data.BeatAccents);
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ public class Metronome : IAsyncDisposable
         Data.NotesPerBar = data.NotesPerBar;
         Data.NoteValue = data.NoteValue;
         Data.BeatAccents = data.BeatAccents;
-        await _js.InvokeVoidAsync("metronome.setBpm", Data.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents, true);
+        await _js.InvokeVoidAsync("metronome.setBpm", Data.Tempo, Data.NotesPerBar, Data.BeatAccents, true);
     }
 
     public async Task UpdateNotesPerBar()
