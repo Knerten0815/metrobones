@@ -1,0 +1,22 @@
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+@code {
+    private DotNetObjectReference<UpdatePWA>? _dotNetRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("registerServiceWorkerUpdateHandler", _dotNetRef);
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnUpdateAvailable()
+        => await JS.InvokeVoidAsync("reloadApp");
+
+    public async ValueTask DisposeAsync()
+        => _dotNetRef?.Dispose();
+}
