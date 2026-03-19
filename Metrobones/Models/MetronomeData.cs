@@ -6,7 +6,6 @@ public class MetronomeData
     public int NotesPerBar { get; set; }
     public int NoteValue { get; set; } = 4;
     public int[] BeatAccents { get; set; }
-    public double AgogicModifier { get; set; } = 1;
 
     public MetronomeData(int notesPerBar = 4)
     {

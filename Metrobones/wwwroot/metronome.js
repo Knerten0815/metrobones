@@ -3,10 +3,16 @@ let audioCtx = null;
 let schedulerHandle = null;
 let nextBeatTime = 0;
 let tempo = 120;        // I avoid naming it BPM, because Beats Per Minute is misleading. As BPM is actually quarter notes per minute. See clicksPerSecond()
-let clicksPerBar = 4;
+let beatsPerBar = 4;
+let noteValue = 4;
 let isRunning = false;
 let currentBeat = 0;
 let beatAccents = [1, 0, 0, 0];
+// agogics:
+let startTempo = -1;
+let endTempo = -1;
+let beatCount = -1;
+let agogicCurrentBeat = 0;
 
 
 const LOOKAHEAD_SEC = 0.1;
@@ -15,8 +21,39 @@ const CLICK_FREQUENCY_HZ = 1000;
 const CLICK_DURATION_SEC = 0.025;
 
 
+function beatLengthInSeconds() {
+    let beatLength = 60 / (tempo * (noteValue / 4));  // Base interval calculation
+
+    // Agogics:
+    if(startTempo > 0 && endTempo > 0 && beatCount > 0) {
+        beatLength = CalculateAgogicBeatLength();
+        agogicCurrentBeat++;
+
+        // Stop agogic scheduling after the last beat
+        if(agogicCurrentBeat >= beatCount) {
+            startTempo = -1;
+            endTempo = -1;
+            beatCount = -1;
+            agogicCurrentBeat = 0;
+        }
+    }
+    return beatLength;
+}
+
+
+function CalculateAgogicBeatLength() {
+    const scale = noteValue / 4;
+    const scaledStart = startTempo * scale;
+    const scaledEnd = endTempo * scale;
+    const k = 60 * beatCount / (scaledEnd - scaledStart);
+    tempo = scaledStart + (scaledEnd - scaledStart) * agogicCurrentBeat / beatCount;
+    const nextTempo   = scaledStart + (scaledEnd - scaledStart) * (agogicCurrentBeat + 1) / beatCount;
+    return k * Math.log(nextTempo / tempo);
+}
+
+
 function scheduleClick(time) {
-    currentBeat = (currentBeat % clicksPerBar) + 1;
+    currentBeat = (currentBeat % beatsPerBar) + 1;
 
     if (beatAccents[currentBeat - 1] != 2) {
         createClickOscillator(beatAccents[currentBeat - 1] === 1, time);
@@ -30,7 +67,7 @@ function scheduleClick(time) {
 
     setTimeout(() => {
         if (dotNetReference) {
-            dotNetReference.invokeMethodAsync('OnBeat', currentBeat);
+            dotNetReference.invokeMethodAsync('OnBeat', currentBeat, tempo);
         }
     }, visualDelayMs);
 }
@@ -61,7 +98,8 @@ function createClickOscillator(isAccented, time) {
 
 
 function scheduler() {
-    const intervalSec = 60 / tempo;
+    const intervalSec = beatLengthInSeconds();
+    
     while (nextBeatTime < audioCtx.currentTime + LOOKAHEAD_SEC) {
         scheduleClick(nextBeatTime);
         nextBeatTime += intervalSec; // Advance from last scheduled time, not from now — prevents drift
@@ -69,10 +107,10 @@ function scheduler() {
 }
 
 
-function start(newTempo, bpb, newBeatAccents) {
+function start(newTempo, bpb, noteVal, newBeatAccents, agogicEndTempo = -1, agogicBeatCount = -1) {
     if (isRunning) return;
 
-    setBpm(newTempo, bpb, newBeatAccents);
+    setBpm(newTempo, bpb, noteVal, newBeatAccents, agogicEndTempo, agogicBeatCount);
 
     if (!audioCtx) {
         audioCtx = new AudioContext();
@@ -102,10 +140,15 @@ function stop() {
 }
 
 
-function setBpm(newTempo, bpb, newBeatAccents, resetBeat = false) {
-    tempo = newTempo || 120;
-    clicksPerBar = bpb || 4;
-    beatAccents = newBeatAccents || [1, 0, 0, 0];
+function setBpm(newTempo, bpb, noteVal, newBeatAccents, resetBeat = false, agogicEndTempo = -1, agogicBeatCount = -1) {
+    tempo = newTempo;
+    beatsPerBar = bpb;
+    noteValue = noteVal;
+    beatAccents = newBeatAccents;
+    startTempo = newTempo;
+    endTempo = agogicEndTempo;
+    beatCount = agogicBeatCount;
+    agogicCurrentBeat = 0;
 
     if (resetBeat) 
     {

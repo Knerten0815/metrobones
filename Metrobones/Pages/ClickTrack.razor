@@ -139,7 +139,7 @@
 
             if (nextSectionIndex < _track.Sections.Count)
             {
-                var nextSection = _track.Sections[nextSectionIndex];
+                Models.ClickTrackSection? nextSection = _track.Sections[nextSectionIndex];
                 _currentSectionID = nextSection.ID;
                 _remainingBeats = nextSection.Length * nextSection.MetData.NotesPerBar;
                 await Met.UpdateSettings(nextSection.MetData);
