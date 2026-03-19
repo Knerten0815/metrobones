@@ -6,7 +6,7 @@ public class ClickTrackStore(LocalStorage storage)
 {
     private const string Key = "clicktracks";
     private List<ClickTrack>? _tracks;
-    private List<ClickTrack> _defaultTracks { get; set; } = new List<ClickTrack>()
+    private static readonly List<ClickTrack> _defaultTracks = new List<ClickTrack>()
     {
         new ClickTrack() {ID=0, Title="Simple Song", Sections = new List<ClickTrackSection>
             {
