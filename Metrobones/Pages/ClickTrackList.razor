@@ -8,7 +8,7 @@
 <PageTitle>Click Tracks</PageTitle>
 
 <MudList T="string">
-    @foreach(Models.ClickTrack track in Tracks)
+    @foreach(ClickTrackData track in Tracks)
     {
         <MudListItem Text=@track.Title Icon=@Icons.Material.Filled.ArrowForwardIos OnClick=@(() => OpenClickTrack(track.ID))>
             <MudStack Row=true Justify=@Justify.SpaceBetween AlignItems=@AlignItems.Center Style="overflow: hidden;">
@@ -25,7 +25,7 @@
 </MudStack>
 
 @code{
-    public List<Models.ClickTrack> Tracks { get; set; } = new();
+    public List<ClickTrackData> Tracks { get; set; } = new();
     
     protected override async Task OnInitializedAsync()
     {
@@ -37,7 +37,7 @@
         Navigation.NavigateTo($"track?id={trackID}");
     }
 
-    private async Task OpenEditTrackDialogAsync(Models.ClickTrack track)
+    private async Task OpenEditTrackDialogAsync(ClickTrackData track)
     {
         DialogParameters<EditClickTrackDialog>? parameters = new DialogParameters<EditClickTrackDialog>{
             { x => x.ClickTrackTitle, track.Title },

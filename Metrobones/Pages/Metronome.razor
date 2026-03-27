@@ -5,7 +5,7 @@
 <PageTitle>Metronome</PageTitle>
 
 <MudStack Spacing=4>
-    <TempoPicker @bind-Tempo=Met.Data.Tempo @bind-Tempo:after=Met.UpdateSettings />
+    <TempoPicker @bind-Tempo=Met.Data.TempoData.Tempo @bind-Tempo:after=Met.UpdateSettings />
 
     <TimeSignaturePicker @bind-BeatsPerBar=Met.Data.NotesPerBar @bind-BeatsPerBar:after=Met.UpdateNotesPerBar
                          @bind-NoteValue=Met.Data.NoteValue @bind-NoteValue:after=Met.UpdateSettings />

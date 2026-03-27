@@ -70,7 +70,7 @@
         // Extract the ID from the path or query string, e.g. /metronome?id=5
         if (int.TryParse(relativePath.Split("/").Last(), out int trackId))
         {
-            ClickTrack? track = await TrackStore.GetAsync(trackId);
+            ClickTrackData? track = await TrackStore.GetAsync(trackId);
             if (track != null)
                 return track.Title;
         }

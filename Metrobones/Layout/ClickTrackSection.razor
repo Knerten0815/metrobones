@@ -7,7 +7,7 @@
 <MudExpansionPanel Expanded=@Section.IsOpen ExpandedChanged=@OpenSection Disabled=@(Met.IsRunning && CurrentSectionID != Section.ID)>
     <TitleContent>
         <MudStack AlignItems=@AlignItems.Center Row="true">
-            <MudDragHandle T=@Models.ClickTrackSection>
+            <MudDragHandle T=@ClickTrackSectionData>
                 <MudIcon Icon="@Icons.Material.Filled.DragHandle" Color="Color.Inherit" Class="mr-2" aria-label="drag"/>
             </MudDragHandle>
             @if (Section.IsOpen)
@@ -26,7 +26,7 @@
         <MudStack Justify=@Justify.SpaceEvenly AlignItems=@AlignItems.Center Row="true">
             <MudChip OnClick=OpenLengthDialogAsync Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.Length) bars</MudChip>
             <MudChip OnClick=OpenTimeSignatureDialogAsync Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.MetData.NotesPerBar)/@(Section.MetData.NoteValue)</MudChip>
-            <MudChip OnClick=OpenTempoDialogAsync Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.MetData.Tempo) bpm</MudChip>
+            <MudChip OnClick=OpenTempoDialogAsync Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.MetData.TempoData.Tempo) bpm</MudChip>
         </MudStack>
 
         <BeatAccenting @bind-BeatAccents=Section.MetData.BeatAccents
@@ -50,13 +50,13 @@
     public int CurrentBar { get; set; }
 
     [Parameter, Required]
-    public required Models.ClickTrackSection Section {get; set;}
+    public required ClickTrackSectionData Section {get; set;}
 
     [Parameter]
-    public EventCallback<Models.ClickTrackSection> SectionChanged { get; set; }
+    public EventCallback<ClickTrackSectionData> SectionChanged { get; set; }
     
     [Parameter]
-    public EventCallback<Models.ClickTrackSection> StartClicktrack{ get; set; }
+    public EventCallback<ClickTrackSectionData> StartClicktrack{ get; set; }
 
     [Parameter]
     public EventCallback<int> DeleteSection{ get; set; }
@@ -117,7 +117,8 @@
     private async Task OpenTempoDialogAsync()
     {
         DialogParameters<TempoPickerDialog>? parameters = new DialogParameters<TempoPickerDialog>{
-            { x => x.Tempo, Section.MetData.Tempo },
+            { x => x.Tempo, Section.MetData.TempoData.Tempo },
+            { x => x.HasAgogicOption, true },
         };
 
         IDialogReference? dialog = await DialogService.ShowAsync<TempoPickerDialog>(title: "Edit Tempo", parameters);
@@ -125,7 +126,7 @@
         
         if (result?.Canceled == false)
         {
-            Section.MetData.Tempo = (int)(result.Data ?? Section.MetData.Tempo);
+            Section.MetData.TempoData.Tempo = (int)(result.Data ?? Section.MetData.TempoData.Tempo);
         }
     }
 

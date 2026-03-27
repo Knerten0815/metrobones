@@ -1,6 +1,6 @@
 namespace Metrobones.Models;
 
-public class ClickTrackSection
+public class ClickTrackSectionData
 {
     public int ID { get; set; }
     public bool IsOpen { get; set; } = true;
@@ -9,7 +9,7 @@ public class ClickTrackSection
 
     public string Title {get; set;} = "Verse";
 
-    public ClickTrackSection(int id)
+    public ClickTrackSectionData(int id)
     {
         ID = id;
     }

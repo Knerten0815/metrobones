@@ -8,7 +8,7 @@ public class Metronome : IAsyncDisposable
     private readonly IJSRuntime _js;
     private DotNetObjectReference<Metronome>? _dotNetRef;
 
-    public ClickTrackSection Section { get; set; } = new(-1);
+    public ClickTrackSectionData Section { get; set; } = new(-1);
 
     public MetronomeData Data { get; set; } = new();
     public bool IsRunning { get; private set; }
@@ -30,7 +30,7 @@ public class Metronome : IAsyncDisposable
 
     public async Task Start()
     {
-        await _js.InvokeVoidAsync("metronome.start", Data.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents);
+        await _js.InvokeVoidAsync("metronome.start", Data.TempoData.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents);
         IsRunning = await _js.InvokeAsync<bool>("metronome.getIsRunning");
     }
 
@@ -48,7 +48,7 @@ public class Metronome : IAsyncDisposable
     /// <returns></returns>
     public async Task UpdateSettings()
     {
-        await _js.InvokeVoidAsync("metronome.setBpm", Data.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents);
+        await _js.InvokeVoidAsync("metronome.setBpm", Data.TempoData.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents);
     }
 
     /// <summary>
@@ -56,11 +56,11 @@ public class Metronome : IAsyncDisposable
     /// </summary>
     public async Task UpdateSettings(MetronomeData data)
     {
-        Data.Tempo = data.Tempo;
+        Data.TempoData.Tempo = data.TempoData.Tempo;
         Data.NotesPerBar = data.NotesPerBar;
         Data.NoteValue = data.NoteValue;
         Data.BeatAccents = data.BeatAccents;
-        await _js.InvokeVoidAsync("metronome.setBpm", Data.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents, true);
+        await _js.InvokeVoidAsync("metronome.setBpm", Data.TempoData.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents, true);
     }
 
     public async Task UpdateNotesPerBar()
@@ -74,7 +74,7 @@ public class Metronome : IAsyncDisposable
     public Task OnBeat(int beatNumber, int currentTempo)
     {
         CurrentBeat = beatNumber;
-        Data.Tempo = currentTempo;
+        Data.TempoData.Tempo = currentTempo;
         BeatCallback?.Invoke();
         return Task.CompletedTask;
     }
