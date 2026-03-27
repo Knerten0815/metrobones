@@ -13,6 +13,13 @@
     <BeatAccenting @bind-BeatAccents=Met.Data.BeatAccents @bind-BeatAccents:after=Met.UpdateSettings
                    CurrentBeat=Met.CurrentBeat NotesPerBar=Met.Data.NotesPerBar Label="Edit Accenting"/>
 
-    <PlayButton OnPlay=Met.Start/>
+    <PlayButton OnPlay=Play/>
 </MudStack>
 
+@code{
+    private async Task Play()
+    {
+        await Met.UpdateSettings();
+        await Met.Start();
+    }
+}

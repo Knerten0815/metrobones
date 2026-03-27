@@ -98,19 +98,15 @@ function createClickOscillator(isAccented, time) {
 
 
 function scheduler() {
-    const intervalSec = beatLengthInSeconds();
-    
     while (nextBeatTime < audioCtx.currentTime + LOOKAHEAD_SEC) {
         scheduleClick(nextBeatTime);
-        nextBeatTime += intervalSec; // Advance from last scheduled time, not from now — prevents drift
+        nextBeatTime += beatLengthInSeconds(); // Advance from last scheduled time, not from now — prevents drift
     }
 }
 
 
-function start(newTempo, bpb, noteVal, newBeatAccents, agogicEndTempo = -1, agogicBeatCount = -1) {
+function start() {
     if (isRunning) return;
-
-    setBpm(newTempo, bpb, noteVal, newBeatAccents, agogicEndTempo, agogicBeatCount);
 
     if (!audioCtx) {
         audioCtx = new AudioContext();

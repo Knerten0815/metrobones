@@ -1,7 +1,37 @@
 @using System.ComponentModel.DataAnnotations
+@inject IDialogService DialogService
+
 <MudDialog>
     <DialogContent>
-        <TempoPicker @bind-Tempo=Tempo/>
+        @if (Data.IsAgogic)
+        {
+            <MudText Typo="Typo.subtitle1">Start Tempo:</MudText>
+            <MudStack Row=true Spacing="2" Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
+                <MudChip OnClick="OpenStartTempoDialogAsync" Disabled=@Data.IsPreviousTempoStartTempo Icon=@Icons.Material.Filled.Speed Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">
+                    @(Data.StartTempo.ToString()) bpm
+                </MudChip>
+                <MudCheckBox @bind-Value=@Data.IsPreviousTempoStartTempo Label="use previous section tempo" Color="Color.Primary" Disabled=@(Data.PreviousTempo <= 0)/>
+            </MudStack>
+            <br/>
+            <MudText Typo="Typo.subtitle1">End Tempo:</MudText>
+            <MudStack Row=true Spacing="2" Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
+                <MudChip OnClick="OpenEndTempoDialogAsync" Disabled=@Data.IsNextTempoEndTempo Icon=@Icons.Material.Filled.Speed Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">
+                    @(Data.EndTempo.ToString()) bpm
+                </MudChip>
+                <MudCheckBox @bind-Value=Data.IsNextTempoEndTempo Label="use next section tempo" Color="Color.Primary" Disabled=@(Data.NextTempo <= 0)/>
+            </MudStack>
+        }
+        else
+        {
+            <TempoPicker @bind-Tempo=Data.Tempo/>
+        }
+
+        @if (HasAgogicOption)
+        {
+            <br/>
+            <MudCheckBox @bind-Value=@Data.IsAgogic Label="Change tempo over time" Color="Color.Primary" Style="margin: 0 -1rem;"/>
+        }
+        
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
@@ -14,9 +44,44 @@
     private IMudDialogInstance MudDialog { get; set; } = default!;
 
     [Parameter]
-    public int Tempo { get; set; }
+    public TempoData Data { get; set; }
 
-    private void Submit() => MudDialog.Close(DialogResult.Ok(result: Tempo));
+    [Parameter]
+    public bool HasAgogicOption { get; set; } = false;
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(result: Data));
 
     private void Cancel() => MudDialog.Cancel();
+
+    private async Task OpenStartTempoDialogAsync()
+    {
+        DialogParameters<TempoPickerDialog>? parameters = new DialogParameters<TempoPickerDialog>{
+            { x => x.Data, new TempoData(Data.StartTempo) },
+        };
+
+        IDialogReference? dialog = await DialogService.ShowAsync<TempoPickerDialog>(title: "Edit Start Tempo", parameters);
+        DialogResult? result = await dialog.Result;
+        
+        if (result?.Canceled == false)
+        {
+            TempoData data = (TempoData)(result.Data ?? new TempoData(Data.StartTempo));
+            Data.StartTempo = data.Tempo;
+        }
+    }
+
+    private async Task OpenEndTempoDialogAsync()
+    {
+        DialogParameters<TempoPickerDialog>? parameters = new DialogParameters<TempoPickerDialog>{
+            { x => x.Data, new TempoData(Data.EndTempo) },
+        };
+
+        IDialogReference? dialog = await DialogService.ShowAsync<TempoPickerDialog>(title: "Edit End Tempo", parameters);
+        DialogResult? result = await dialog.Result;
+        
+        if (result?.Canceled == false)
+        {
+            TempoData data = (TempoData)(result.Data ?? new TempoData(Data.EndTempo));
+            Data.EndTempo = data.Tempo;
+        }
+    }
 }

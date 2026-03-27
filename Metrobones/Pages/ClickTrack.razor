@@ -119,7 +119,7 @@
             _remainingBeats += _countInBeats;
         }
 
-        await Met.UpdateSettings(startSection.MetData);
+        await Met.UpdateSettings(startSection.MetData, _remainingBeats);
         await Met.Start();
     }
 
@@ -142,7 +142,7 @@
                 ClickTrackSectionData? nextSection = _track.Sections[nextSectionIndex];
                 _currentSectionID = nextSection.ID;
                 _remainingBeats = nextSection.Length * nextSection.MetData.NotesPerBar;
-                await Met.UpdateSettings(nextSection.MetData);
+                await Met.UpdateSettings(nextSection.MetData, _remainingBeats);
             }
             else
             {
