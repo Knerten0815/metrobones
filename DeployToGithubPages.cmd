@@ -35,6 +35,13 @@ if errorlevel 1 (
     exit /b 1
 )
 
+:: --- Copy index.html to 404.html for GitHub Pages routing ---
+copy /y "%PUBLISH_DIR%\index.html" "%PUBLISH_DIR%\404.html"
+if errorlevel 1 (
+    echo ERROR: Failed to copy index.html to 404.html.
+    exit /b 1
+)
+
 :: --- Validation ---
 if not exist "%PUBLISH_DIR%" (
     echo ERROR: Publish directory not found: %PUBLISH_DIR%
