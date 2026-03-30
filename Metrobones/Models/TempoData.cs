@@ -29,4 +29,17 @@ public class TempoData
         IsPreviousTempoStartTempo = data.IsPreviousTempoStartTempo;
         IsNextTempoEndTempo = data.IsNextTempoEndTempo;
     }
+
+    public void UpdateAgogics(bool hasPreviousSection = false, bool hasNextSection = false)
+    {
+        if (StartTempo <= 0 || (IsPreviousTempoStartTempo && hasPreviousSection == false))
+        {
+            StartTempo = PreviousTempo > 0 ? PreviousTempo : Tempo;
+        }
+
+        if (EndTempo <= 0 || (IsNextTempoEndTempo && hasNextSection == false))
+        {
+            EndTempo = NextTempo > 0 ? NextTempo : Tempo;
+        }
+    }
 }

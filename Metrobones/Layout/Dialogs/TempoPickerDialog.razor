@@ -10,7 +10,7 @@
                 <MudChip OnClick=@OpenStartTempoDialogAsync Disabled=@(Data.IsPreviousTempoStartTempo && Data.PreviousTempo > 0) Icon=@Icons.Material.Filled.Speed Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T=@string>
                     @(Data.StartTempo.ToString()) bpm
                 </MudChip>
-                <MudCheckBox @bind-Value=Data.IsPreviousTempoStartTempo @bind-Value:after=UpdateStartTempo Label="use previous section tempo" Color="Color.Primary" Disabled=@(Data.PreviousTempo <= 0)/>
+                <MudCheckBox @bind-Value=Data.IsPreviousTempoStartTempo @bind-Value:after=UpdateAgogics Label="use previous section tempo" Color="Color.Primary" Disabled=@(Data.PreviousTempo <= 0)/>
             </MudStack>
             <br/>
             <MudText Typo=@Typo.subtitle1>End Tempo:</MudText>
@@ -18,7 +18,7 @@
                 <MudChip OnClick=@OpenEndTempoDialogAsync Disabled=@(Data.IsNextTempoEndTempo && Data.NextTempo > 0) Icon=@Icons.Material.Filled.Speed Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=@string>
                     @(Data.EndTempo.ToString()) bpm
                 </MudChip>
-                <MudCheckBox @bind-Value=Data.IsNextTempoEndTempo @bind-Value:after=UpdateEndTempo Label="use next section tempo" Color=@Color.Primary Disabled=@(Data.NextTempo <= 0)/>
+                <MudCheckBox @bind-Value=Data.IsNextTempoEndTempo @bind-Value:after=UpdateAgogics Label="use next section tempo" Color=@Color.Primary Disabled=@(Data.NextTempo <= 0)/>
             </MudStack>
         }
         else
@@ -40,36 +40,16 @@
 </MudDialog>
 
 @code {
-    [CascadingParameter, Required]
-    private IMudDialogInstance MudDialog { get; set; } = default!;
+    [CascadingParameter, EditorRequired]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
 
-    [Parameter]
-    public TempoData Data { get; set; }
+    [Parameter, EditorRequired]
+    public TempoData Data { get; set; } = null!;
 
     [Parameter]
     public bool HasAgogicOption { get; set; } = false;
 
-    protected override void OnInitialized()
-    {
-        UpdateStartTempo();
-        UpdateEndTempo();
-    }
-
-    private void UpdateStartTempo()
-    {
-        if (Data.StartTempo <= 0 || Data.IsPreviousTempoStartTempo)
-        {
-            Data.StartTempo = Data.PreviousTempo > 0 ? Data.PreviousTempo : Data.Tempo;
-        }
-    }
-
-    private void UpdateEndTempo()
-    {
-        if (Data.EndTempo <= 0 || Data.IsNextTempoEndTempo)
-        {
-            Data.EndTempo = Data.NextTempo > 0 ? Data.NextTempo : Data.Tempo;
-        }
-    }
+    private void UpdateAgogics() => Data.UpdateAgogics();
 
     private void Submit() => MudDialog.Close(DialogResult.Ok(result: Data));
 

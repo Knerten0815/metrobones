@@ -104,19 +104,7 @@
 
     private void UpdateAgogics(bool isLastSection)
     {
-        TempoData data = Section.MetData.TempoData;
-
-        if (data.StartTempo <= 0 || (data.IsPreviousTempoStartTempo && Section.ID != 0))
-        {
-            data.StartTempo = data.PreviousTempo > 0 ? data.PreviousTempo : data.Tempo;
-        }
-
-        if (data.EndTempo <= 0 || (data.IsNextTempoEndTempo && isLastSection == false))
-        {
-            data.EndTempo = data.NextTempo > 0 ? data.NextTempo : data.Tempo;
-        }
-
-        Section.MetData.TempoData = data;
+        Section.MetData.TempoData.UpdateAgogics(hasPreviousSection: Section.ID == 0, isLastSection);
     }
 
     protected override void OnParametersSet()
