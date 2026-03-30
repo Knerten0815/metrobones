@@ -66,8 +66,8 @@
         if (_pageTitles.TryGetValue(relativePath.Trim('/'), out var title))
             return title;
 
-        // Extract the ID from the path or query string, e.g. /metronome?id=5
-        if (int.TryParse(relativePath.Split("/").Last(), out int trackId))
+        // Extract the ID from the path or query string, e.g. /track?id=5
+        if (int.TryParse(relativePath.Split("=").Last(), out int trackId))
         {
             ClickTrackData? track = await TrackStore.GetAsync(trackId);
             if (track != null)
