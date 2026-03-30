@@ -8,7 +8,7 @@
 <MudStack Spacing=3 AlignItems=AlignItems.Center>
     <MudStack Row=true Spacing=1 AlignItems=AlignItems.Center>
         <MudSwitch Size=@Size.Large Color=@(_countInActive ? Color.Secondary : Color.Primary) @bind-Value=_track.CountIn Class="@(_countInActive ? "no-interact" : "")" Label="Count in" />
-        <MudNumericField @bind-Value=_track.CountInBars Min=1 Max=10 Disabled=@(_track.CountIn) Class="input-center-text" Style="max-width: 3rem"/>
+        <MudNumericField @bind-Value=_track.CountInBars Min=1 Max=10 Disabled=@(_track.CountIn == false) Class="input-center-text" Style="max-width: 3rem"/>
         <MudText> bars.</MudText>
     </MudStack>
     @* <MudText>Remaining=@_remainingBeats Current=@Met.CurrentBeat</MudText> *@
