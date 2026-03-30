@@ -17,7 +17,7 @@ public class ClickTrackStore(LocalStorage storage)
                 new ClickTrackSectionData (id: 4) { Title = "Chorus", Length = 4 , MetData = new MetronomeData(){TempoData = new TempoData(100)}},
             }
         },
-        new ClickTrackData() {ID=2, Title="Weird Track", 
+        new ClickTrackData() {ID=1, Title="Weird Track", 
             Sections = new List<ClickTrackSectionData>
             {
                 new ClickTrackSectionData (id: 0) { Title = "Slow Waltz", Length = 4, MetData = new MetronomeData(notesPerBar: 3) { TempoData = new TempoData(75) }},
@@ -25,7 +25,7 @@ public class ClickTrackStore(LocalStorage storage)
                 new ClickTrackSectionData (id: 2) { Title = "6/8 Beat", Length = 4, MetData = new MetronomeData(notesPerBar: 6) { NoteValue = 8, BeatAccents = [1, 0, 2, 0, 1, 0], TempoData = new TempoData(65) }}
             }
         },
-        new ClickTrackData() {ID=1, Title="Inge Brauch - Beginnen zu Beginnen", CountIn=true, CountInBars=2,
+        new ClickTrackData() {ID=2, Title="Inge Brauch - Beginnen zu Beginnen", CountIn=true, CountInBars=2,
             Sections = new List<ClickTrackSectionData>
             {
                 new ClickTrackSectionData (id: 0) { Title = "Intro", Length = 10, MetData = new MetronomeData(notesPerBar: 6) { TempoData = new TempoData(220) }},
