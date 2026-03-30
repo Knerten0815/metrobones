@@ -1,6 +1,7 @@
 @inherits Layout.MetronomePageBase
 @using Metrobones.Layout.Dialogs
 @inject IDialogService DialogService
+@inject IScrollManager ScrollManager
 
 <MudStack Spacing=4>
     <MudStack Justify=@Justify.SpaceEvenly AlignItems=@AlignItems.Center Row=true>
@@ -22,7 +23,7 @@
                     CurrentBeat=Met.CurrentBeat NotesPerBar=Section.MetData.NotesPerBar/>
 
     <MudStack Justify=@Justify.Center AlignItems=@AlignItems.Center Row=true Style="position:relative">
-        <MudChip Variant=@Variant.Text Color=@(CountInActive ? Color.Secondary : Color.Primary) Size=@Size.Medium T=string Style="position: absolute; left: 0; text-align: center">
+        <MudChip Variant=@Variant.Outlined Color=@(CountInActive ? Color.Secondary : Color.Primary) Size=@Size.Medium T=string Style="position: absolute; left: 0; text-align: center">
             @if(CountInActive)
             {
                 <span>Count-in</span>
@@ -59,6 +60,16 @@
     protected override bool ShouldRender()
     {
         return Section.IsOpen;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+
+        if (Met.IsRunning && Met.CurrentBeat == 1 && Section.IsOpen)
+        {
+            await ScrollManager.ScrollIntoViewAsync(selector: $"#section{Section.ID}", ScrollBehavior.Smooth);
+        }
     }
 
     private async Task OnPlaySection()

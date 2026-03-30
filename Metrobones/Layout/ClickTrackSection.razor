@@ -1,5 +1,4 @@
 @inherits Layout.MetronomePageBase
-@inject IScrollManager ScrollManager
 
 <MudExpansionPanel Expanded=@Section.IsOpen ExpandedChanged=@OpenSection Disabled=@(Met.IsRunning && IsActiveSection() == false)>
     <TitleContent>
@@ -88,18 +87,6 @@
         
         if (Met.CurrentBeat != 1)
             return;
-        
-        ScrollManager.ScrollIntoViewAsync(selector: $"#section{Section.ID}", ScrollBehavior.Smooth);
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await base.OnAfterRenderAsync(firstRender);
-
-        if (Met.IsRunning && Met.CurrentBeat == 1 && IsActiveSection())
-        {
-            await ScrollManager.ScrollIntoViewAsync(selector: $"#section{Section.ID}", ScrollBehavior.Smooth);
-        }
     }
 
     private void OpenSection(bool shouldOpen){

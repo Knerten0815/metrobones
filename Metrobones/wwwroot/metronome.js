@@ -120,7 +120,7 @@ function start() {
 
     // Small offset so the first beat isn't scheduled in the past
     // by the time the audio engine processes it.
-    nextBeatTime = audioCtx.currentTime + 0.05;
+    nextBeatTime = audioCtx.currentTime + 0.15;
 
     schedulerHandle = setInterval(scheduler, SCHEDULER_INTERVAL_MS);
     isRunning = true;

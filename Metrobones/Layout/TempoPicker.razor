@@ -3,7 +3,7 @@
 
 <MudStack Spacing=2 Justify=@Justify.Center>
     <MudText Typo=@Typo.caption>BPM</MudText>
-    <MudNumericField Value=@Tempo ValueChanged=@OnTempoChanged T=int Min=1 Max=1000 Step=1 Variant=@Variant.Text HideSpinButtons=@true Class="input-center-text" Style="font-size: 8rem;" />
+    <MudNumericField Value=@Tempo ValueChanged=@OnTempoChanged T=int Min=1 Max=420 Step=1 Variant=@Variant.Text HideSpinButtons=@true Class="input-center-text" Style="font-size: 8rem;" />
     <MudSlider Value=@Tempo ValueChanged=@OnTempoChanged T=int Min=1 Max=420 />
     <MudStack Row=@true Spacing=2 Justify=@Justify.Center>
         <MudButton Variant=@Variant.Filled Color=@Color.Primary OnClick=@(() => IncrementTempo(-1))>-</MudButton>
@@ -37,7 +37,6 @@
 
         await OnTempoChanged(Tempo + increment);
     }
-
 
     private async Task HandleTap()
     {

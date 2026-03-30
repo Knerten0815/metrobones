@@ -1,6 +1,5 @@
 @page "/track"
 
-@using System.ComponentModel.DataAnnotations
 @inherits Layout.MetronomePageBase
 @inject ClickTrackStore TrackStore
 @inject NavigationManager Navigation
@@ -17,7 +16,7 @@
         <MudNumericField @bind-Value=_track.CountInBars Min=1 Max=10 Disabled=@(_track.CountIn == false) Class="input-center-text" Style="max-width: 3rem"/>
         <MudText> bars.</MudText>
     </MudStack>
-    @* <MudText>Remaining=@_remainingBeats Current=@Met.CurrentBeat</MudText> *@
+    
     <MudDropContainer T=@ClickTrackSectionData Items=@_track.Sections ItemsSelector="@((item,dropzone) => true)" ItemDropped=@MoveSection Class="d-flex flex-wrap flex-grow-1">
         <ChildContent>
             <MudExpansionPanels Class="mud-width-full">
@@ -101,13 +100,7 @@
 
     private async Task SectionChanged(ClickTrackSectionData section)
     {
-        int index = _track.Sections.FindIndex(s => s.ID == section.ID);
-        if (index != -1)
-        {
-            _track.Sections[index] = section;
-            UpdateSectionList();
-            await TrackStore.UpdateAsync(_track);
-        }
+        await TrackStore.UpdateAsync(_track);
     }
 
     private async Task MoveSection(MudItemDropInfo<ClickTrackSectionData> dropItem)
