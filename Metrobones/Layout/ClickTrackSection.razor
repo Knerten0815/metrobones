@@ -4,7 +4,7 @@
 @inject IDialogService DialogService
 @inject IScrollManager ScrollManager
 
-<MudExpansionPanel Expanded=@Section.IsOpen ExpandedChanged=@OpenSection Disabled=@(Met.IsRunning && CurrentSectionID != Section.ID)>
+<MudExpansionPanel Expanded=@Section.IsOpen ExpandedChanged=@OpenSection Disabled=@(Met.IsRunning && IsActiveSection() == false)>
     <TitleContent>
         <MudStack AlignItems=@AlignItems.Center Row="true">
             <MudDragHandle T=@ClickTrackSectionData>
@@ -42,7 +42,16 @@
                         CurrentBeat=Met.CurrentBeat NotesPerBar=Section.MetData.NotesPerBar/>
 
         <MudStack Justify=@Justify.Center AlignItems=@AlignItems.Center Row="true" Style="position:relative">
-            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T=string Style="position: absolute; left: 0; text-align: center">@(CurrentBar). bar</MudChip>
+            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T=string Style="position: absolute; left: 0; text-align: center">
+                @if(CountInActive)
+                {
+                    <span>Count-in</span>
+                }
+                else
+                {
+                    <span>@(CurrentBar). bar</span>
+                }
+                </MudChip>
             <PlayButton OnPlay=OnPlaySection/>
             <MudIconButton OnClick=OpenDeleteSectionDialogAsync Color=@Color.Error Icon="@Icons.Material.Outlined.Delete" Size=@Size.Medium
                             Disabled=@Met.IsRunning Style="position: absolute; right: 0" aria-label="delete section" />
@@ -57,6 +66,8 @@
     public int CurrentSectionID { get; set; }
     [Parameter]
     public int CurrentBar { get; set; }
+    [Parameter]
+    public bool CountInActive { get; set; }
 
     [Parameter, Required]
     public required ClickTrackSectionData Section {get; set;}
@@ -70,14 +81,42 @@
     [Parameter]
     public EventCallback<int> DeleteSection{ get; set; }
 
+    private bool IsActiveSection()
+    {
+        if(CountInActive)
+            return CurrentSectionID == Section.ID - 1;
+        
+        return CurrentSectionID == Section.ID;
+    }
+
+
     protected override void OnInitialized()
     {
         CurrentBar = Section.Length;
+        Section.OnTrackAgogicsChanged += UpdateAgogics;
     }
 
-    private void OnSectionChanged()
+    public override async ValueTask DisposeAsync()
     {
-        SectionChanged.InvokeAsync(Section);
+        Section.OnTrackAgogicsChanged -= UpdateAgogics;
+        await base.DisposeAsync();
+    }
+
+    private void UpdateAgogics(bool isLastSection)
+    {
+        TempoData data = Section.MetData.TempoData;
+
+        if (data.StartTempo <= 0 || (data.IsPreviousTempoStartTempo && Section.ID != 0))
+        {
+            data.StartTempo = data.PreviousTempo > 0 ? data.PreviousTempo : data.Tempo;
+        }
+
+        if (data.EndTempo <= 0 || (data.IsNextTempoEndTempo && isLastSection == false))
+        {
+            data.EndTempo = data.NextTempo > 0 ? data.NextTempo : data.Tempo;
+        }
+
+        Section.MetData.TempoData = data;
     }
 
     protected override void OnParametersSet()
@@ -85,7 +124,7 @@
         if(Met.IsRunning == false)
             return;
         
-        Section.IsOpen = CurrentSectionID == Section.ID;
+        Section.IsOpen = IsActiveSection();
 
         if(Section.IsOpen == false)
             return;
@@ -100,16 +139,16 @@
     {
         await base.OnAfterRenderAsync(firstRender);
 
-        if (Met.IsRunning && Met.CurrentBeat == 1 && CurrentSectionID == Section.ID)
+        if (Met.IsRunning && Met.CurrentBeat == 1 && IsActiveSection())
         {
             await ScrollManager.ScrollIntoViewAsync(selector: $"#section{Section.ID}", ScrollBehavior.Smooth);
         }
     }
-    
+
     private void OpenSection(bool shouldOpen){
         if (Met.IsRunning)
         {
-            Section.IsOpen = CurrentSectionID == Section.ID && shouldOpen;
+            Section.IsOpen = IsActiveSection() && shouldOpen;
         }
         else
         {
@@ -126,7 +165,7 @@
     private async Task OpenTempoDialogAsync()
     {
         DialogParameters<TempoPickerDialog>? parameters = new DialogParameters<TempoPickerDialog>{
-            { x => x.Data, Section.MetData.TempoData },
+            { x => x.Data, new TempoData(Section.MetData.TempoData) },
             { x => x.HasAgogicOption, true },
         };
 
@@ -136,6 +175,7 @@
         if (result?.Canceled == false)
         {
             Section.MetData.TempoData = (TempoData)(result.Data ?? Section.MetData.TempoData);
+            await SectionChanged.InvokeAsync(Section);
         }
     }
 
@@ -155,6 +195,7 @@
             Section.MetData.NotesPerBar = resultData.NotesPerBar;
             Section.MetData.NoteValue = resultData.NoteValue;
             Section.MetData.BeatAccents = resultData.BeatAccents;
+            await SectionChanged.InvokeAsync(Section);
         }
     }
 
@@ -170,6 +211,7 @@
         if (result?.Canceled == false)
         {
             Section.Length = (int)(result.Data ?? Section.Length);
+            await SectionChanged.InvokeAsync(Section);
         }
     }
 

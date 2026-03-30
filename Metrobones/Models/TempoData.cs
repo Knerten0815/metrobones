@@ -2,7 +2,7 @@ namespace Metrobones.Models;
 
 public class TempoData
 {
-    public int Tempo { get; set; }
+    public int Tempo { get; set; } = 120;
     public bool IsAgogic { get; set; } = false;
     public int PreviousTempo { get; set; } = -1;
     public int NextTempo { get; set; } = -1;
@@ -11,8 +11,22 @@ public class TempoData
     public bool IsPreviousTempoStartTempo { get; set; } = false;
     public bool IsNextTempoEndTempo { get; set ; } = false;
 
-    public TempoData(int tempo = 120)
+    public TempoData(){}
+
+    public TempoData(int tempo)
     {
         Tempo = tempo;
+    }
+
+    public TempoData(TempoData data)
+    {
+        Tempo = data.Tempo;
+        IsAgogic = data.IsAgogic;
+        PreviousTempo = data.PreviousTempo;
+        NextTempo = data.NextTempo;
+        StartTempo = data.StartTempo;
+        EndTempo = data.EndTempo;
+        IsPreviousTempoStartTempo = data.IsPreviousTempoStartTempo;
+        IsNextTempoEndTempo = data.IsNextTempoEndTempo;
     }
 }

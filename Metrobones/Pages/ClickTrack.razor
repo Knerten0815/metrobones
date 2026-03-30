@@ -19,7 +19,7 @@
             </MudExpansionPanels>
         </ChildContent>
         <ItemRenderer>
-            <ClickTrackSection Section=@context CurrentBar=@(Met.IsRunning ? context.Length - (_remainingBeats / context.MetData.NotesPerBar) : 0) SectionChanged=@SectionChanged CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection/>
+            <ClickTrackSection Section=@context CountInActive=@_countInActive CurrentBar=@(Met.IsRunning ? context.Length - (_remainingBeats / context.MetData.NotesPerBar) : 0) SectionChanged=@SectionChanged CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection/>
         </ItemRenderer>
     </MudDropContainer>
 
@@ -34,9 +34,9 @@
     [Parameter, SupplyParameterFromQuery]
     public int Id { get; set; }
     public ClickTrackData _track { get; set; } = new ClickTrackData();
-    private bool _countInActive;
+    private bool _countInActive = false;
     private int _countInBeats = 8;
-    private int _currentSectionID = -1;
+    private int _currentSectionID = -2; // -2 when no section is active, -1 when count-in section is active
     private int _remainingBeats = -1;
 
     protected override void OnInitialized()
@@ -64,14 +64,14 @@
     {
         int newID = _track.Sections.Count > 0 ? _track.Sections.Max(s => s.ID) + 1 : 0;
         _track.Sections.Add(item: new ClickTrackSectionData(newID));
-        StateHasChanged();
+        UpdateSectionList();
         await TrackStore.UpdateAsync(_track);
     }
 
     private async Task DeleteSection(int id)
     {
         _track.Sections.RemoveAll(s => s.ID == id);
-        StateHasChanged();
+        UpdateSectionList();
         await TrackStore.UpdateAsync(_track);
     }
 
@@ -81,7 +81,7 @@
         if (index != -1)
         {
             _track.Sections[index] = section;
-            StateHasChanged();
+            UpdateSectionList();
             await TrackStore.UpdateAsync(_track);
         }
     }
@@ -94,14 +94,36 @@
         
         _track.Sections.Remove(section);
         _track.Sections.Insert(dropItem.IndexInZone, section);
+        UpdateSectionList();
+        await TrackStore.UpdateAsync(_track);
+    }
 
-        // Reassign IDs
+    private void UpdateSectionList()
+    {
         for (int i = 0; i < _track.Sections.Count; i++)
         {
             _track.Sections[i].ID = i;
-        }
+            _track.Sections[i].MetData.TempoData.PreviousTempo = GetPreviousTempo(i);
+            _track.Sections[i].MetData.TempoData.NextTempo = GetNextTempo(i);
 
-        await TrackStore.UpdateAsync(_track);
+            _track.Sections[i].OnTrackAgogicsChanged?.Invoke(i == _track.Sections.Count - 1);
+        }
+    }
+
+    private int GetPreviousTempo(int i)
+    {
+        if (i == 0) return -1;
+
+        TempoData prev = _track.Sections[i - 1].MetData.TempoData;
+        return prev.IsAgogic ? prev.EndTempo : prev.Tempo;
+    }
+
+    private int GetNextTempo(int i)
+    {
+        if (i >= _track.Sections.Count - 1) return -1;
+
+        TempoData next = _track.Sections[i + 1].MetData.TempoData;
+        return next.IsAgogic ? next.StartTempo : next.Tempo;
     }
 
     private async Task StartClickTrack(ClickTrackSectionData startSection)
@@ -109,17 +131,25 @@
         if(startSection == null)
             return;
         
-        _currentSectionID = startSection.ID;
-        _remainingBeats = startSection.Length * startSection.MetData.NotesPerBar;
+        ClickTrackSectionData section = new ClickTrackSectionData(startSection);
 
         if(_track.CountIn)
         {
             _countInActive = true;
-            _countInBeats = _track.CountInBars * startSection.MetData.NotesPerBar;
-            _remainingBeats += _countInBeats;
+            section.ID--;
+            section.Length = _track.CountInBars;
+
+            if(startSection.MetData.TempoData.IsAgogic)
+            {
+                section.MetData.TempoData.Tempo = startSection.MetData.TempoData.StartTempo;
+                section.MetData.TempoData.IsAgogic = false;
+            }
         }
 
-        await Met.UpdateSettings(startSection.MetData, _remainingBeats);
+        _currentSectionID = section.ID;
+        _remainingBeats = section.Length * section.MetData.NotesPerBar;
+
+        await Met.UpdateSettings(section.MetData, _remainingBeats);
         await Met.Start();
     }
 
@@ -128,12 +158,10 @@
         if (_remainingBeats > 1)
         {
             _remainingBeats--;
-            _countInBeats--;
-            if (_countInBeats <= 0)
-                _countInActive = false;
         }
         else
         {
+            _countInActive = false;
             _remainingBeats--;
             int nextSectionIndex = _track.Sections.FindIndex(s => s.ID == _currentSectionID) + 1;
 
@@ -146,7 +174,7 @@
             }
             else
             {
-                _currentSectionID = -1;
+                _currentSectionID = -2;
                 _remainingBeats = -1;
                 await Met.Stop();
             }

@@ -1,16 +1,29 @@
+using System.Text.Json.Serialization;
+
 namespace Metrobones.Models;
 
 public class ClickTrackSectionData
 {
     public int ID { get; set; }
     public bool IsOpen { get; set; } = true;
-    public int Length {get; set;} = 8;
+    public int Length {get; set;} = 4;
     public MetronomeData MetData {get; set;} = new();
+    public string Title {get; set;} = "Intro";
+    [JsonIgnore]
+    public Action<bool>? OnTrackAgogicsChanged { get; set;}
 
-    public string Title {get; set;} = "Verse";
+    public ClickTrackSectionData(){}
 
     public ClickTrackSectionData(int id)
     {
         ID = id;
+    }
+
+    public ClickTrackSectionData(ClickTrackSectionData data)
+    {
+        ID = data.ID;
+        Title = data.Title;
+        Length = data.Length;
+        MetData = new MetronomeData(data.MetData);
     }
 }
