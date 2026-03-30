@@ -5,6 +5,12 @@
 @inject ClickTrackStore TrackStore
 @inject NavigationManager Navigation
 
+@if (_isLoading)
+{
+    <MudProgressCircular Indeterminate="true" />
+    return;
+}
+
 <MudStack Spacing=3 AlignItems=AlignItems.Center>
     <MudStack Row=true Spacing=1 AlignItems=AlignItems.Center>
         <MudSwitch Size=@Size.Large Color=@(_countInActive ? Color.Secondary : Color.Primary) @bind-Value=_track.CountIn Class="@(_countInActive ? "no-interact" : "")" Label="Count in" />
@@ -33,7 +39,9 @@
 @code {
     [Parameter, SupplyParameterFromQuery]
     public int Id { get; set; }
-    public ClickTrackData _track { get; set; } = new ClickTrackData();
+
+    private bool _isLoading = true;
+    private ClickTrackData _track { get; set; } = null!; // Initialized in OnInitializedAsync
     private bool _countInActive = false;
     private int _currentSectionID = -2; // -2 when no section is active, -1 when count-in section is active
     private int _remainingBeats = -1;
@@ -43,15 +51,18 @@
         Met.StopCallback += ResetCountInActive;
     }
 
-    // Validation in OnParametersSet, because OnInitialized is not called when navigating from /track/1 to /track/2
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
-        _track = await TrackStore.GetAsync(Id);
-        if (_track == null)
+        _isLoading = true;
+        ClickTrackData? track = await TrackStore.GetAsync(Id);
+        if (track == null)
         {
-            Navigation.NavigateTo("/clicktracks", true);
-            await Task.FromCanceled(new CancellationToken());
+            Navigation.NavigateTo("/clicktracks");
+            return;
         }
+
+        _track = track;
+        _isLoading = false;
     }
 
     private void ResetCountInActive()
