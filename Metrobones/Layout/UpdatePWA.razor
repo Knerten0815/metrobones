@@ -4,6 +4,7 @@
 @code {
     private DotNetObjectReference<UpdatePWA>? _dotNetRef;
 
+#if !DEBUG
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
@@ -12,6 +13,7 @@
             await JS.InvokeVoidAsync("registerServiceWorkerUpdateHandler", _dotNetRef);
         }
     }
+#endif
 
     [JSInvokable]
     public async Task OnUpdateAvailable()
