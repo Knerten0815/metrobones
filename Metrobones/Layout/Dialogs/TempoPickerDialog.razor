@@ -5,20 +5,20 @@
     <DialogContent>
         @if (Data.IsAgogic)
         {
-            <MudText Typo="Typo.subtitle1">Start Tempo:</MudText>
-            <MudStack Row=true Spacing="2" Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
-                <MudChip OnClick=@OpenStartTempoDialogAsync Disabled=@(Data.IsPreviousTempoStartTempo && Data.PreviousTempo > 0) Icon=@Icons.Material.Filled.Speed Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">
+            <MudText Typo=@Typo.subtitle1>Start Tempo:</MudText>
+            <MudStack Row=true Spacing=2 Justify=@Justify.FlexStart AlignItems=@AlignItems.Center>
+                <MudChip OnClick=@OpenStartTempoDialogAsync Disabled=@(Data.IsPreviousTempoStartTempo && Data.PreviousTempo > 0) Icon=@Icons.Material.Filled.Speed Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T=@string>
                     @(Data.StartTempo.ToString()) bpm
                 </MudChip>
                 <MudCheckBox @bind-Value=Data.IsPreviousTempoStartTempo @bind-Value:after=UpdateStartTempo Label="use previous section tempo" Color="Color.Primary" Disabled=@(Data.PreviousTempo <= 0)/>
             </MudStack>
             <br/>
-            <MudText Typo="Typo.subtitle1">End Tempo:</MudText>
-            <MudStack Row=true Spacing="2" Justify="Justify.FlexStart" AlignItems="AlignItems.Center">
-                <MudChip OnClick=@OpenEndTempoDialogAsync" Disabled=@(Data.IsNextTempoEndTempo && Data.NextTempo > 0) Icon=@Icons.Material.Filled.Speed Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">
+            <MudText Typo=@Typo.subtitle1>End Tempo:</MudText>
+            <MudStack Row=true Spacing=2 Justify=@Justify.FlexStart AlignItems=@AlignItems.Center>
+                <MudChip OnClick=@OpenEndTempoDialogAsync Disabled=@(Data.IsNextTempoEndTempo && Data.NextTempo > 0) Icon=@Icons.Material.Filled.Speed Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=@string>
                     @(Data.EndTempo.ToString()) bpm
                 </MudChip>
-                <MudCheckBox @bind-Value=Data.IsNextTempoEndTempo @bind-Value:after=UpdateEndTempo Label="use next section tempo" Color="Color.Primary" Disabled=@(Data.NextTempo <= 0)/>
+                <MudCheckBox @bind-Value=Data.IsNextTempoEndTempo @bind-Value:after=UpdateEndTempo Label="use next section tempo" Color=@Color.Primary Disabled=@(Data.NextTempo <= 0)/>
             </MudStack>
         }
         else
@@ -29,13 +29,13 @@
         @if (HasAgogicOption)
         {
             <br/>
-            <MudCheckBox @bind-Value=@Data.IsAgogic Label="Change tempo over time" Color="Color.Primary" Style="margin: 0 -1rem;"/>
+            <MudCheckBox @bind-Value=@Data.IsAgogic Label="Change tempo over time" Color=@Color.Primary Style="margin: 0 -1rem;"/>
         }
         
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Primary" OnClick="Submit">OK</MudButton>
+        <MudButton OnClick=@Cancel>Cancel</MudButton>
+        <MudButton Color=@Color.Primary OnClick=@Submit>OK</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -45,8 +45,6 @@
 
     [Parameter]
     public TempoData Data { get; set; }
-    [Parameter]
-    public EventCallback<TempoData> DataChanged { get; set; }
 
     [Parameter]
     public bool HasAgogicOption { get; set; } = false;
@@ -62,7 +60,6 @@
         if (Data.StartTempo <= 0 || Data.IsPreviousTempoStartTempo)
         {
             Data.StartTempo = Data.PreviousTempo > 0 ? Data.PreviousTempo : Data.Tempo;
-            DataChanged.InvokeAsync(Data);
         }
     }
 
@@ -71,7 +68,6 @@
         if (Data.EndTempo <= 0 || Data.IsNextTempoEndTempo)
         {
             Data.EndTempo = Data.NextTempo > 0 ? Data.NextTempo : Data.Tempo;
-            DataChanged.InvokeAsync(Data);
         }
     }
 
