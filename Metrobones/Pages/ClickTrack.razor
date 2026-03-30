@@ -62,8 +62,22 @@
 
     private async Task AddSection()
     {
-        int newID = _track.Sections.Count > 0 ? _track.Sections.Max(s => s.ID) + 1 : 0;
-        _track.Sections.Add(item: new ClickTrackSectionData(newID));
+        ClickTrackSectionData? newSection = _track.Sections.LastOrDefault();
+
+        if(newSection == null)
+        {
+            _track.Sections.Add(new ClickTrackSectionData(id: 0));
+        }
+        else
+        {
+            if(newSection.MetData.TempoData.IsAgogic == true)
+            {
+                newSection.MetData.TempoData = new TempoData(newSection.MetData.TempoData.EndTempo);
+            }
+
+            _track.Sections.Add(new ClickTrackSectionData(newSection));
+        }
+        
         UpdateSectionList();
         await TrackStore.UpdateAsync(_track);
     }

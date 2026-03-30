@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace Metrobones.Models;
 
@@ -22,8 +23,21 @@ public class ClickTrackSectionData
     public ClickTrackSectionData(ClickTrackSectionData data)
     {
         ID = data.ID;
-        Title = data.Title;
+        Title = IncrementTrailingNumber(data.Title);
         Length = data.Length;
         MetData = new MetronomeData(data.MetData);
+    }
+
+    public static string IncrementTrailingNumber(string input)
+    {
+        var match = Regex.Match(input, @"(\d+)$");
+
+        if (match.Success)
+        {
+            int number = int.Parse(match.Value);
+            return input[..match.Index] + (number + 1);
+        }
+
+        return input + " 2";
     }
 }
