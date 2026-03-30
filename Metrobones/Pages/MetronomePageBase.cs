@@ -6,7 +6,7 @@ namespace Metrobones.Layout;
 public abstract class MetronomePageBase : ComponentBase, IAsyncDisposable
 {
     [Inject]
-    protected Metronome Met { get; set; } = default!;
+    protected Metronome Met { get; set; } = null!;
 
     protected override async Task OnInitializedAsync()
     {

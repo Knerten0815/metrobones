@@ -14,8 +14,9 @@
 </MudDialog>
 
 @code {
-    [CascadingParameter, Required]
-    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [CascadingParameter, EditorRequired]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
 
     [Parameter]
     public int Length { get; set; }

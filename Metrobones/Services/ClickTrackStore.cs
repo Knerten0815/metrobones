@@ -45,8 +45,8 @@ public class ClickTrackStore(LocalStorage storage)
 
     public async Task<ClickTrackData?> GetAsync(int id)
     {
-        await EnsureLoaded();
-        return _tracks!.FirstOrDefault(t => t!.ID == id, null);
+        var tracks = await EnsureLoaded();
+        return tracks.FirstOrDefault(t => t.ID == id);
     }
 
     public async Task RemoveAsync(int id)

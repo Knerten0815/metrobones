@@ -69,8 +69,8 @@
     [Parameter]
     public bool CountInActive { get; set; }
 
-    [Parameter, Required]
-    public required ClickTrackSectionData Section {get; set;}
+    [Parameter, EditorRequired]
+    public ClickTrackSectionData Section {get; set;} = null!;
 
     [Parameter]
     public EventCallback<ClickTrackSectionData> SectionChanged { get; set; }

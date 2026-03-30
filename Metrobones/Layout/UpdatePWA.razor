@@ -1,5 +1,5 @@
 @inject IJSRuntime JS
-@implements IAsyncDisposable
+@implements IDisposable
 
 @code {
     private DotNetObjectReference<UpdatePWA>? _dotNetRef;
@@ -17,6 +17,5 @@
     public async Task OnUpdateAvailable()
         => await JS.InvokeVoidAsync("reloadApp");
 
-    public async ValueTask DisposeAsync()
-        => _dotNetRef?.Dispose();
+    public void Dispose() => _dotNetRef?.Dispose();
 }

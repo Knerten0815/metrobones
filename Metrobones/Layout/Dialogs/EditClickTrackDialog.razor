@@ -20,13 +20,14 @@
 </MudDialog>
 
 @code {
-    [CascadingParameter, Required]
-    private IMudDialogInstance MudDialog { get; set; } = default!;
 
-    [Parameter, Required]
-    public required string ClickTrackTitle { get; set; } = default!;
-    [Parameter, Required]
-    public required int ClickTrackID { get; set; } = default!;
+    [CascadingParameter, EditorRequired]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string ClickTrackTitle { get; set; }
+    [Parameter]
+    public int ClickTrackID { get; set; }
 
     private void Submit() => MudDialog.Close(DialogResult.Ok(result: ClickTrackTitle));
 
