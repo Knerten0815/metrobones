@@ -130,7 +130,8 @@
     {
         DialogParameters<TimeSignatureDialog>? parameters = new DialogParameters<TimeSignatureDialog>{
             { x => x.BeatsPerBar, Section.MetData.NotesPerBar },
-            { x => x.NoteValue, Section.MetData.NoteValue }
+            { x => x.NoteValue, Section.MetData.NoteValue },
+            { x => x.Subdivisions, Section.MetData.Subdivisions },
         };
 
         IDialogReference? dialog = await DialogService.ShowAsync<TimeSignatureDialog>(title: "Edit Time Signature", parameters);
@@ -141,6 +142,7 @@
             MetronomeData resultData = (MetronomeData)(result.Data ?? Section.MetData);
             Section.MetData.NotesPerBar = resultData.NotesPerBar;
             Section.MetData.NoteValue = resultData.NoteValue;
+            Section.MetData.Subdivisions = resultData.Subdivisions;
             Section.MetData.BeatAccents = resultData.BeatAccents;
             await SectionChanged.InvokeAsync(Section);
         }

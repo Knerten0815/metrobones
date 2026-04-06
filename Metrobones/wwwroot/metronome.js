@@ -8,6 +8,7 @@ let noteValue = 4;
 let isRunning = false;
 let currentBeat = 0;
 let beatAccents = [1, 0, 0, 0];
+let subdivisions = -1;
 // agogics:
 let startTempo = -1;
 let endTempo = -1;
@@ -24,6 +25,12 @@ const CLICK_DURATION_SEC = 0.025;
 function beatLengthInSeconds() {
     let beatLength = 60 / (tempo * (noteValue / 4));  // Base interval calculation
 
+    // Subdivisions:
+    if (subdivisions > 0) {
+        beatLength = (beatLength * beatsPerBar) / subdivisions;
+        beatCount = (beatCount / beatsPerBar) * subdivisions;   // Adjust for agogics
+    }
+
     // Agogics:
     if(startTempo > 0 && endTempo > 0 && beatCount > 0) {
         beatLength = CalculateAgogicBeatLength();
@@ -37,6 +44,7 @@ function beatLengthInSeconds() {
             agogicCurrentBeat = 0;
         }
     }
+
     return beatLength;
 }
 
@@ -53,7 +61,12 @@ function CalculateAgogicBeatLength() {
 
 
 function scheduleClick(time) {
-    currentBeat = (currentBeat % beatsPerBar) + 1;
+    if (subdivisions > 0) {
+        currentBeat = (currentBeat % subdivisions) + 1;
+    }
+    else {
+        currentBeat = (currentBeat % beatsPerBar) + 1;
+    }
 
     if (beatAccents[currentBeat - 1] != 2) {
         createClickOscillator(beatAccents[currentBeat - 1] === 1, time);
@@ -136,9 +149,10 @@ function stop() {
 }
 
 
-function setBpm(newTempo, bpb, noteVal, newBeatAccents, resetBeat = false, agogicEndTempo = -1, agogicBeatCount = -1) {
+function setBpm(newTempo, bpb, noteVal, newBeatAccents, newSubdivisions=-1, resetBeat = false, agogicEndTempo = -1, agogicBeatCount = -1) {
     tempo = newTempo;
     beatsPerBar = bpb;
+    subdivisions = newSubdivisions;
     noteValue = noteVal;
     beatAccents = newBeatAccents;
     startTempo = newTempo;

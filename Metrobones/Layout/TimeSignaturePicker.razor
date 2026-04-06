@@ -1,20 +1,38 @@
-<MudText Typo=@Typo.caption>Time Signature</MudText>
-<MudStack Row=@true Spacing=1 Justify=@Justify.Center>
-    @* TODO: Increase size of these controls. font-size style doesn't do anything. *@
-    <MudSelect Value=@BeatsPerBar ValueChanged=@OnBeatsPerBarChanged T=int FitContent=true Style="text-align: center; font-size: 5rem;">
-        @foreach (var beat in _beats)
-        {
-            <MudSelectItem Value=@beat>@beat</MudSelectItem>
-        }
-    </MudSelect>
-    <MudText>/</MudText>
-    <MudSelect Value=@NoteValue ValueChanged=@OnNoteValueChanged T=int FitContent=true Style="text-align: center; font-size: 5rem;">
-        @foreach (var note in _notes)
-        {
-            <MudSelectItem Value=@note>@note</MudSelectItem>
-        }
-    </MudSelect>
+<MudStack Row=@true Spacing=3 Justify=@Justify.SpaceAround>
+    <MudStack>
+        <MudText Typo=@Typo.caption>Time Signature</MudText>
+        <MudStack Row=@true Spacing=1 Justify=@Justify.Center>
+            @* TODO: Increase size of these controls. font-size style doesn't do anything. *@
+            <MudSelect Value=@BeatsPerBar ValueChanged=@OnBeatsPerBarChanged T=int FitContent=true Style="text-align: center; font-size: 5rem;">
+                @foreach (int value in _listOfIntegers)
+                {
+                    <MudSelectItem Value=@value>@value</MudSelectItem>
+                }
+            </MudSelect>
+            <MudText>/</MudText>
+            <MudSelect Value=@NoteValue ValueChanged=@OnNoteValueChanged T=int FitContent=true Style="text-align: center; font-size: 5rem;">
+                @foreach (var note in _notes)
+                {
+                    <MudSelectItem Value=@note>@note</MudSelectItem>
+                }
+            </MudSelect>
+        </MudStack>
+    </MudStack>
+    <MudStack>
+        <MudText Typo=@Typo.caption>Subdivisions</MudText>
+        <MudStack Row=@true Spacing=1 Justify=@Justify.Center AlignItems=@AlignItems.Center>
+            <MudCheckBox @bind-Value=@useSubdivisions @bind-Value:after=OnUseSubdivisions Color=@Color.Primary Size=@Size.Small Style="margin: -1rem 0 -1rem -1rem"/>
+            @* <MudNumericField Value=Subdivisions ValueChanged=OnSubdivisionsChanged T=int Min=1 Max=1000 Step=1 Disabled=@(useSubdivisions == false) Class="input-center-text"/> *@
+            <MudSelect Value=@Subdivisions ValueChanged=@OnSubdivisionsChanged T=int Disabled=@(useSubdivisions == false) FitContent=true Style="text-align: center; font-size: 5rem;">
+                @foreach (int value in _listOfIntegers)
+                {
+                    <MudSelectItem Value=@value>@value</MudSelectItem>
+                }
+            </MudSelect>
+        </MudStack>
+    </MudStack>
 </MudStack>
+
 
 @code {
     [Parameter]
@@ -25,8 +43,29 @@
     public int NoteValue { get; set; } = 4;
     [Parameter]
     public EventCallback<int> NoteValueChanged { get; set; }
+    [Parameter]
+    public int Subdivisions { get; set; } = 4;
+    [Parameter]
+    public EventCallback<int> SubdivisionsChanged { get; set; }
 
-    private List<int> _beats = new();
+    private int SubdivisionVisualValue
+    {
+        get
+        {
+            if (Subdivisions < 1)
+                return BeatsPerBar;
+            else 
+                return Subdivisions;
+        }
+        set
+        {
+            Subdivisions = value;
+        }
+    }
+    
+    private bool useSubdivisions = false;
+
+    private List<int> _listOfIntegers = new List<int>();
     private int[] _notes = { 1, 2, 4, 8, 16 };
 
     protected override void OnInitialized()
@@ -34,8 +73,31 @@
         base.OnInitialized();
         for (int i = 1; i <= 32; i++)
         {
-            _beats.Add(i);
+            _listOfIntegers.Add(i);
         }
+
+        if (Subdivisions > 0)
+        {
+            useSubdivisions = true;
+        }
+    }
+
+    private async Task OnUseSubdivisions()
+    {
+        if(useSubdivisions)
+        {
+            await OnSubdivisionsChanged(BeatsPerBar);
+        }
+        else
+        {
+            await OnSubdivisionsChanged(-1);
+        }
+    }
+
+    private async Task OnSubdivisionsChanged(int value)
+    {
+        Subdivisions = value;
+        await SubdivisionsChanged.InvokeAsync(value);
     }
 
     private async Task OnBeatsPerBarChanged(int value)
@@ -48,5 +110,13 @@
     {
         NoteValue = value;
         await NoteValueChanged.InvokeAsync(value);
+    }
+
+    private void IncrementSubdivisions(int increment)
+    {
+        if (Subdivisions + increment < 1 || Subdivisions + increment > 1000)
+            return;
+
+        Subdivisions += increment;
     }
 }
