@@ -14,7 +14,8 @@ public class Metronome : IAsyncDisposable
     public bool IsRunning { get; private set; }
     public int CurrentBeat { get; private set; }
 
-    public event Action? BeatCallback;
+    public event Action<int>? BeatCallback;
+    public event Action? OneCallback;
     public event Action? StopCallback;
 
     public Metronome(IJSRuntime js)
@@ -82,7 +83,11 @@ public class Metronome : IAsyncDisposable
     {
         CurrentBeat = beatNumber;
         Data.TempoData.Tempo = (int)Math.Round(currentTempo);
-        BeatCallback?.Invoke();
+        BeatCallback?.Invoke(beatNumber);
+
+        if(beatNumber == 1)
+            OneCallback?.Invoke();
+        
         return Task.CompletedTask;
     }
 

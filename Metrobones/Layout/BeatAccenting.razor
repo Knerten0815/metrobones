@@ -1,12 +1,14 @@
+@inherits MetronomePageBase
+
 @if(string.IsNullOrEmpty(Label) == false)
 {
     <MudText Typo=@Typo.caption>@Label</MudText>
 }
-<MudStack Row=@true Wrap=@Wrap.Wrap Justify=@Justify.SpaceEvenly>
+<MudStack Row=@true Wrap=@Wrap.Wrap Justify=@Justify.SpaceEvenly Spacing=0>
     @for (int i = 1; i <= BeatAccents.Length; i++)
     {
         var beat = i;
-        <BeatButton BeatNumber=@beat IsCurrentBeat=@(beat == CurrentBeat) BeatAccent=@(BeatAccents[beat - 1])
+        <BeatButton BeatNumber=@beat IsCurrentBeat=@(beat == _currentBeat) BeatAccent=@(BeatAccents[beat - 1])
                     BeatAccentChanged=@((x) => SetBeatAccent(beat, x)) />
     }
 </MudStack>
@@ -15,13 +17,30 @@
     [Parameter]
     public string Label { get; set; } = "";
     [Parameter]
-    public int CurrentBeat { get; set; } = 0;
-    [Parameter]
     public int[] BeatAccents { get; set; } = new int[] { 1, 0, 0, 0 };
     [Parameter]
     public EventCallback<int[]> BeatAccentsChanged { get; set; }
     [Parameter]
     public int NotesPerBar { get; set; } = 4;
+
+    private int _currentBeat = 0;
+
+    protected override void OnInitialized()
+    {
+        Met.BeatCallback += OnBeat;
+    }
+    
+    public override async ValueTask DisposeAsync()
+    {
+        Met.BeatCallback -= OnBeat;
+        await base.DisposeAsync();
+    }
+
+    private void OnBeat(int beatNumber)
+    {
+        _currentBeat = beatNumber;
+        StateHasChanged();
+    }
 
     private async Task SetBeatAccent(int beatNumber, int accent)
     {

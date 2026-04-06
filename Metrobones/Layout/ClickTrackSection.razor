@@ -22,7 +22,6 @@
         <ClickTrackSectionExpanded
             Section=@Section 
             CountInActive=@CountInActive 
-            CurrentBar=@CurrentBar 
             SectionChanged=@SectionChanged 
             StartClicktrack=@StartClicktrack
             DeleteSection=@DeleteSection
@@ -34,8 +33,7 @@
 @code {
     [Parameter]
     public int CurrentSectionID { get; set; }
-    [Parameter]
-    public int CurrentBar { get; set; }
+    
     [Parameter]
     public bool CountInActive { get; set; }
 

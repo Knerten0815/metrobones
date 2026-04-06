@@ -20,7 +20,7 @@
     </MudStack>
 
     <BeatAccenting @bind-BeatAccents=Section.MetData.BeatAccents
-                    CurrentBeat=Met.CurrentBeat NotesPerBar=Section.MetData.NotesPerBar/>
+                    NotesPerBar=Section.MetData.NotesPerBar/>
 
     <MudStack Justify=@Justify.Center AlignItems=@AlignItems.Center Row=true Style="position:relative">
         <MudChip Variant=@Variant.Outlined Color=@(CountInActive ? Color.Secondary : Color.Primary) Size=@Size.Medium T=string Style="position: absolute; left: 0; text-align: center">
@@ -30,7 +30,7 @@
             }
             else
             {
-                <span>@(CurrentBar). bar</span>
+                <span>@(_currentBar). bar</span>
             }
             </MudChip>
         <PlayButton OnPlay=OnPlaySection/>
@@ -40,8 +40,6 @@
 </MudStack>
 
 @code {
-    [Parameter]
-    public int CurrentBar { get; set; }
     [Parameter]
     public bool CountInActive { get; set; }
 
@@ -57,9 +55,24 @@
     [Parameter]
     public EventCallback<int> DeleteSection{ get; set; }
 
+    private int _currentBar = 0;
+
     protected override bool ShouldRender()
     {
         return Section.IsOpen;
+    }
+
+    protected override void OnInitialized()
+    {
+        Met.OneCallback += IncrementCurrentBar;
+        Met.StopCallback += ResetCurrentBar;
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
+        Met.OneCallback -= IncrementCurrentBar;
+        Met.StopCallback -= ResetCurrentBar;
+        await base.DisposeAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -75,6 +88,24 @@
     private async Task OnPlaySection()
     {
         await StartClicktrack.InvokeAsync(Section);
+    }
+
+    private void IncrementCurrentBar()
+    {
+        if(Section.IsOpen == false)
+            return;
+        
+        if(CountInActive)
+            return;
+        
+        _currentBar++;
+        StateHasChanged();
+    }
+
+    private void ResetCurrentBar()
+    {
+        _currentBar = 0;
+        StateHasChanged();
     }
 
     @* ------- Dialog Stuff ------- *@

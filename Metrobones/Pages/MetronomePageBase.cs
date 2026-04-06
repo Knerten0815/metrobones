@@ -18,21 +18,19 @@ public abstract class MetronomePageBase : ComponentBase, IAsyncDisposable
     {
         if (firstRender)
         {
-            Met.BeatCallback += OnStateChanged;
-            Met.StopCallback += OnStateChanged;
+            Met.StopCallback += OnStateChange;
             await Met.Initialize();
         }
     }
 
-    protected virtual async void OnStateChanged()
+    protected virtual async void OnStateChange()
     {
         await InvokeAsync(StateHasChanged);
     }
 
     public virtual async ValueTask DisposeAsync()
     {
-        Met.StopCallback -= OnStateChanged;
-        Met.BeatCallback -= OnStateChanged;
+        Met.StopCallback -= OnStateChange;
         await Met.Stop();
     }
 }
