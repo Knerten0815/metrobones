@@ -5,7 +5,7 @@
 
 <MudStack Spacing=4>
     <MudStack Justify=@Justify.SpaceEvenly AlignItems=@AlignItems.Center Row=true>
-        <MudChip OnClick=OpenLengthDialogAsync Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string>@(Section.Length) bars</MudChip>
+        <MudChip OnClick=OpenLengthDialogAsync Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string>@(Section.PlayForever ? "∞" : Section.Length) bars</MudChip>
         <MudChip OnClick=OpenTimeSignatureDialogAsync Icon=@Icons.Material.Filled.MusicNote Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string>@(Section.MetData.NotesPerBar)/@(Section.MetData.NoteValue)</MudChip>
         <MudChip OnClick=OpenTempoDialogAsync Icon=@Icons.Material.Filled.Speed Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string>
             @if(Section.MetData.TempoData.IsAgogic)
@@ -148,16 +148,20 @@
 
     private async Task OpenLengthDialogAsync()
     {
+        SectionLengthDialog.EditLength resultData = new SectionLengthDialog.EditLength { Length = Section.Length, PlayForever = Section.PlayForever };
+
         DialogParameters<SectionLengthDialog>? parameters = new DialogParameters<SectionLengthDialog>{
-            { x => x.Length, Section.Length },
+            { x => x.Result, resultData },
         };
 
         IDialogReference? dialog = await DialogService.ShowAsync<SectionLengthDialog>(title: "Edit Section Length", parameters);
         DialogResult? result = await dialog.Result;
         
-        if (result?.Canceled == false)
+        if (result?.Canceled == false && result.Data != null)
         {
-            Section.Length = (int)(result.Data ?? Section.Length);
+            resultData = (SectionLengthDialog.EditLength)(result.Data);
+            Section.Length = resultData.Length;
+            Section.PlayForever = resultData.PlayForever;
             await SectionChanged.InvokeAsync(Section);
         }
     }

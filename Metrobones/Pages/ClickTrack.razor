@@ -180,6 +180,9 @@
 
     protected async void OnBeat(int currentBeat)
     {
+        if(_track.Sections[_currentSectionID].PlayForever)
+            return;
+        
         if (_remainingBeats > 1)
         {
             _remainingBeats--;
