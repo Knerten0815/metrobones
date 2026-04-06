@@ -10,11 +10,12 @@
 </MudDialog>
 
 @code {
-    [CascadingParameter, Required]
-    private IMudDialogInstance MudDialog { get; set; } = default!;
 
-    [Parameter, Required]
-    public required string SectionTitle { get; set; } = default!;
+    [CascadingParameter, EditorRequired]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter, EditorRequired]
+    public string SectionTitle { get; set; }
 
     private void Submit() => MudDialog.Close(DialogResult.Ok(result: true));
 

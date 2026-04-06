@@ -8,7 +8,7 @@ public class Metronome : IAsyncDisposable
     private readonly IJSRuntime _js;
     private DotNetObjectReference<Metronome>? _dotNetRef;
 
-    public ClickTrackSection Section { get; set; } = new(-1);
+    public ClickTrackSectionData Section { get; set; } = new(-1);
 
     public MetronomeData Data { get; set; } = new();
     public bool IsRunning { get; private set; }
@@ -30,7 +30,7 @@ public class Metronome : IAsyncDisposable
 
     public async Task Start()
     {
-        await _js.InvokeVoidAsync("metronome.start", Data.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents);
+        await _js.InvokeVoidAsync("metronome.start");
         IsRunning = await _js.InvokeAsync<bool>("metronome.getIsRunning");
     }
 
@@ -48,19 +48,26 @@ public class Metronome : IAsyncDisposable
     /// <returns></returns>
     public async Task UpdateSettings()
     {
-        await _js.InvokeVoidAsync("metronome.setBpm", Data.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents);
+        await _js.InvokeVoidAsync("metronome.setBpm", Data.TempoData.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents);
     }
 
     /// <summary>
     /// Used by clicktracks. Updates the running metronome on the next beat  without stopping. Sets the next beat as the 1.
     /// </summary>
-    public async Task UpdateSettings(MetronomeData data)
+    public async Task UpdateSettings(MetronomeData data, int sectionBeatCount)
     {
-        Data.Tempo = data.Tempo;
-        Data.NotesPerBar = data.NotesPerBar;
-        Data.NoteValue = data.NoteValue;
-        Data.BeatAccents = data.BeatAccents;
-        await _js.InvokeVoidAsync("metronome.setBpm", Data.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents, true);
+        if(data == null)
+            return;
+        
+        Data = data;
+        if(Data.TempoData.IsAgogic)
+        {
+            await _js.InvokeVoidAsync("metronome.setBpm", Data.TempoData.StartTempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents, true, Data.TempoData.EndTempo, sectionBeatCount);
+        }
+        else
+        {
+            await _js.InvokeVoidAsync("metronome.setBpm", Data.TempoData.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents, true);
+        }
     }
 
     public async Task UpdateNotesPerBar()
@@ -71,9 +78,10 @@ public class Metronome : IAsyncDisposable
     }
 
     [JSInvokable]
-    public Task OnBeat(int beatNumber)
+    public Task OnBeat(int beatNumber, double currentTempo)
     {
         CurrentBeat = beatNumber;
+        Data.TempoData.Tempo = (int)Math.Round(currentTempo);
         BeatCallback?.Invoke();
         return Task.CompletedTask;
     }

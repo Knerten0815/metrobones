@@ -1,13 +1,9 @@
 @inherits Layout.MetronomePageBase
-@using System.ComponentModel.DataAnnotations
-@using Metrobones.Layout.Dialogs
-@inject IDialogService DialogService
-@inject IScrollManager ScrollManager
 
-<MudExpansionPanel Expanded=@Section.IsOpen ExpandedChanged=@OpenSection Disabled=@(Met.IsRunning && CurrentSectionID != Section.ID)>
+<MudExpansionPanel Expanded=@Section.IsOpen ExpandedChanged=@OpenSection Disabled=@(Met.IsRunning && IsActiveSection() == false)>
     <TitleContent>
         <MudStack AlignItems=@AlignItems.Center Row="true">
-            <MudDragHandle T=@Models.ClickTrackSection>
+            <MudDragHandle T=@ClickTrackSectionData>
                 <MudIcon Icon="@Icons.Material.Filled.DragHandle" Color="Color.Inherit" Class="mr-2" aria-label="drag"/>
             </MudDragHandle>
             @if (Section.IsOpen)
@@ -22,24 +18,16 @@
         </MudStack>
     </TitleContent>
 
-    <ChildContent><MudStack Spacing=4>
-        <MudStack Justify=@Justify.SpaceEvenly AlignItems=@AlignItems.Center Row="true">
-            <MudChip OnClick=OpenLengthDialogAsync Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.Length) bars</MudChip>
-            <MudChip OnClick=OpenTimeSignatureDialogAsync Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.MetData.NotesPerBar)/@(Section.MetData.NoteValue)</MudChip>
-            <MudChip OnClick=OpenTempoDialogAsync Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T="string">@(Section.MetData.Tempo) bpm</MudChip>
-        </MudStack>
-
-        <BeatAccenting @bind-BeatAccents=Section.MetData.BeatAccents
-                        CurrentBeat=Met.CurrentBeat NotesPerBar=Section.MetData.NotesPerBar/>
-
-        <MudStack Justify=@Justify.Center AlignItems=@AlignItems.Center Row="true" Style="position:relative">
-            <MudChip Variant="Variant.Text" Color=@Color.Primary Size=@Size.Medium T=string Style="position: absolute; left: 0; text-align: center">@RemainingBars bars<br/>remaining</MudChip>
-            <PlayButton OnPlay=OnPlaySection/>
-            <MudIconButton OnClick=OpenDeleteSectionDialogAsync Color=@Color.Error Icon="@Icons.Material.Outlined.Delete" Size=@Size.Medium
-                            Disabled=@Met.IsRunning Style="position: absolute; right: 0" aria-label="delete section" />
-        </MudStack>
-
-    </MudStack></ChildContent>
+    <ChildContent>
+        <ClickTrackSectionExpanded
+            Section=@Section 
+            CountInActive=@CountInActive 
+            CurrentBar=@CurrentBar 
+            SectionChanged=@SectionChanged 
+            StartClicktrack=@StartClicktrack
+            DeleteSection=@DeleteSection
+        />
+    </ChildContent>
 </MudExpansionPanel>
 
 
@@ -47,28 +35,44 @@
     [Parameter]
     public int CurrentSectionID { get; set; }
     [Parameter]
-    public int RemainingBars { get; set; }
+    public int CurrentBar { get; set; }
+    [Parameter]
+    public bool CountInActive { get; set; }
 
-    [Parameter, Required]
-    public required Models.ClickTrackSection Section {get; set;}
+    [Parameter, EditorRequired]
+    public ClickTrackSectionData Section {get; set;} = null!;
 
     [Parameter]
-    public EventCallback<Models.ClickTrackSection> SectionChanged { get; set; }
+    public EventCallback<ClickTrackSectionData> SectionChanged { get; set; }
     
     [Parameter]
-    public EventCallback<Models.ClickTrackSection> StartClicktrack{ get; set; }
+    public EventCallback<ClickTrackSectionData> StartClicktrack{ get; set; }
 
     [Parameter]
     public EventCallback<int> DeleteSection{ get; set; }
 
-    protected override void OnInitialized()
+    private bool IsActiveSection()
     {
-        RemainingBars = Section.Length;
+        if(CountInActive)
+            return CurrentSectionID == Section.ID - 1;
+        
+        return CurrentSectionID == Section.ID;
     }
 
-    private void OnSectionChanged()
+    protected override void OnInitialized()
     {
-        SectionChanged.InvokeAsync(Section);
+        Section.OnTrackAgogicsChanged += UpdateAgogics;
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
+        Section.OnTrackAgogicsChanged -= UpdateAgogics;
+        await base.DisposeAsync();
+    }
+
+    private void UpdateAgogics(bool isLastSection)
+    {
+        Section.MetData.TempoData.UpdateAgogics(hasPreviousSection: Section.ID == 0, isLastSection);
     }
 
     protected override void OnParametersSet()
@@ -76,105 +80,23 @@
         if(Met.IsRunning == false)
             return;
         
-        Section.IsOpen = CurrentSectionID == Section.ID;
+        Section.IsOpen = IsActiveSection();
 
         if(Section.IsOpen == false)
             return;
         
         if (Met.CurrentBeat != 1)
             return;
-        
-        ScrollManager.ScrollIntoViewAsync(selector: $"#section{Section.ID}", ScrollBehavior.Smooth);
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        await base.OnAfterRenderAsync(firstRender);
-
-        if (Met.IsRunning && Met.CurrentBeat == 1 && CurrentSectionID == Section.ID)
-        {
-            await ScrollManager.ScrollIntoViewAsync(selector: $"#section{Section.ID}", ScrollBehavior.Smooth);
-        }
-    }
-    
     private void OpenSection(bool shouldOpen){
         if (Met.IsRunning)
         {
-            Section.IsOpen = CurrentSectionID == Section.ID && shouldOpen;
+            Section.IsOpen = IsActiveSection() && shouldOpen;
         }
         else
         {
             Section.IsOpen = shouldOpen;
-        }
-    }
-
-    private async Task OnPlaySection()
-    {
-        await StartClicktrack.InvokeAsync(Section);
-    }
-
-    @* ------- Dialog Stuff ------- *@
-    private async Task OpenTempoDialogAsync()
-    {
-        DialogParameters<TempoPickerDialog>? parameters = new DialogParameters<TempoPickerDialog>{
-            { x => x.Tempo, Section.MetData.Tempo },
-        };
-
-        IDialogReference? dialog = await DialogService.ShowAsync<TempoPickerDialog>(title: "Edit Tempo", parameters);
-        DialogResult? result = await dialog.Result;
-        
-        if (result?.Canceled == false)
-        {
-            Section.MetData.Tempo = (int)(result.Data ?? Section.MetData.Tempo);
-        }
-    }
-
-    private async Task OpenTimeSignatureDialogAsync()
-    {
-        DialogParameters<TimeSignatureDialog>? parameters = new DialogParameters<TimeSignatureDialog>{
-            { x => x.BeatsPerBar, Section.MetData.NotesPerBar },
-            { x => x.NoteValue, Section.MetData.NoteValue }
-        };
-
-        IDialogReference? dialog = await DialogService.ShowAsync<TimeSignatureDialog>(title: "Edit Time Signature", parameters);
-        DialogResult? result = await dialog.Result;
-
-        if (result?.Canceled == false)
-        {
-            MetronomeData resultData = (MetronomeData)(result.Data ?? Section.MetData);
-            Section.MetData.NotesPerBar = resultData.NotesPerBar;
-            Section.MetData.NoteValue = resultData.NoteValue;
-            Section.MetData.BeatAccents = resultData.BeatAccents;
-        }
-    }
-
-    private async Task OpenLengthDialogAsync()
-    {
-        DialogParameters<SectionLengthDialog>? parameters = new DialogParameters<SectionLengthDialog>{
-            { x => x.Length, Section.Length },
-        };
-
-        IDialogReference? dialog = await DialogService.ShowAsync<SectionLengthDialog>(title: "Edit Section Length", parameters);
-        DialogResult? result = await dialog.Result;
-        
-        if (result?.Canceled == false)
-        {
-            Section.Length = (int)(result.Data ?? Section.Length);
-        }
-    }
-
-    private async Task OpenDeleteSectionDialogAsync()
-    {
-        DialogParameters<DeleteSectionDialog>? parameters = new DialogParameters<DeleteSectionDialog>{
-            { x => x.SectionTitle, Section.Title }
-        };
-
-        IDialogReference? dialog = await DialogService.ShowAsync<DeleteSectionDialog>(title: "Delete Section", parameters);
-        DialogResult? result = await dialog.Result;
-        
-        if (result?.Canceled == false)
-        {
-            await DeleteSection.InvokeAsync(Section.ID);
         }
     }
 }

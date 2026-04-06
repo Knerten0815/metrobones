@@ -8,12 +8,12 @@
 <PageTitle>Click Tracks</PageTitle>
 
 <MudList T="string">
-    @foreach(Models.ClickTrack track in Tracks)
+    @foreach(ClickTrackData track in Tracks)
     {
         <MudListItem Text=@track.Title Icon=@Icons.Material.Filled.ArrowForwardIos OnClick=@(() => OpenClickTrack(track.ID))>
             <MudStack Row=true Justify=@Justify.SpaceBetween AlignItems=@AlignItems.Center Style="overflow: hidden;">
                 <MudText Style="overflow: hidden; text-overflow: ellipsis;">@track.Title</MudText>
-                <MudIconButton OnClick=@(() => OpenEditTrackDialogAsync(track)) Color=@Color.Primary Icon="@Icons.Material.Outlined.Edit" Size=@Size.Medium aria-label="edit click track" Style="flex-shrink: 0;" />
+                <MudIconButton OnClick=@(() => OpenEditTrackDialogAsync(track)) Color=@Color.Primary Icon=@Icons.Material.Outlined.Edit Size=@Size.Medium aria-label="edit click track" Style="flex-shrink: 0;" />
             </MudStack>
         </MudListItem>
     }
@@ -21,11 +21,11 @@
 
 <MudStack Row=true Justify=@Justify.SpaceAround>
     @* TODO: duplicate tracks or choose track as template *@
-    <MudIconButton OnClick=TrackStore.AddAsync Icon="@Icons.Material.Filled.AddCircleOutline" Size=@Size.Large aria-label="add click track" />
+    <MudIconButton OnClick=@TrackStore.AddAsync Color=@Color.Primary Icon=@Icons.Material.Filled.AddCircleOutline Size=@Size.Large aria-label="add click track" />
 </MudStack>
 
 @code{
-    public List<Models.ClickTrack> Tracks { get; set; } = new();
+    public List<ClickTrackData> Tracks { get; set; } = new List<ClickTrackData>();
     
     protected override async Task OnInitializedAsync()
     {
@@ -37,7 +37,7 @@
         Navigation.NavigateTo($"track?id={trackID}");
     }
 
-    private async Task OpenEditTrackDialogAsync(Models.ClickTrack track)
+    private async Task OpenEditTrackDialogAsync(ClickTrackData track)
     {
         DialogParameters<EditClickTrackDialog>? parameters = new DialogParameters<EditClickTrackDialog>{
             { x => x.ClickTrackTitle, track.Title },

@@ -2,15 +2,25 @@ namespace Metrobones.Models;
 
 public class MetronomeData
 {
-    public int Tempo { get; set; } = 120;
     public int NotesPerBar { get; set; } = 4;
     public int NoteValue { get; set; } = 4;
-    public int[] BeatAccents { get; set; } = [1, 0, 0, 0];
+    public int[] BeatAccents { get; set; } = { 1, 0, 0, 0 };
+    public TempoData TempoData{ get; set; } = new TempoData();
 
-    public MetronomeData(int notesPerBar = 4)
+    public MetronomeData(){}
+
+    public MetronomeData(int notesPerBar)
     {
         NotesPerBar = notesPerBar;
         BeatAccents = new int[notesPerBar];
         BeatAccents[0] = 1;
+    }
+
+    public MetronomeData(MetronomeData data)
+    {
+        NotesPerBar = data.NotesPerBar;
+        NoteValue = data.NoteValue;
+        BeatAccents = data.BeatAccents;
+        TempoData = new TempoData(data.TempoData);
     }
 }
