@@ -44,7 +44,7 @@
 
     private async Task SetBeatAccent(int beatNumber, int accent)
     {
-        if (beatNumber >= 1 && beatNumber <= NotesPerBar)
+        if (beatNumber >= 1 && beatNumber <= BeatAccents.Length)
         {
             BeatAccents[beatNumber - 1] = accent;
             await BeatAccentsChanged.InvokeAsync(BeatAccents);
