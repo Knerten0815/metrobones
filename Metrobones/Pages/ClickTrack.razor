@@ -108,6 +108,7 @@
 
     private async Task SectionChanged(ClickTrackSectionData section)
     {
+        UpdateSectionList();
         await TrackStore.UpdateAsync(_track);
     }
 

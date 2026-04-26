@@ -1,5 +1,6 @@
 using Microsoft.JSInterop;
 using Metrobones.Models;
+using System.Diagnostics;
 
 namespace Metrobones.Services;
 
@@ -49,7 +50,7 @@ public class Metronome : IAsyncDisposable
     /// <returns></returns>
     public async Task UpdateSettings()
     {
-        await _js.InvokeVoidAsync("metronome.setBpm", Data.TempoData.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents);
+        await _js.InvokeVoidAsync("metronome.setBpm", Data.TempoData.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents, Data.Subdivisions);
     }
 
     /// <summary>
@@ -61,19 +62,29 @@ public class Metronome : IAsyncDisposable
             return;
         
         Data = data;
-        if(Data.TempoData.IsAgogic)
+
+        if(Data.Subdivisions < 0)
         {
-            await _js.InvokeVoidAsync("metronome.setBpm", Data.TempoData.StartTempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents, true, Data.TempoData.EndTempo, sectionBeatCount);
+            Debug.Assert(Data.BeatAccents.Length == Data.NotesPerBar, "BeatAccents.Length != NotesPerBar");
         }
         else
         {
-            await _js.InvokeVoidAsync("metronome.setBpm", Data.TempoData.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents, true);
+            Debug.Assert(Data.BeatAccents.Length == Data.Subdivisions, "BeatAccents.Length != Subdivisions");
+        }
+
+        if(Data.TempoData.IsAgogic)
+        {
+            await _js.InvokeVoidAsync("metronome.setBpm", Data.TempoData.StartTempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents, Data.Subdivisions, true, Data.TempoData.EndTempo, sectionBeatCount);
+        }
+        else
+        {
+            await _js.InvokeVoidAsync("metronome.setBpm", Data.TempoData.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents, Data.Subdivisions, true);
         }
     }
 
     public async Task UpdateNotesPerBar()
     {
-        Data.BeatAccents = new int[Data.NotesPerBar];
+        Data.BeatAccents = new int[Data.Subdivisions > 0 ? Data.Subdivisions : Data.NotesPerBar];
         Data.BeatAccents[0] = 1;
         await UpdateSettings();
     }
