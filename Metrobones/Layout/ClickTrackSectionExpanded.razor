@@ -29,6 +29,7 @@
     </MudStack>
 
     <BeatAccenting @bind-BeatAccents=Section.MetData.BeatAccents
+                    DisableWhenMetronomeRunning=@true
                     NotesPerBar=Section.MetData.NotesPerBar/>
 
     <MudStack Justify=@Justify.Center AlignItems=@AlignItems.Center Row=true Style="position:relative">
