@@ -23,7 +23,7 @@
         <MudStack Row=@true Spacing=1 Justify=@Justify.Center AlignItems=@AlignItems.Center>
             <MudCheckBox @bind-Value=@useSubdivisions @bind-Value:after=OnUseSubdivisions Color=@Color.Primary Size=@Size.Small Style="margin: -1rem 0 -1rem -1rem"/>
             @* <MudNumericField Value=Subdivisions ValueChanged=OnSubdivisionsChanged T=int Min=1 Max=1000 Step=1 Disabled=@(useSubdivisions == false) Class="input-center-text"/> *@
-            <MudSelect Value=@Subdivisions ValueChanged=@OnSubdivisionsChanged T=int Disabled=@(useSubdivisions == false) FitContent=true Style="text-align: center; font-size: 5rem;">
+            <MudSelect Value=@DisplayedSubdivisions ValueChanged=@OnSubdivisionsChanged T=int Disabled=@(useSubdivisions == false) FitContent=true Style="text-align: center; font-size: 5rem;">
                 @foreach (int value in _listOfIntegers)
                 {
                     <MudSelectItem Value=@value>@value</MudSelectItem>
@@ -47,8 +47,10 @@
     public int Subdivisions { get; set; } = 4;
     [Parameter]
     public EventCallback<int> SubdivisionsChanged { get; set; }
-
-    private int SubdivisionVisualValue
+    
+    // TODO: subdivisions -1 means "use beatsPerBar instead". This property is used to hide the -1 value in the frontend. 
+    // Refactor so that the code always uses subdivisions, and beatsPerBar just determines the length of a bar. Then theres no need for magic value -1.
+    private int DisplayedSubdivisions
     {
         get
         {
