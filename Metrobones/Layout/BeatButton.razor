@@ -1,6 +1,8 @@
+@inject Metronome Metronome
+
 @* TODO: Add some bouncy css animation on beat *@
 <MudIconButton Icon=@GetIcon() Color=@(IsCurrentBeat? Color.Secondary: Color.Primary) Size=@Size.Large
-               aria-label="cycle beat accent" OnClick=@CycleBeatAccent />
+               aria-label="cycle beat accent" OnClick=@CycleBeatAccent/>
 
 @code {
     [Parameter]
@@ -15,6 +17,9 @@
     [Parameter]
     public EventCallback<int> BeatAccentChanged { get; set; }
 
+    [Parameter]
+    public bool DisableWhenMetronomeRunning { get; set; }
+
     private string GetIcon()
     {
         return BeatAccent switch
@@ -28,6 +33,10 @@
 
     private void CycleBeatAccent()
     {
+        // TODO: show a snackbar, that beat accents cant be edited when the metronome is running
+        if (DisableWhenMetronomeRunning && Metronome.IsRunning) 
+            return;
+        
         BeatAccent = (BeatAccent + 1) % 3;
         BeatAccentChanged.InvokeAsync(BeatAccent);
     }

@@ -12,7 +12,7 @@
                          @bind-Subdivisions=Met.Data.Subdivisions @bind-Subdivisions:after=Met.UpdateNotesPerBar/>
 
     <BeatAccenting @bind-BeatAccents=Met.Data.BeatAccents @bind-BeatAccents:after=Met.UpdateSettings
-                   NotesPerBar=Met.Data.NotesPerBar Label="Edit Accenting"/>
+                   NotesPerBar=Met.Data.NotesPerBar Label="Edit Accenting" DisableWhenMetronomeRunning=@false/>
 
     <PlayButton OnPlay=Play/>
 </MudStack>

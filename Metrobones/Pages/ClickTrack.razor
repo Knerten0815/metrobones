@@ -181,7 +181,7 @@
 
     protected async void OnBeat(int currentBeat)
     {
-        if(_track.Sections[_currentSectionID].PlayForever)
+        if(_currentSectionID >= 0 && _track.Sections[_currentSectionID].PlayForever)
             return;
         
         if (_remainingBeats > 1)

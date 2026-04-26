@@ -9,6 +9,7 @@
     {
         var beat = i;
         <BeatButton BeatNumber=@beat IsCurrentBeat=@(beat == _currentBeat) BeatAccent=@(BeatAccents[beat - 1])
+                    DisableWhenMetronomeRunning=@DisableWhenMetronomeRunning
                     BeatAccentChanged=@((x) => SetBeatAccent(beat, x)) />
     }
 </MudStack>
@@ -22,6 +23,9 @@
     public EventCallback<int[]> BeatAccentsChanged { get; set; }
     [Parameter]
     public int NotesPerBar { get; set; } = 4;
+
+    [Parameter]
+    public bool DisableWhenMetronomeRunning { get; set; }
 
     private int _currentBeat = 0;
 

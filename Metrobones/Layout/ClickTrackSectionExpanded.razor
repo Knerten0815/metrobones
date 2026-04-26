@@ -5,9 +5,18 @@
 
 <MudStack Spacing=4>
     <MudStack Justify=@Justify.SpaceEvenly AlignItems=@AlignItems.Center Row=true>
-        <MudChip OnClick=OpenLengthDialogAsync Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string>@(Section.PlayForever ? "∞" : Section.Length) bars</MudChip>
-        <MudChip OnClick=OpenTimeSignatureDialogAsync Icon=@Icons.Material.Filled.MusicNote Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string>@(Section.MetData.NotesPerBar)/@(Section.MetData.NoteValue)</MudChip>
-        <MudChip OnClick=OpenTempoDialogAsync Icon=@Icons.Material.Filled.Speed Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string>
+        <MudChip OnClick=OpenLengthDialogAsync Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string Disabled=@(Met.IsRunning)>@(Section.PlayForever ? "∞" : Section.Length) bars</MudChip>
+        <MudChip OnClick=OpenTimeSignatureDialogAsync Icon=@Icons.Material.Filled.MusicNote Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string Disabled=@(Met.IsRunning)>
+            @if(Section.MetData.Subdivisions > 1)
+            {
+                <span>@(Section.MetData.NotesPerBar)/@(Section.MetData.NoteValue) *@(Section.MetData.Subdivisions)</span>
+            }
+            else
+            {
+                <span>@(Section.MetData.NotesPerBar)/@(Section.MetData.NoteValue)</span>
+            }
+        </MudChip>
+        <MudChip OnClick=OpenTempoDialogAsync Icon=@Icons.Material.Filled.Speed Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string Disabled=@(Met.IsRunning)>
             @if(Section.MetData.TempoData.IsAgogic)
             {
                 <span>@(Section.MetData.TempoData.StartTempo) -> @(Section.MetData.TempoData.EndTempo)</span>
@@ -20,6 +29,7 @@
     </MudStack>
 
     <BeatAccenting @bind-BeatAccents=Section.MetData.BeatAccents
+                    DisableWhenMetronomeRunning=@true
                     NotesPerBar=Section.MetData.NotesPerBar/>
 
     <MudStack Justify=@Justify.Center AlignItems=@AlignItems.Center Row=true Style="position:relative">

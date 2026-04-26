@@ -1,0 +1,12 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Metrobones",
+            "type": "blazorwasm",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/metrobones",
+            // "preLaunchTask": "Kill Edge"
+        },
+    ],
+}

@@ -35,11 +35,11 @@ public class ClickTrackStore(LocalStorage storage)
                 new ClickTrackSectionData (id: 4) { Title = "Bridge", Length = 1, MetData = new MetronomeData(notesPerBar: 6) { TempoData = new TempoData(137) }},
                 new ClickTrackSectionData (id: 5) { Title = "Pre-Chorus", Length = 8, MetData = new MetronomeData() { TempoData = new TempoData(137) { IsAgogic = true, StartTempo = 137, EndTempo = 157, IsPreviousTempoStartTempo = true, IsNextTempoEndTempo = true} }},
                 new ClickTrackSectionData (id: 6) { Title = "Chorus", Length = 32, MetData = new MetronomeData() { TempoData = new TempoData(157) }},
-                new ClickTrackSectionData (id: 7) { Title = "Interlude ", Length = 24, MetData = new MetronomeData(notesPerBar: 6) { TempoData = new TempoData(240) }}, // TODO: make this 12 bars 4/4 @ 120bpm with 6 subdivisions once subdivisions are added
+                new ClickTrackSectionData (id: 7) { Title = "Interlude ", Length = 24, MetData = new MetronomeData(notesPerBar: 6) { TempoData = new TempoData(240) }},
                 new ClickTrackSectionData (id: 8) { Title = "Verse 2", Length = 7, MetData = new MetronomeData() { TempoData = new TempoData(137) }},
                 new ClickTrackSectionData (id: 9) { Title = "Bridge x3", Length = 3, MetData = new MetronomeData(notesPerBar: 6) { TempoData = new TempoData(137) { IsAgogic = true, StartTempo = 137, EndTempo = 157, IsPreviousTempoStartTempo = true, IsNextTempoEndTempo = true} }},
                 new ClickTrackSectionData (id: 10) { Title = "Chorus", Length = 24, MetData = new MetronomeData() { TempoData = new TempoData(157) }},
-                new ClickTrackSectionData (id: 11) { Title = "Outro ", Length = 64, MetData = new MetronomeData(notesPerBar: 6) { TempoData = new TempoData(240) }}, // TODO: the same as Interlude but 130bpm. Also use infinite for Length once added
+                new ClickTrackSectionData (id: 11) { Title = "Outro ", PlayForever = true, Length = 63, MetData = new MetronomeData(notesPerBar: 6) { TempoData = new TempoData(240) }},
             }
         },
     };
