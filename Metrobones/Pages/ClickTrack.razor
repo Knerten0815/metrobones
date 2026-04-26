@@ -24,7 +24,7 @@
             </MudExpansionPanels>
         </ChildContent>
         <ItemRenderer>
-            <ClickTrackSection Section=@context CountInActive=@_countInActive CurrentBar=@(Met.IsRunning ? context.Length - (_remainingBeats / context.MetData.NotesPerBar) : 0) SectionChanged=@SectionChanged CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection/>
+            <ClickTrackSection Section=@context CountInActive=@_countInActive SectionChanged=@SectionChanged CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection/>
         </ItemRenderer>
     </MudDropContainer>
 
@@ -48,6 +48,14 @@
     protected override void OnInitialized()
     {
         Met.StopCallback += ResetCountInActive;
+        Met.BeatCallback += OnBeat;
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
+        Met.StopCallback -= ResetCountInActive;
+        Met.BeatCallback -= OnBeat;
+        await base.DisposeAsync();
     }
 
     protected override async Task OnInitializedAsync()
@@ -100,6 +108,7 @@
 
     private async Task SectionChanged(ClickTrackSectionData section)
     {
+        UpdateSectionList();
         await TrackStore.UpdateAsync(_track);
     }
 
@@ -170,8 +179,11 @@
         await Met.Start();
     }
 
-    protected override async void OnStateChanged()
+    protected async void OnBeat(int currentBeat)
     {
+        if(_track.Sections[_currentSectionID].PlayForever)
+            return;
+        
         if (_remainingBeats > 1)
         {
             _remainingBeats--;
@@ -188,6 +200,7 @@
                 _currentSectionID = nextSection.ID;
                 _remainingBeats = nextSection.Length * nextSection.MetData.NotesPerBar;
                 await Met.UpdateSettings(nextSection.MetData, _remainingBeats);
+                await InvokeAsync(StateHasChanged);
             }
             else
             {
@@ -196,7 +209,5 @@
                 await Met.Stop();
             }
         }
-        
-        base.OnStateChanged();
     }
 }

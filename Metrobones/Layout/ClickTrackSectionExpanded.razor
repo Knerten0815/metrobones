@@ -5,7 +5,7 @@
 
 <MudStack Spacing=4>
     <MudStack Justify=@Justify.SpaceEvenly AlignItems=@AlignItems.Center Row=true>
-        <MudChip OnClick=OpenLengthDialogAsync Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string>@(Section.Length) bars</MudChip>
+        <MudChip OnClick=OpenLengthDialogAsync Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string>@(Section.PlayForever ? "∞" : Section.Length) bars</MudChip>
         <MudChip OnClick=OpenTimeSignatureDialogAsync Icon=@Icons.Material.Filled.MusicNote Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string>@(Section.MetData.NotesPerBar)/@(Section.MetData.NoteValue)</MudChip>
         <MudChip OnClick=OpenTempoDialogAsync Icon=@Icons.Material.Filled.Speed Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string>
             @if(Section.MetData.TempoData.IsAgogic)
@@ -20,7 +20,7 @@
     </MudStack>
 
     <BeatAccenting @bind-BeatAccents=Section.MetData.BeatAccents
-                    CurrentBeat=Met.CurrentBeat NotesPerBar=Section.MetData.NotesPerBar/>
+                    NotesPerBar=Section.MetData.NotesPerBar/>
 
     <MudStack Justify=@Justify.Center AlignItems=@AlignItems.Center Row=true Style="position:relative">
         <MudChip Variant=@Variant.Outlined Color=@(CountInActive ? Color.Secondary : Color.Primary) Size=@Size.Medium T=string Style="position: absolute; left: 0; text-align: center">
@@ -30,9 +30,9 @@
             }
             else
             {
-                <span>@(CurrentBar). bar</span>
+                <span>@(_currentBar). bar</span>
             }
-            </MudChip>
+        </MudChip>
         <PlayButton OnPlay=OnPlaySection/>
         <MudIconButton OnClick=OpenDeleteSectionDialogAsync Color=@Color.Error Icon=@Icons.Material.Outlined.Delete Size=@Size.Medium
                         Disabled=@Met.IsRunning Style="position: absolute; right: 0" aria-label="delete section" />
@@ -40,8 +40,6 @@
 </MudStack>
 
 @code {
-    [Parameter]
-    public int CurrentBar { get; set; }
     [Parameter]
     public bool CountInActive { get; set; }
 
@@ -57,9 +55,24 @@
     [Parameter]
     public EventCallback<int> DeleteSection{ get; set; }
 
+    private int _currentBar = 0;
+
     protected override bool ShouldRender()
     {
         return Section.IsOpen;
+    }
+
+    protected override void OnInitialized()
+    {
+        Met.OneCallback += IncrementCurrentBar;
+        Met.StopCallback += ResetCurrentBar;
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
+        Met.OneCallback -= IncrementCurrentBar;
+        Met.StopCallback -= ResetCurrentBar;
+        await base.DisposeAsync();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -75,6 +88,24 @@
     private async Task OnPlaySection()
     {
         await StartClicktrack.InvokeAsync(Section);
+    }
+
+    private void IncrementCurrentBar()
+    {
+        if(Section.IsOpen == false)
+            return;
+        
+        if(CountInActive)
+            return;
+        
+        _currentBar++;
+        StateHasChanged();
+    }
+
+    private void ResetCurrentBar()
+    {
+        _currentBar = 0;
+        StateHasChanged();
     }
 
     @* ------- Dialog Stuff ------- *@
@@ -99,7 +130,8 @@
     {
         DialogParameters<TimeSignatureDialog>? parameters = new DialogParameters<TimeSignatureDialog>{
             { x => x.BeatsPerBar, Section.MetData.NotesPerBar },
-            { x => x.NoteValue, Section.MetData.NoteValue }
+            { x => x.NoteValue, Section.MetData.NoteValue },
+            { x => x.Subdivisions, Section.MetData.Subdivisions },
         };
 
         IDialogReference? dialog = await DialogService.ShowAsync<TimeSignatureDialog>(title: "Edit Time Signature", parameters);
@@ -110,6 +142,7 @@
             MetronomeData resultData = (MetronomeData)(result.Data ?? Section.MetData);
             Section.MetData.NotesPerBar = resultData.NotesPerBar;
             Section.MetData.NoteValue = resultData.NoteValue;
+            Section.MetData.Subdivisions = resultData.Subdivisions;
             Section.MetData.BeatAccents = resultData.BeatAccents;
             await SectionChanged.InvokeAsync(Section);
         }
@@ -117,16 +150,20 @@
 
     private async Task OpenLengthDialogAsync()
     {
+        SectionLengthDialog.EditLength resultData = new SectionLengthDialog.EditLength { Length = Section.Length, PlayForever = Section.PlayForever };
+
         DialogParameters<SectionLengthDialog>? parameters = new DialogParameters<SectionLengthDialog>{
-            { x => x.Length, Section.Length },
+            { x => x.Result, resultData },
         };
 
         IDialogReference? dialog = await DialogService.ShowAsync<SectionLengthDialog>(title: "Edit Section Length", parameters);
         DialogResult? result = await dialog.Result;
         
-        if (result?.Canceled == false)
+        if (result?.Canceled == false && result.Data != null)
         {
-            Section.Length = (int)(result.Data ?? Section.Length);
+            resultData = (SectionLengthDialog.EditLength)(result.Data);
+            Section.Length = resultData.Length;
+            Section.PlayForever = resultData.PlayForever;
             await SectionChanged.InvokeAsync(Section);
         }
     }

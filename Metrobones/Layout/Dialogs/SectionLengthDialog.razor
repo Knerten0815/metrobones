@@ -1,11 +1,12 @@
-@using System.ComponentModel.DataAnnotations
 <MudDialog>
     <DialogContent>
         <MudStack Row=@true Spacing=4 Justify=@Justify.Center>
-            <MudButton Variant=@Variant.Filled Color=@Color.Primary OnClick=@(() => IncrementLength(-1)) Size=@Size.Large>-</MudButton>
-            <MudNumericField @bind-Value=Length T=int Min=1 Max=1000 Step=1 HideSpinButtons=@true Class="input-center-text" Style="font-size: 3rem;" />
-            <MudButton Variant=@Variant.Filled Color=@Color.Primary OnClick=@(() => IncrementLength(1)) Size=@Size.Large>+</MudButton>
+            <MudButton Variant=@Variant.Filled Color=@Color.Primary OnClick=@(() => IncrementLength(-1)) Size=@Size.Large Disabled=@Result.PlayForever>-</MudButton>
+            <MudNumericField @bind-Value=Result.Length T=int Min=1 Max=1000 Step=1 HideSpinButtons=@true Class="input-center-text" Style="font-size: 3rem;" Disabled=@Result.PlayForever/>
+            <MudButton Variant=@Variant.Filled Color=@Color.Primary OnClick=@(() => IncrementLength(1)) Size=@Size.Large Disabled=@Result.PlayForever>+</MudButton>
         </MudStack>
+        <br/>
+        <MudCheckBox @bind-Value=@Result.PlayForever Label="play forever" Color=@Color.Primary Style="margin: 0 -1rem;"/>
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
@@ -18,18 +19,24 @@
     [CascadingParameter, EditorRequired]
     private IMudDialogInstance MudDialog { get; set; } = null!;
 
-    [Parameter]
-    public int Length { get; set; }
+    [Parameter, EditorRequired]
+    public EditLength Result { get; set; } = null!;
 
-    private void Submit() => MudDialog.Close(DialogResult.Ok(result: Length));
+    public class EditLength
+    {
+        public int Length { get; set; }
+        public bool PlayForever { get; set; }
+    }
+
+    private void Submit() => MudDialog.Close(DialogResult.Ok(result: Result));
 
     private void Cancel() => MudDialog.Cancel();
 
     private void IncrementLength(int increment)
     {
-        if (Length + increment < 1 || Length + increment > 1000)
+        if (Result.Length + increment < 1 || Result.Length + increment > 1000)
             return;
 
-        Length += increment;
+        Result.Length += increment;
     }
 }

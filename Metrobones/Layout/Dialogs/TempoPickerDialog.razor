@@ -1,4 +1,3 @@
-@using System.ComponentModel.DataAnnotations
 @inject IDialogService DialogService
 
 <MudDialog>
@@ -29,7 +28,7 @@
         @if (HasAgogicOption)
         {
             <br/>
-            <MudCheckBox @bind-Value=@Data.IsAgogic Label="Change tempo over time" Color=@Color.Primary Style="margin: 0 -1rem;"/>
+            <MudCheckBox @bind-Value=@Data.IsAgogic @bind-Value:after=@UpdateInitValues Label="Change tempo over time" Color=@Color.Primary Style="margin: 0 -1rem;"/>
         }
         
     </DialogContent>
@@ -54,6 +53,14 @@
     private void Submit() => MudDialog.Close(DialogResult.Ok(result: Data));
 
     private void Cancel() => MudDialog.Cancel();
+
+    private void UpdateInitValues()
+    {
+        if (Data.IsAgogic == false)
+            return;
+        
+        UpdateAgogics();
+    }
 
     private async Task OpenStartTempoDialogAsync()
     {

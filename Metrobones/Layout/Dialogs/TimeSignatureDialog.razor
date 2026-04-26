@@ -1,7 +1,6 @@
-@using System.ComponentModel.DataAnnotations
 <MudDialog>
     <DialogContent>
-        <TimeSignaturePicker @bind-BeatsPerBar=BeatsPerBar @bind-NoteValue=NoteValue/>
+        <TimeSignaturePicker @bind-BeatsPerBar=BeatsPerBar @bind-NoteValue=NoteValue @bind-Subdivisions=Subdivisions/>
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Cancel</MudButton>
@@ -19,10 +18,12 @@
 
     [Parameter]
     public int NoteValue { get; set; }
+    [Parameter]
+    public int Subdivisions { get; set; }
 
     private void Submit()
     {
-        MetronomeData data = new MetronomeData(notesPerBar: BeatsPerBar) { NoteValue = NoteValue };
+        MetronomeData data = new MetronomeData(notesPerBar: BeatsPerBar, noteValue: NoteValue, subdivisions: Subdivisions);
         MudDialog.Close(DialogResult.Ok(result: data));
     }
 

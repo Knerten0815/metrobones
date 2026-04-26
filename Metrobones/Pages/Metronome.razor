@@ -8,10 +8,11 @@
     <TempoPicker @bind-Tempo=Met.Data.TempoData.Tempo @bind-Tempo:after=Met.UpdateSettings />
 
     <TimeSignaturePicker @bind-BeatsPerBar=Met.Data.NotesPerBar @bind-BeatsPerBar:after=Met.UpdateNotesPerBar
-                         @bind-NoteValue=Met.Data.NoteValue @bind-NoteValue:after=Met.UpdateSettings />
+                         @bind-NoteValue=Met.Data.NoteValue @bind-NoteValue:after=Met.UpdateSettings 
+                         @bind-Subdivisions=Met.Data.Subdivisions @bind-Subdivisions:after=Met.UpdateNotesPerBar/>
 
     <BeatAccenting @bind-BeatAccents=Met.Data.BeatAccents @bind-BeatAccents:after=Met.UpdateSettings
-                   CurrentBeat=Met.CurrentBeat NotesPerBar=Met.Data.NotesPerBar Label="Edit Accenting"/>
+                   NotesPerBar=Met.Data.NotesPerBar Label="Edit Accenting"/>
 
     <PlayButton OnPlay=Play/>
 </MudStack>

@@ -12,7 +12,7 @@
             }
             else
             {
-                <MudChip Variant="Variant.Text" Size=@Size.Small T="string">@(Section.Length)x</MudChip>
+                <MudChip Variant="Variant.Text" Size=@Size.Small T="string" Color=@(Section.PlayForever ? Color.Secondary : Color.Default)>@(Section.PlayForever ? "∞" : $"{Section.Length}x")</MudChip>
                 <MudText>@Section.Title</MudText>
             }
         </MudStack>
@@ -22,7 +22,6 @@
         <ClickTrackSectionExpanded
             Section=@Section 
             CountInActive=@CountInActive 
-            CurrentBar=@CurrentBar 
             SectionChanged=@SectionChanged 
             StartClicktrack=@StartClicktrack
             DeleteSection=@DeleteSection
@@ -34,8 +33,7 @@
 @code {
     [Parameter]
     public int CurrentSectionID { get; set; }
-    [Parameter]
-    public int CurrentBar { get; set; }
+    
     [Parameter]
     public bool CountInActive { get; set; }
 
