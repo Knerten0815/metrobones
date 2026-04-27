@@ -12,7 +12,9 @@ public class ClickTrackSectionData
     public MetronomeData MetData {get; set;} = new();
     public string Title {get; set;} = "Intro";
     [JsonIgnore]
-    public Action<bool>? OnTrackAgogicsChanged { get; set;}
+    public Action<bool>? OnTrackAgogicsChanged { get; set;}         // bool: isLastSectionOfTrack
+    [JsonIgnore]
+    public Action<int, bool>? OnTrackSectionOpened { get; set;}     // int: sectionId, bool: isOpen
 
     public ClickTrackSectionData(){}
 
