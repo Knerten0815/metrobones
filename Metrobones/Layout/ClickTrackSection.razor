@@ -1,18 +1,18 @@
 @inherits Layout.MetronomePageBase
 
-<MudExpansionPanel Expanded=@Section.IsOpen ExpandedChanged=@OpenSection Disabled=@(Met.IsRunning && IsActiveSection() == false)>
+<MudExpansionPanel Expanded=@Section.IsOpen ExpandedChanged=@OpenSection>
     <TitleContent>
-        <MudStack AlignItems=@AlignItems.Center Row="true">
-            <MudDragHandle T=@ClickTrackSectionData>
-                <MudIcon Icon="@Icons.Material.Filled.DragHandle" Color="Color.Inherit" Class="mr-2" aria-label="drag"/>
+        <MudStack AlignItems=@AlignItems.Center Row=true>
+            <MudDragHandle T=@ClickTrackSectionData >
+                <MudIcon Icon=@Icons.Material.Filled.DragHandle aria-label="drag" Style=@(Met.IsRunning ? "color: var(--mud-palette-action-disabled);" : null) />
             </MudDragHandle>
             @if (Section.IsOpen)
             {
-                <MudTextField @bind-Value=Section.Title T="string" @onclick:stopPropagation @onkeydown:stopPropagation id=@("section" + Section.ID)/>
+                <MudTextField @bind-Value=Section.Title T=string @onclick:stopPropagation @onkeydown:stopPropagation id=@("section" + Section.ID)/>
             }
             else
             {
-                <MudChip Variant="Variant.Text" Size=@Size.Small T="string" Color=@(Section.PlayForever ? Color.Secondary : Color.Default)>@(Section.PlayForever ? "∞" : $"{Section.Length}x")</MudChip>
+                <MudChip Variant=@Variant.Text Size=@Size.Small T=string Color=@(Section.PlayForever ? Color.Secondary : Color.Default)>@(Section.PlayForever ? "∞" : $"{Section.Length}x")</MudChip>
                 <MudText>@Section.Title</MudText>
             }
         </MudStack>

@@ -12,15 +12,17 @@
 
 <MudStack Spacing=3 AlignItems=AlignItems.Center>
     <MudStack Row=true Spacing=1 AlignItems=AlignItems.Center>
-        <MudSwitch Size=@Size.Large Color=@(_countInActive ? Color.Secondary : Color.Primary) @bind-Value=_track.CountIn Class="@(_countInActive ? "no-interact" : "")" Label="Count in" />
+        <MudSwitch Size=@Size.Large Color=@(_countInActive ? Color.Secondary : Color.Primary) @bind-Value=_track.CountIn Class=@(_countInActive ? "no-interact" : "") Label="Count in" />
         <MudNumericField @bind-Value=_track.CountInBars Min=1 Max=10 Disabled=@(_track.CountIn == false) Class="input-center-text" Style="max-width: 3rem"/>
         <MudText> bars.</MudText>
     </MudStack>
     
-    <MudDropContainer T=@ClickTrackSectionData Items=@_track.Sections ItemsSelector="@((item,dropzone) => true)" ItemDropped=@MoveSection Class="d-flex flex-wrap flex-grow-1">
+    <MudDropContainer T=@ClickTrackSectionData Items=@_track.Sections ItemsSelector=@((item,dropzone) => true) ItemDropped=@MoveSection ItemDisabled=@(_ => Met.IsRunning) Class="d-flex flex-wrap flex-grow-1">
         <ChildContent>
             <MudExpansionPanels Class="mud-width-full">
-                <MudDropZone T=@ClickTrackSectionData Class="flex-grow-1" AllowReorder="true" ItemsClassSelector=@((item) => item.IsOpen ? "drop-item-disabled" : "")/>
+                @* Hack: ItemsClassSelector property is not used but adding it fixes the section rendering during playback. Somehow this syncs state more reliably/often? *@
+                @* Fix: Flip wrapping of MudExpansionPanels and MudDropZone. Remove ItemsClassSelector. Hopefully that wont introduce new bugs. *@
+                <MudDropZone T=@ClickTrackSectionData Class="flex-grow-1" AllowReorder=true ItemsClassSelector=@(_ => "this css class does not exist")/>
             </MudExpansionPanels>
         </ChildContent>
         <ItemRenderer>
