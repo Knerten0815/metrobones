@@ -19,11 +19,11 @@
     
     <MudDropContainer T=@ClickTrackSectionData Items=@_track.Sections ItemsSelector=@((item,dropzone) => true) ItemDropped=@MoveSection ItemDisabled=@(_ => Met.IsRunning) Class="d-flex flex-wrap flex-grow-1">
         <ChildContent>
-            <MudExpansionPanels Class="mud-width-full">
+            <MudDropZone T=@ClickTrackSectionData Class="flex-grow-1" AllowReorder=true>
                 @* Hack: ItemsClassSelector property is not used but adding it fixes the section rendering during playback. Somehow this syncs state more reliably/often? *@
                 @* Fix: Flip wrapping of MudExpansionPanels and MudDropZone. Remove ItemsClassSelector. Hopefully that wont introduce new bugs. *@
-                <MudDropZone T=@ClickTrackSectionData Class="flex-grow-1" AllowReorder=true ItemsClassSelector=@(_ => "this css class does not exist")/>
-            </MudExpansionPanels>
+                @* <MudExpansionPanels Class="mud-width-full"/> *@
+            </MudDropZone>
         </ChildContent>
         <ItemRenderer>
             <ClickTrackSection Section=@context CountInActive=@_countInActive SectionChanged=@SectionChanged CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection/>
@@ -110,6 +110,17 @@
 
     private async Task SectionChanged(ClickTrackSectionData section)
     {
+        if (section.IsOpen)
+        {
+            foreach (ClickTrackSectionData s in _track.Sections)
+            {
+                if (s.ID != section.ID)
+                {
+                    s.IsOpen = false;
+                }
+            }
+        }
+
         UpdateSectionList();
         await TrackStore.UpdateAsync(_track);
     }
@@ -199,6 +210,8 @@
             if (nextSectionIndex < _track.Sections.Count)
             {
                 ClickTrackSectionData? nextSection = _track.Sections[nextSectionIndex];
+                _track.Sections[_currentSectionID].IsOpen = false;
+                nextSection.IsOpen = true;
                 _currentSectionID = nextSection.ID;
                 _remainingBeats = nextSection.Length * nextSection.MetData.NotesPerBar;
                 await Met.UpdateSettings(nextSection.MetData, _remainingBeats);

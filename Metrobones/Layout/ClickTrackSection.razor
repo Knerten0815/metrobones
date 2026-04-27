@@ -1,24 +1,23 @@
 @inherits Layout.MetronomePageBase
 
-<MudExpansionPanel Expanded=@Section.IsOpen ExpandedChanged=@OpenSection>
-    <TitleContent>
-        <MudStack AlignItems=@AlignItems.Center Row=true>
-            <MudDragHandle T=@ClickTrackSectionData >
-                <MudIcon Icon=@Icons.Material.Filled.DragHandle aria-label="drag" Style=@(Met.IsRunning ? "color: var(--mud-palette-action-disabled);" : null) />
-            </MudDragHandle>
-            @if (Section.IsOpen)
-            {
-                <MudTextField @bind-Value=Section.Title T=string @onclick:stopPropagation @onkeydown:stopPropagation id=@("section" + Section.ID)/>
-            }
-            else
-            {
-                <MudChip Variant=@Variant.Text Size=@Size.Small T=string Color=@(Section.PlayForever ? Color.Secondary : Color.Default)>@(Section.PlayForever ? "∞" : $"{Section.Length}x")</MudChip>
-                <MudText>@Section.Title</MudText>
-            }
-        </MudStack>
-    </TitleContent>
+<MudStack Spacing=0>
+    <MudStack AlignItems=@AlignItems.Center Row=true>
+        <MudDragHandle T=@ClickTrackSectionData >
+            <MudIcon Icon=@Icons.Material.Filled.DragHandle aria-label="drag" Style=@(Met.IsRunning ? "color: var(--mud-palette-action-disabled);" : null) />
+        </MudDragHandle>
+        @if (Section.IsOpen)
+        {
+            <MudTextField @bind-Value=Section.Title T=string @onclick:stopPropagation @onkeydown:stopPropagation id=@("section" + Section.ID)/>
+        }
+        else
+        {
+            <MudChip Variant=@Variant.Text Size=@Size.Small T=string Color=@(Section.PlayForever ? Color.Secondary : Color.Default)>@(Section.PlayForever ? "∞" : $"{Section.Length}x")</MudChip>
+            <MudText Class="mud-width-full">@Section.Title</MudText>
+        }
+        <MudIconButton OnClick=@OpenSection Icon=@(Section.IsOpen ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)/>
+    </MudStack>
 
-    <ChildContent>
+    <MudCollapse Expanded=Section.IsOpen>
         <ClickTrackSectionExpanded
             Section=@Section 
             CountInActive=@CountInActive 
@@ -26,9 +25,8 @@
             StartClicktrack=@StartClicktrack
             DeleteSection=@DeleteSection
         />
-    </ChildContent>
-</MudExpansionPanel>
-
+    </MudCollapse>
+</MudStack>
 
 @code {
     [Parameter]
@@ -87,14 +85,13 @@
             return;
     }
 
-    private void OpenSection(bool shouldOpen){
+    private async Task OpenSection(){
         if (Met.IsRunning)
         {
-            Section.IsOpen = IsActiveSection() && shouldOpen;
+            return;
         }
-        else
-        {
-            Section.IsOpen = shouldOpen;
-        }
+
+        Section.IsOpen = !Section.IsOpen;
+        await SectionChanged.InvokeAsync(Section);
     }
 }
