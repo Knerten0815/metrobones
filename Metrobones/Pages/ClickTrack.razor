@@ -17,16 +17,12 @@
         <MudText> bars.</MudText>
     </MudStack>
     
-    <MudDropContainer T=@ClickTrackSectionData Items=@_track.Sections ItemsSelector=@((item,dropzone) => true) ItemDropped=@MoveSection ItemDisabled=@(_ => Met.IsRunning) Class="d-flex flex-wrap flex-grow-1">
+    <MudDropContainer T=@ClickTrackSectionData Items=@_track.Sections ItemsSelector=@((item,dropzone) => true) ItemDropped=@MoveSection Class="d-flex flex-wrap flex-grow-1">
         <ChildContent>
-            <MudDropZone T=@ClickTrackSectionData Class="flex-grow-1" AllowReorder=true>
-                @* Hack: ItemsClassSelector property is not used but adding it fixes the section rendering during playback. Somehow this syncs state more reliably/often? *@
-                @* Fix: Flip wrapping of MudExpansionPanels and MudDropZone. Remove ItemsClassSelector. Hopefully that wont introduce new bugs. *@
-                @* <MudExpansionPanels Class="mud-width-full"/> *@
-            </MudDropZone>
+            <MudDropZone T=@ClickTrackSectionData Class="flex-grow-1" AllowReorder=true ItemDisabled=@(_ => Met.IsRunning)/>
         </ChildContent>
         <ItemRenderer>
-            <ClickTrackSection Section=@context CountInActive=@_countInActive SectionChanged=@SectionChanged CurrentSectionID=_currentSectionID StartClicktrack=StartClickTrack DeleteSection=DeleteSection/>
+            <ClickTrackSection Section=@context CountInActive=@_countInActive CurrentSectionID=@_currentSectionID SectionChanged=@SectionChanged OpenSectionChanged=@UpdateOpenSections StartClicktrack=@StartClickTrack DeleteSection=@DeleteSection/>
         </ItemRenderer>
     </MudDropContainer>
 
@@ -79,25 +75,39 @@
         _countInActive = false;
     }
 
+    private void UpdateOpenSections(ClickTrackSectionData? openedSection)
+    {
+        if(openedSection == null)
+            return;
+        
+        foreach (ClickTrackSectionData section in _track.Sections)
+        {
+            section.OnTrackSectionOpened?.Invoke(openedSection.ID, openedSection.IsOpen);
+        }
+    }
+
     private async Task AddSection()
     {
-        ClickTrackSectionData? newSection = _track.Sections.LastOrDefault();
+        ClickTrackSectionData? lastSection = _track.Sections.LastOrDefault();
+        ClickTrackSectionData newSection;
 
-        if(newSection == null)
+        if(lastSection == null)
         {
-            _track.Sections.Add(new ClickTrackSectionData(id: 0));
+            newSection = new ClickTrackSectionData(id: 0);
         }
         else
         {
-            if(newSection.MetData.TempoData.IsAgogic == true)
+            if(lastSection.MetData.TempoData.IsAgogic == true)
             {
-                newSection.MetData.TempoData = new TempoData(newSection.MetData.TempoData.EndTempo);
+                lastSection.MetData.TempoData = new TempoData(lastSection.MetData.TempoData.EndTempo);
             }
 
-            _track.Sections.Add(new ClickTrackSectionData(newSection));
+            newSection = new ClickTrackSectionData(lastSection);
         }
         
+        _track.Sections.Add(newSection);
         UpdateSectionList();
+        UpdateOpenSections(newSection);
         await TrackStore.UpdateAsync(_track);
     }
 
@@ -110,17 +120,6 @@
 
     private async Task SectionChanged(ClickTrackSectionData section)
     {
-        if (section.IsOpen)
-        {
-            foreach (ClickTrackSectionData s in _track.Sections)
-            {
-                if (s.ID != section.ID)
-                {
-                    s.IsOpen = false;
-                }
-            }
-        }
-
         UpdateSectionList();
         await TrackStore.UpdateAsync(_track);
     }
@@ -190,6 +189,8 @@
 
         await Met.UpdateSettings(section.MetData, _remainingBeats);
         await Met.Start();
+        // update open sections, to disable drag handles
+        UpdateOpenSections(section);
     }
 
     protected async void OnBeat(int currentBeat)
@@ -210,11 +211,11 @@
             if (nextSectionIndex < _track.Sections.Count)
             {
                 ClickTrackSectionData? nextSection = _track.Sections[nextSectionIndex];
-                _track.Sections[_currentSectionID].IsOpen = false;
-                nextSection.IsOpen = true;
                 _currentSectionID = nextSection.ID;
                 _remainingBeats = nextSection.Length * nextSection.MetData.NotesPerBar;
                 await Met.UpdateSettings(nextSection.MetData, _remainingBeats);
+                nextSection.IsOpen = true;
+                UpdateOpenSections(nextSection);
                 await InvokeAsync(StateHasChanged);
             }
             else

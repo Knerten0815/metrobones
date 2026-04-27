@@ -2,7 +2,7 @@
 
 <MudStack Spacing=0>
     <MudStack AlignItems=@AlignItems.Center Row=true>
-        <MudDragHandle T=@ClickTrackSectionData >
+        <MudDragHandle T=@ClickTrackSectionData>
             <MudIcon Icon=@Icons.Material.Filled.DragHandle aria-label="drag" Style=@(Met.IsRunning ? "color: var(--mud-palette-action-disabled);" : null) />
         </MudDragHandle>
         @if (Section.IsOpen)
@@ -14,7 +14,7 @@
             <MudChip Variant=@Variant.Text Size=@Size.Small T=string Color=@(Section.PlayForever ? Color.Secondary : Color.Default)>@(Section.PlayForever ? "∞" : $"{Section.Length}x")</MudChip>
             <MudText Class="mud-width-full">@Section.Title</MudText>
         }
-        <MudIconButton OnClick=@OpenSection Icon=@(Section.IsOpen ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)/>
+        <MudIconButton OnClick=@ToggleOpenSection Disabled=@Met.IsRunning Icon=@(Section.IsOpen ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)/>
     </MudStack>
 
     <MudCollapse Expanded=Section.IsOpen>
@@ -42,7 +42,10 @@
     public EventCallback<ClickTrackSectionData> SectionChanged { get; set; }
     
     [Parameter]
-    public EventCallback<ClickTrackSectionData> StartClicktrack{ get; set; }
+    public EventCallback<ClickTrackSectionData> StartClicktrack { get; set; }
+
+    [Parameter]
+    public EventCallback<ClickTrackSectionData> OpenSectionChanged { get; set; }
 
     [Parameter]
     public EventCallback<int> DeleteSection{ get; set; }
@@ -58,17 +61,14 @@
     protected override void OnInitialized()
     {
         Section.OnTrackAgogicsChanged += UpdateAgogics;
+        Section.OnTrackSectionOpened += UpdateOpenSection;
     }
 
     public override async ValueTask DisposeAsync()
     {
         Section.OnTrackAgogicsChanged -= UpdateAgogics;
+        Section.OnTrackSectionOpened -= UpdateOpenSection;
         await base.DisposeAsync();
-    }
-
-    private void UpdateAgogics(bool isLastSection)
-    {
-        Section.MetData.TempoData.UpdateAgogics(hasPreviousSection: Section.ID == 0, isLastSection);
     }
 
     protected override void OnParametersSet()
@@ -85,13 +85,31 @@
             return;
     }
 
-    private async Task OpenSection(){
-        if (Met.IsRunning)
-        {
+    private void UpdateAgogics(bool isLastSection)
+    {
+        Section.MetData.TempoData.UpdateAgogics(hasPreviousSection: Section.ID == 0, isLastSection);
+    }
+
+    private async Task ToggleOpenSection()
+    {
+        if(Met.IsRunning)
             return;
+        
+        Section.IsOpen = !Section.IsOpen;
+        await OpenSectionChanged.InvokeAsync(Section);
+    }
+
+    private void UpdateOpenSection(int openSectionID, bool isOpen)
+    {
+        if(Section.ID == openSectionID)
+        {
+            Section.IsOpen = isOpen;
+        }
+        else
+        {
+            Section.IsOpen = false;
         }
 
-        Section.IsOpen = !Section.IsOpen;
-        await SectionChanged.InvokeAsync(Section);
+        StateHasChanged();
     }
 }

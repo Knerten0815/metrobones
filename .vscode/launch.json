@@ -12,6 +12,7 @@
             "type": "blazorwasm",
             "request": "launch",
             "cwd": "${workspaceFolder}/metrobones",
+            "url": "http://localhost:5248/"
         },
     ],
 }
