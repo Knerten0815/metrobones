@@ -19,7 +19,7 @@
     
     <MudDivider/>
 
-    <MudDropContainer T=@ClickTrackSectionData Items=@_track.Sections ItemsSelector=@((item,dropzone) => true) ItemDropped=@MoveSection DraggingClass="" Class="d-flex flex-wrap flex-grow-1">
+    <MudDropContainer T=@ClickTrackSectionData Items=@_track.Sections ItemsSelector=@((item,dropzone) => true) ItemDropped=@MoveSection Class="d-flex flex-wrap flex-grow-1">
         <ChildContent>
             <MudDropZone T=@ClickTrackSectionData Class="flex-grow-1" AllowReorder=true ItemDisabled=@(_ => Met.IsRunning) ItemDraggingClass="dragging-track-item"/>
         </ChildContent>

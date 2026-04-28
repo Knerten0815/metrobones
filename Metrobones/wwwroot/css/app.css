@@ -19,6 +19,15 @@
     pointer-events: none;
 }
 
+/* .mud-collapse-container.invisible {
+    display: none;
+} */
+
+.open-section{
+    background-color: var(--mud-palette-background-gray);
+    border-radius: 1rem;
+}
+
 .dragging-track-item {
     background-color: var(--mud-palette-background-gray);
     color: var(--mud-palette-primary);
