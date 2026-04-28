@@ -17,9 +17,11 @@
         <MudText> bars.</MudText>
     </MudStack>
     
-    <MudDropContainer T=@ClickTrackSectionData Items=@_track.Sections ItemsSelector=@((item,dropzone) => true) ItemDropped=@MoveSection Class="d-flex flex-wrap flex-grow-1">
+    <MudDivider/>
+
+    <MudDropContainer T=@ClickTrackSectionData Items=@_track.Sections ItemsSelector=@((item,dropzone) => true) ItemDropped=@MoveSection DraggingClass="" Class="d-flex flex-wrap flex-grow-1">
         <ChildContent>
-            <MudDropZone T=@ClickTrackSectionData Class="flex-grow-1" AllowReorder=true ItemDisabled=@(_ => Met.IsRunning)/>
+            <MudDropZone T=@ClickTrackSectionData Class="flex-grow-1" AllowReorder=true ItemDisabled=@(_ => Met.IsRunning) ItemDraggingClass="dragging-track-item"/>
         </ChildContent>
         <ItemRenderer>
             <ClickTrackSection Section=@context CountInActive=@_countInActive CurrentSectionID=@_currentSectionID SectionChanged=@SectionChanged OpenSectionChanged=@UpdateOpenSections StartClicktrack=@StartClickTrack DeleteSection=@DeleteSection/>
