@@ -19,6 +19,28 @@
     pointer-events: none;
 }
 
+/* .mud-collapse-container.invisible {
+    display: none;
+} */
+
+.open-section{
+    background-color: var(--mud-palette-background-gray);
+    border-radius: 1rem;
+}
+
+.dragging-track-item {
+    background-color: var(--mud-palette-background-gray);
+    color: var(--mud-palette-primary);
+}
+
+.dragging-track-item .mud-icon-root,
+.dragging-track-item .mud-icon-button,
+.dragging-track-item .mud-text,
+.dragging-track-item .mud-chip,
+.dragging-track-item .mud-input-control {
+    color: inherit;
+}
+
 #blazor-error-ui {
     color-scheme: light only;
     background: lightyellow;

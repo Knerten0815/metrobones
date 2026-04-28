@@ -2,11 +2,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Metrobones",
+            "name": "C#: Metrobones Debug",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/metrobones/Metrobones.csproj",
+        },
+        {
+            "name": "BlazorWASM: Metrobones Debug",
             "type": "blazorwasm",
             "request": "launch",
             "cwd": "${workspaceFolder}/metrobones",
-            // "preLaunchTask": "Kill Edge"
+            "url": "http://localhost:5248/"
         },
     ],
 }
