@@ -61,14 +61,21 @@
     protected override async Task OnInitializedAsync()
     {
         _isLoading = true;
+
         ClickTrackData? track = await TrackStore.GetAsync(Id);
         if (track == null)
         {
             Navigation.NavigateTo("/clicktracks");
             return;
         }
-
         _track = track;
+
+        if(_track.Sections.Count > 0)
+        {
+            _track.Sections[0].IsOpen = true;
+             UpdateOpenSections(_track.Sections[0]);
+        }
+
         _isLoading = false;
     }
 
