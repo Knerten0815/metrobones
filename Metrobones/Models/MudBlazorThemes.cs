@@ -41,7 +41,7 @@ namespace Metrobones.Models
                 TableLines = "rgba(224,224,224,1)",
                 Tertiary = "rgba(33, 37, 41, 0.5)",
                 ActionDefault = "rgba(0,0,0,0.5372549019607843)",
-                SecondaryLighten = "white",
+                SecondaryLighten = "#ffffff",
                 Divider = "rgba(224,224,224,1)",
                 DividerLight = "rgba(0,0,0,0.8)",
                 Secondary = "#fff",
@@ -67,7 +67,7 @@ namespace Metrobones.Models
                 Success = "#68d391",
                 DarkLighten = "rgb(87,87,87)",
                 SecondaryContrastText = "#415b16ff",
-                DrawerBackground = "white",
+                DrawerBackground = "#ffffff",
                 WarningContrastText = "#fff4cc",
                 WarningLighten = "#fff4cc",
                 TertiaryContrastText = "#415b16ff",
@@ -84,7 +84,7 @@ namespace Metrobones.Models
             },
             PaletteDark = new PaletteDark()
             {
-                TextSecondary = "white",
+                TextSecondary = "#ffffff",
                 Surface = "rgba(55,55,64,1)",
                 Background = "rgba(50,51,61,1)",
                 BackgroundGray = "rgba(39,39,47,1)",
@@ -1692,8 +1692,8 @@ namespace Metrobones.Models
                 PrimaryDarken = "#0a0a0a",
                 Success = "#4bbf73",
                 Dark = "#343a40",
-                SecondaryLighten = "white",
-                DrawerBackground = "white",
+                SecondaryLighten = "#ffffff",
+                DrawerBackground = "#ffffff",
                 WarningLighten = "#fcefdc",
                 WarningContrastText = "#fcefdc",
                 Info = "#1f9bcf",
@@ -1710,8 +1710,8 @@ namespace Metrobones.Models
             },
             PaletteDark = new PaletteDark()
             {
-                TextSecondary = "white",
-                SecondaryDarken = "white",
+                TextSecondary = "#ffffff",
+                SecondaryDarken = "#ffffff",
                 Surface = "rgba(55,55,64,1)",
                 Background = "rgba(50,51,61,1)",
                 BackgroundGray = "rgba(39,39,47,1)",
@@ -3311,7 +3311,7 @@ namespace Metrobones.Models
                 Primary = "#d9230f",
                 AppbarText = "#d9230f",
                 Tertiary = "#d7690fff",
-                SecondaryLighten = "white",
+                SecondaryLighten = "#ffffff",
                 SecondaryDarken = "#a9a9a9ff",
                 TertiaryDarken = "#8a4003ff",
                 SuccessDarken = "#1c3b03",
@@ -3336,7 +3336,7 @@ namespace Metrobones.Models
             },
             PaletteDark = new PaletteDark()
             {
-                TextSecondary = "white",
+                TextSecondary = "#ffffff",
                 Surface = "rgba(55,55,64,1)",
                 Background = "rgba(50,51,61,1)",
                 BackgroundGray = "rgba(39,39,47,1)",
@@ -5233,8 +5233,8 @@ namespace Metrobones.Models
             },
             PaletteDark = new PaletteDark()
             {
-                TextSecondary = "white",
-                SecondaryDarken = "white",
+                TextSecondary = "#ffffff",
+                SecondaryDarken = "#ffffff",
                 Surface = "rgba(55,55,64,1)",
                 Background = "rgba(50,51,61,1)",
                 BackgroundGray = "rgba(39,39,47,1)",

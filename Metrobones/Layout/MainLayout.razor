@@ -2,8 +2,9 @@
 @implements IDisposable
 @inject NavigationManager Navigation
 @inject ClickTrackStore TrackStore
+@inject ThemeManager ThemeManager
 
-<MudThemeProvider />
+<MudThemeProvider Theme=@ThemeManager.Theme IsDarkMode=@ThemeManager.IsDarkMode/>
 <MudPopoverProvider />
 <MudDialogProvider CloseOnEscapeKey=true />
 @* <MudSnackbarProvider /> *@
