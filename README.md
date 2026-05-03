@@ -32,7 +32,6 @@ Metrobones is designed for my drummer "Bones", who complained at rehearsal, that
 - Alternative click sounds
 - Notification controls via Media Session API
 - Native Android app
-- Color themes (global and per track)
 - Setlists
 
 
