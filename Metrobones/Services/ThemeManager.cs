@@ -5,21 +5,46 @@ namespace Metrobones.Services;
 
 public class ThemeManager
 {
-    public MudTheme Theme = MudBlazorThemes.MudBlazorDefault;
-    public bool IsDarkMode = true;
+    private MudTheme _theme = null!;
+    private bool _isDarkMode = false;
 
-    public void SetDarkMode(bool isDarkMode)
+    public event Action? OnThemeChanged;
+
+    public MudTheme Theme
     {
-        IsDarkMode = isDarkMode;
+        get
+        {
+            if (_theme == null)
+            {
+                _theme = MudBlazorThemes.Mud;
+            }
+            return _theme;
+        }
+        set
+        {
+            _theme = value;
+            OnThemeChanged?.Invoke();
+        }
     }
 
-    public void ToggleDarkMode()
+    public bool IsDarkMode
     {
-        IsDarkMode = !IsDarkMode;
+        get => _isDarkMode;
+        set
+        {
+            _isDarkMode = value;
+            OnThemeChanged?.Invoke();
+        }
     }
 
-    public void SetTheme(MudTheme theme)
+    public static Dictionary<string, MudTheme> GetThemes()
     {
-        Theme = theme;
+        Dictionary<string, MudTheme> themes = typeof(MudBlazorThemes)
+            .GetFields()
+            .ToDictionary(
+                f => f.Name,
+                f => (MudTheme)f.GetValue(null)!
+            );
+        return themes;
     }
 }

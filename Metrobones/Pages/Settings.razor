@@ -1,0 +1,21 @@
+@page "/settings"
+@inject ThemeManager ThemeManager
+
+<PageTitle>Settings</PageTitle>
+
+<MudStack>
+    <MudText Typo=@Typo.h4 Class="mb-4">Theme</MudText>
+    <MudStack Row=true>
+        <MudText>Use dark mode: </MudText>
+        <MudSwitch @bind-Value=@ThemeManager.IsDarkMode/>
+    </MudStack>
+    <MudStack Row=true>
+        <MudText>Theme</MudText>
+        <MudSelect @bind-Value=@ThemeManager.Theme T=@MudTheme>
+            @foreach(KeyValuePair<string, MudBlazor.MudTheme> theme in ThemeManager.GetThemes())
+            {
+                <MudSelectItem Value=@theme.Value>@theme.Key</MudSelectItem>
+            }
+        </MudSelect>
+    </MudStack>
+</MudStack>
