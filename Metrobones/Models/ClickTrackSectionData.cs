@@ -6,7 +6,7 @@ namespace Metrobones.Models;
 public class ClickTrackSectionData
 {
     public int ID { get; set; }
-    public bool IsOpen { get; set; } = true;
+    public bool IsOpen { get; set; } = false;
     public int Length {get; set;} = 4;
     public bool PlayForever { get; set; } = false;
     public MetronomeData MetData {get; set;} = new();

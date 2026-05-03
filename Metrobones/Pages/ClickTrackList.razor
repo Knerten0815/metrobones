@@ -10,12 +10,15 @@
 <MudList T="string">
     @foreach(ClickTrackData track in Tracks)
     {
-        <MudListItem Text=@track.Title Icon=@Icons.Material.Filled.ArrowForwardIos OnClick=@(() => OpenClickTrack(track.ID))>
-            <MudStack Row=true Justify=@Justify.SpaceBetween AlignItems=@AlignItems.Center Style="overflow: hidden;">
-                <MudText Style="overflow: hidden; text-overflow: ellipsis;">@track.Title</MudText>
-                <MudIconButton OnClick=@(() => OpenEditTrackDialogAsync(track)) Color=@Color.Primary Icon=@Icons.Material.Outlined.Edit Size=@Size.Medium aria-label="edit click track" Style="flex-shrink: 0;" />
-            </MudStack>
-        </MudListItem>
+        <MudStack Class="ma-2">
+            <MudListItem Text=@track.Title Icon=@Icons.Material.Filled.ArrowForwardIos OnClick=@(() => OpenClickTrack(track.ID)) Style="border-radius: 1rem;">
+                <MudStack Row=true Justify=@Justify.SpaceBetween AlignItems=@AlignItems.Center Style="overflow: hidden;">
+                    <MudText Style="overflow: hidden; text-overflow: ellipsis;">@track.Title</MudText>
+                    <MudIconButton OnClick=@(() => OpenEditTrackDialogAsync(track)) Color=@Color.Primary Icon=@Icons.Material.Outlined.Edit Size=@Size.Medium aria-label="edit click track" Style="flex-shrink: 0;" />
+                </MudStack>
+            </MudListItem>
+            <MudDivider/>
+        </MudStack>
     }
 </MudList>
 

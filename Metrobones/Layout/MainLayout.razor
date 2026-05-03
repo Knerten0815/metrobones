@@ -2,8 +2,9 @@
 @implements IDisposable
 @inject NavigationManager Navigation
 @inject ClickTrackStore TrackStore
+@inject ThemeManager ThemeManager
 
-<MudThemeProvider />
+<MudThemeProvider Theme=@ThemeManager.Theme IsDarkMode=@ThemeManager.IsDarkMode/>
 <MudPopoverProvider />
 <MudDialogProvider CloseOnEscapeKey=true />
 @* <MudSnackbarProvider /> *@
@@ -43,12 +44,19 @@
         ["clicktracks"] = "Click Tracks",
         ["metronome"] = "Metronome",
         ["setlists"] = "Set Lists",
+        ["settings"] = "Settings"
     };
 
     protected override async Task OnInitializedAsync()
     {
         Navigation.LocationChanged += OnLocationChangedAsync;
+        ThemeManager.OnThemeChanged += OnThemeChangedAsync;
         _pageTitle = await GetPageTitleAsync(Navigation.Uri);
+    }
+
+    private async void OnThemeChangedAsync()
+    {
+        await InvokeAsync(StateHasChanged);
     }
 
     private async void OnLocationChangedAsync(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
@@ -85,5 +93,6 @@
     public void Dispose()
     {
         Navigation.LocationChanged -= OnLocationChangedAsync;
+        ThemeManager.OnThemeChanged -= OnThemeChangedAsync;
     }
 }
