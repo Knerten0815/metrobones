@@ -46,6 +46,7 @@ public class ClickTrackStore(LocalStorage storage)
 
     private async Task<List<ClickTrackData>> EnsureLoaded()
     {
+        //TODO FIX: When _defaultTracks are loaded for the first time and tempo was not changed yet, usePrevious/Next time is greyed out!
         _tracks ??= await storage.GetAsync<List<ClickTrackData>>(Key) ?? _defaultTracks;
         return _tracks;
     }
