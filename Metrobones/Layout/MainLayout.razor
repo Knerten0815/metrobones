@@ -4,7 +4,7 @@
 @inject ClickTrackStore TrackStore
 @inject ThemeManager ThemeManager
 
-<MudThemeProvider Theme=@ThemeManager.Theme IsDarkMode=@ThemeManager.IsDarkMode/>
+<MudThemeProvider Theme=@ThemeManager.Theme IsDarkMode=@ThemeManager.UseDarkMode/>
 <MudPopoverProvider />
 <MudDialogProvider CloseOnEscapeKey=true />
 @* <MudSnackbarProvider /> *@
@@ -47,10 +47,15 @@
         ["settings"] = "Settings"
     };
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
         Navigation.LocationChanged += OnLocationChangedAsync;
         ThemeManager.OnThemeChanged += OnThemeChangedAsync;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await ThemeManager.InitializeAsync();
         _pageTitle = await GetPageTitleAsync(Navigation.Uri);
     }
 
