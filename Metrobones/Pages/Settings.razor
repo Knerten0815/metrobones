@@ -3,19 +3,36 @@
 
 <PageTitle>Settings</PageTitle>
 
+@if (_isLoading)
+{
+    <MudProgressCircular Indeterminate="true" />
+    return;
+}
+
 <MudStack>
     <MudText Typo=@Typo.h4 Class="my-4">Theme</MudText>
     <MudStack Row=true AlignItems=@AlignItems.Center Justify=@Justify.SpaceBetween>
         <MudText>Theme: </MudText>
         <MudSelect @bind-Value=@ThemeManager.Theme T=@MudTheme>
-            @foreach(KeyValuePair<string, MudBlazor.MudTheme> theme in ThemeManager.GetThemes())
+            @foreach(KeyValuePair<string, MudBlazor.MudTheme> kvp in ThemeManager.ThemeDict)
             {
-                <MudSelectItem Value=@theme.Value>@theme.Key</MudSelectItem>
+                <MudSelectItem Value=@kvp.Value>@kvp.Key</MudSelectItem>
             }
         </MudSelect>
     </MudStack>
     <MudStack Row=true AlignItems=@AlignItems.Center Justify=@Justify.SpaceBetween>
         <MudText>Dark mode: </MudText>
-        <MudSwitch @bind-Value=@ThemeManager.IsDarkMode Color=@Color.Primary/>
+        <MudSwitch @bind-Value=@ThemeManager.UseDarkMode Color=@Color.Primary/>
     </MudStack>
 </MudStack>
+
+@code
+{
+    private bool _isLoading = true;
+    protected override async Task OnInitializedAsync()
+    {
+        _isLoading = true;
+        await ThemeManager.InitializeAsync();
+        _isLoading = false;
+    }
+}
