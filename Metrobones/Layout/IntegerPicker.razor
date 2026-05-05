@@ -1,13 +1,22 @@
+<MudSlider @bind-Value=Value Min=Min Max=Max Color=@Color.Primary>
+    @if(String.IsNullOrEmpty(AdornmentText))
+    {
+        <MudNumericField Label=@Label @bind-Value=Value T=int Min=@Min Max=@Max Step=1 HideSpinButtons=@false Class="input-center-text" Disabled=@Disabled/>
+    }
+    else
+    {
+        <MudNumericField AdornmentText=@AdornmentText Adornment=Adornment.End Label=@Label @bind-Value=Value T=int Min=@Min Max=@Max Step=1 HideSpinButtons=@false Class="input-center-text" Disabled=@Disabled/>
+    }
+</MudSlider>
 
-<MudStack Row=@true Spacing=4 Justify=@Justify.Center>
-    <MudButton Variant=@Variant.Filled Color=@Color.Primary OnClick=@(() => Increment(-1)) Size=@Size.Large Disabled=@Disabled>-</MudButton>
-    <MudNumericField @bind-Value=Value T=int Min=@Min Max=@Max Step=1 HideSpinButtons=@true Class="input-center-text" Style="font-size: 3rem;" Disabled=@Disabled/>
-    <MudButton Variant=@Variant.Filled Color=@Color.Primary OnClick=@(() => Increment(1)) Size=@Size.Large Disabled=@Disabled>+</MudButton>
-</MudStack>
 
 @code {
     [Parameter]
     public int Value { get; set; } = 4;
+    [Parameter]
+    public string Label { get; set; } = "Value";
+    [Parameter]
+    public string AdornmentText { get; set; } = "";
     [Parameter]
     public EventCallback<int> ValueChanged { get; set; }
     [Parameter]

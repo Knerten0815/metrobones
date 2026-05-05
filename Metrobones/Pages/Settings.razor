@@ -15,46 +15,34 @@
 <MudStack>
     <MudText Typo=@Typo.h4 Class="my-4">Appearance</MudText>
     <MudStack Row=true AlignItems=@AlignItems.Center>
-        <MudText>Color Theme: </MudText>
-        <MudSelect @bind-Value=@ThemeManager.Theme T=@MudTheme>
+        <MudSelect Label="Color Theme" @bind-Value=@ThemeManager.Theme T=@MudTheme>
             @foreach(KeyValuePair<string, MudBlazor.MudTheme> kvp in ThemeManager.ThemeDict)
             {
                 <MudSelectItem Value=@kvp.Value>@kvp.Key</MudSelectItem>
             }
         </MudSelect>
     </MudStack>
-    <MudStack Row=true AlignItems=@AlignItems.Center Justify=@Justify.SpaceBetween>
-        <MudText>Dark mode: </MudText>
-        <MudSwitch @bind-Value=@ThemeManager.UseDarkMode Color=@Color.Primary/>
+    <MudStack Row=true AlignItems=@AlignItems.Center Justify=@Justify.Center>
+        <MudSwitch @bind-Value=@ThemeManager.UseDarkMode Label="Dark mode" LabelPlacement=@Placement.Start Color=@Color.Primary/>
     </MudStack>
 </MudStack>
 
 <MudStack>
     <MudText Typo=@Typo.h4 Class="my-4">Click</MudText>
     <MudStack Row=true AlignItems=@AlignItems.Center>
-        <MudText>Sound: </MudText>
-        <MudSelect @bind-Value=@_currentSound T=@string>
+        <MudSelect Label="Sound" @bind-Value=@_currentSound T=@string>
             @foreach(string sound in _sounds)
             {
                 <MudSelectItem Value=@sound.ToLower() >@sound</MudSelectItem>
             }
         </MudSelect>
     </MudStack>
-    <MudStack Row=true AlignItems=@AlignItems.Center>
-        <MudText>Volume: </MudText>
-        <MudNumericField @bind-Value=@_volume Min="1" Max="100" Step="1"/>
-    </MudStack>
-    <MudStack Row=true AlignItems=@AlignItems.Center>
-        <MudText>On-beat pitch: </MudText>
-        <MudNumericField @bind-Value=@_onBeatPitch Min="20" Max="20000" Step="100"/>
-    </MudStack>
-    <MudStack Row=true AlignItems=@AlignItems.Center>
-        <MudText>Off-beat pitch: </MudText>
-        <MudNumericField @bind-Value=@_offBeatPitch Min="20" Max="20000" Step="100"/>
-    </MudStack>
+    <IntegerPicker Label="Volume" Value=@_volume Min=1 Max=100/>
+    <IntegerPicker Label="On-beat pitch" AdornmentText="Hz" Value=@_onBeatPitch Min=20 Max=20000/>
+    <IntegerPicker Label="Off-beat pitch" AdornmentText="Hz" Value=@_offBeatPitch Min=20 Max=20000/>
     <MudStack Row=true AlignItems=@AlignItems.Center Justify=@Justify.Center>
         <MudText>Test click: </MudText>
-        <PlayButton OnPlay=@PlayTestSound />
+        <PlayButton OnPlay=@PlayTestClick />
     </MudStack>
 </MudStack>
 
@@ -76,7 +64,7 @@
         _isLoading = false;
     }
 
-    private async Task PlayTestSound()
+    private async Task PlayTestClick()
     {
         await Met.UpdateSettings(_testMetronome, sectionBeatCount: -1);
         await Met.Start();
