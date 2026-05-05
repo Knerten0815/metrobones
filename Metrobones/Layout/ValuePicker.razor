@@ -1,0 +1,100 @@
+<MudSlider @bind-Value=SliderValue @bind-Value:after=SliderChanged T=double Min=@(Logarithmic ? 0 : Min) Max=@(Logarithmic ? 100 : Max) Step=@(Logarithmic ? 1.0 : Step) Color=@Color.Primary>
+    @if (String.IsNullOrEmpty(AdornmentText))
+    {
+        <MudNumericField Label=@Label @bind-Value=_currentValue @bind-Value:after=OnValueChanged T=double Min=@Min Max=@Max Step=@Step Class="input-center-text" Disabled=@Disabled/>
+    }
+    else
+    {
+        <MudNumericField AdornmentText=@AdornmentText Adornment=Adornment.End Label=@Label @bind-Value=_currentValue @bind-Value:after=OnValueChanged T=double Min=@Min Max=@Max Step=@Step Class="input-center-text" Disabled=@Disabled/>
+    }
+</MudSlider>
+
+@code {
+    [Parameter]
+    public double Value { get; set; } = 4;
+    [Parameter]
+    public string Label { get; set; } = "Value";
+    [Parameter]
+    public string AdornmentText { get; set; } = "";
+    [Parameter]
+    public EventCallback<double> ValueChanged { get; set; }
+    [Parameter]
+    public int Min { get; set; } = 1;
+    [Parameter]
+    public int Max { get; set; } = 1000;
+    [Parameter]
+    public double Step { get; set; } = 1;
+    [Parameter]
+    public bool Logarithmic { get; set; } = false;
+    [Parameter]
+    public bool Disabled { get; set; } = false;
+
+    private double _currentValue;
+    private double _logValue;
+    private double SliderValue 
+    {
+        get
+        {
+            return Logarithmic ? _logValue : _currentValue;
+        }
+        set
+        {
+            if (Logarithmic)
+                _logValue = value;
+            else
+                _currentValue = value;
+        }
+    }
+
+    protected override void OnParametersSet()
+    {
+        _currentValue = Value;
+        _logValue = ValueToLogSlider(Value);
+    }
+
+    // Convert an actual value → slider position [0, 100]
+    private double ValueToLogSlider(double value)
+    {
+        if (Min <= 0 || Max <= 0 || Min >= Max)
+            return 0;
+
+        var clampedValue = Math.Clamp(value, Min, Max);
+        return (Math.Log(clampedValue) - Math.Log(Min))
+             / (Math.Log(Max) - Math.Log(Min))
+             * 100.0;
+    }
+
+    // Convert slider position [0, 100] → actual value
+    private double LogSliderToValue(double sliderPos)
+    {
+        if (Min <= 0 || Max <= 0 || Min >= Max)
+            return Min;
+
+        var t = sliderPos / 100.0;
+        return Math.Round(Math.Exp(Math.Log(Min) + t * (Math.Log(Max) - Math.Log(Min))));
+    }
+
+    private async Task OnValueChanged()
+    {
+        if (_currentValue == Value)
+            return;
+
+        // Keep the log slider in sync when the numeric field is edited directly
+        _logValue = ValueToLogSlider(_currentValue);
+        await ValueChanged.InvokeAsync(_currentValue);
+    }
+
+    private async Task LogSliderChanged()
+    {
+        _currentValue = LogSliderToValue(_logValue);
+        await ValueChanged.InvokeAsync(_currentValue);
+    }
+
+    private async Task SliderChanged()
+    {
+        if (Logarithmic)
+            await LogSliderChanged();
+        else
+            await OnValueChanged();
+    }
+}

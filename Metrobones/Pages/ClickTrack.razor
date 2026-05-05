@@ -196,7 +196,7 @@
         _currentSectionID = section.ID;
         _remainingBeats = section.Length * section.MetData.NotesPerBar;
 
-        await Met.UpdateSettings(section.MetData, _remainingBeats);
+        await Met.Update(section.MetData, _remainingBeats);
         await Met.Start();
         // update open sections, to disable drag handles
         UpdateOpenSections(section);
@@ -222,7 +222,7 @@
                 ClickTrackSectionData? nextSection = _track.Sections[nextSectionIndex];
                 _currentSectionID = nextSection.ID;
                 _remainingBeats = nextSection.Length * nextSection.MetData.NotesPerBar;
-                await Met.UpdateSettings(nextSection.MetData, _remainingBeats);
+                await Met.Update(nextSection.MetData, _remainingBeats);
                 nextSection.IsOpen = true;
                 UpdateOpenSections(nextSection);
                 await InvokeAsync(StateHasChanged);
