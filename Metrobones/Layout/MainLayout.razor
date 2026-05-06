@@ -4,11 +4,19 @@
 @inject ClickTrackStore TrackStore
 @inject ThemeManager ThemeManager
 
+
+<UpdatePWA />
+
+@if (_isLoading)
+{
+    <MudProgressCircular Indeterminate="true" />
+    return;
+}
+
 <MudThemeProvider Theme=@ThemeManager.Theme IsDarkMode=@ThemeManager.UseDarkMode/>
 <MudPopoverProvider />
 <MudDialogProvider CloseOnEscapeKey=true />
 @* <MudSnackbarProvider /> *@
-<UpdatePWA />
 
 <MudLayout>
     <MudAppBar Elevation=1 Dense=@true>
@@ -29,9 +37,10 @@
 </MudLayout>
 
 @code {
-    bool _drawerOpen = false;
-    string _pageTitle = "Click Tracks";
-    string _currentLogoSvgText = CustomIcons.Logo;
+    private bool _isLoading = true;
+    private bool _drawerOpen = false;
+    private string _pageTitle = "Click Tracks";
+    private string _currentLogoSvgText = CustomIcons.Logo;
     private DialogOptions _options = new DialogOptions { CloseOnEscapeKey = true };
 
     static readonly Dictionary<string, string> _pageTitles = new(StringComparer.OrdinalIgnoreCase)
@@ -53,6 +62,7 @@
     {
         await ThemeManager.InitializeAsync();
         _pageTitle = await GetPageTitleAsync(Navigation.Uri);
+        _isLoading = false;
     }
 
     private async void OnThemeChangedAsync()

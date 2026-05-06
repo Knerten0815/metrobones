@@ -72,6 +72,12 @@ public class SoundManager(LocalStorage storage, ILogger<SoundManager> logger)
         SoundData? settings = await storage.GetAsync<SoundData>(SoundSettingsKey);
         if (settings != null)
             _defaults = settings;
+        else
+        {
+            logger.LogWarning("Failed to load sound settings. Using defaults.");
+            _defaults = new SoundData();
+            await Persist();
+        }
     }
 
     public SoundData GetDefaultsSnapshot()

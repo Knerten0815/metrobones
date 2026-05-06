@@ -60,7 +60,7 @@ public class ThemeManager(LocalStorage storage, ILogger<ThemeManager> logger)
         if(ThemeDict.TryGetValue(themeName, out MudTheme? theme) == false)
         {
             Theme = MudBlazorThemes.Mud;
-            logger.LogError("Failed to load theme {ThemeName}. Using default Mud theme.", themeName);
+            logger.LogWarning("Failed to load theme '{ThemeName}'. Using default Mud theme.", themeName);
         }
         else
         {
