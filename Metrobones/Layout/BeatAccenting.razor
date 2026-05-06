@@ -32,17 +32,25 @@
     protected override void OnInitialized()
     {
         Met.BeatCallback += OnBeat;
+        Met.StopCallback += ResetCurrentBeat;
     }
     
     public override async ValueTask DisposeAsync()
     {
         Met.BeatCallback -= OnBeat;
+        Met.StopCallback -= ResetCurrentBeat;
         await base.DisposeAsync();
     }
 
     private void OnBeat(int beatNumber)
     {
         _currentBeat = beatNumber;
+        StateHasChanged();
+    }
+
+    private void ResetCurrentBeat()
+    {
+        _currentBeat = 0;
         StateHasChanged();
     }
 
