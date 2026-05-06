@@ -42,6 +42,10 @@
     color: var(--mud-palette-primary);
 }
 
+.icon-chip-centered .mud-chip-icon {
+    margin-right: -0.25rem !important;
+}
+
 .dragging-track-item .mud-icon-root,
 .dragging-track-item .mud-icon-button,
 .dragging-track-item .mud-text,

@@ -1,6 +1,6 @@
 @inherits Layout.MetronomePageBase
 
-<MudStack Class=@(Section.IsOpen ? "open-section pa-2" : "border-b border-solid mud-border-lines-default pa-2 ma-2")>
+<MudStack Class=@(Section.IsOpen ? "open-section pa-2 mud-elevation-2" : "border-b border-solid mud-border-lines-default pa-2 ma-2")>
     <MudStack AlignItems=@AlignItems.Center Row=true>
         <MudDragHandle T=@ClickTrackSectionData>
             <MudIcon Icon=@Icons.Material.Filled.DragHandle aria-label="drag" Style=@(Met.IsRunning ? "color: var(--mud-palette-action-disabled);" : null) />
