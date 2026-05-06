@@ -23,10 +23,15 @@
     pointer-events: none;
 }
 
-/* .mud-collapse-container.invisible {
-    display: none;
-} */
+.beat-animation .mud-icon-size-large {
+    animation: beatAnimation 0.25s ease-in-out;
+}
 
+@keyframes beatAnimation {
+    0%   { transform: scale(1); }
+    25%  { transform: scale(1.33); }
+    100% { transform: scale(1); }
+}
 
 .mud-list-item-clickable:hover {
     background-color: var(--mud-palette-primary-background) !important;

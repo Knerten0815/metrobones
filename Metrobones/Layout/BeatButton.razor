@@ -1,7 +1,6 @@
 @inject Metronome Metronome
 
-@* TODO: Add some bouncy css animation on beat *@
-<MudIconButton Icon=@GetIcon() Color=@(IsCurrentBeat? Color.Secondary: Color.Primary) Size=@Size.Large
+<MudIconButton Icon=@GetIcon() Color=@(IsCurrentBeat ? Color.Secondary: Color.Primary) Size=@Size.Large Class=@(IsCurrentBeat ? "beat-animation" : "")
                aria-label="cycle beat accent" OnClick=@CycleBeatAccent/>
 
 @code {
