@@ -3,13 +3,11 @@
 <MudStack Row=@true Spacing=2 Justify=@Justify.SpaceEvenly>
     @if (Met.IsRunning)
     {
-        <MudIconButton OnClick=@Met.Stop Color=@Color.Secondary Icon="@Icons.Material.Outlined.StopCircle" Size=@Size.Large
-                        aria-label="Stop" />
+        <MudIconButton OnClick=@Met.Stop Color=@Color.Secondary Icon=@Icons.Material.Filled.Stop Size=@Size.Large Variant=@Variant.Filled Class="rounded-xl mud-elevation-3"aria-label="Stop" />
     }
     else
     {
-        <MudIconButton OnClick=@OnPlay Color=@Color.Primary Icon="@Icons.Material.Filled.PlayCircleOutline" Size=@Size.Large
-                        aria-label="Start" />
+        <MudIconButton OnClick=@OnPlay Color=@Color.Primary Icon=@Icons.Material.Filled.PlayArrow Size=@Size.Large Variant=@Variant.Filled Class="rounded-xl mud-elevation-2" aria-label="Start" />
     }
 </MudStack>
 

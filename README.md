@@ -16,7 +16,7 @@ Metrobones is designed for my drummer "Bones", who complained at rehearsal, that
 
 ## Features
 
-- **Create Click Tracks** with different tempi and time signatures throughout the track. Start the click at any section. 
+- **Create Click Tracks** with different tempi, time signatures and click sounds throughout the track. Start your click at any section. 
 - **Time signature support** allows selecting beats-per-bar (1–32) and note value (1, 2, 4, 8, 16)
 - **Custom Beat Accenting** - mute some beats for practice or accent additional beats in odd time signatures
 - **Subdivisions:** divide bars into any number of beats
@@ -29,10 +29,8 @@ Metrobones is designed for my drummer "Bones", who complained at rehearsal, that
 ### Planned
 
 - Export and import clicktracks as MIDI
-- Alternative click sounds
 - Notification controls via Media Session API
 - Native Android app
-- Color themes (global and per track)
 - Setlists
 
 

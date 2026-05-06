@@ -1,17 +1,18 @@
 ﻿@page "/metronome"
 
 @inherits Layout.MetronomePageBase
+@inject SoundManager SoundSettings
 
 <PageTitle>Metronome</PageTitle>
 
 <MudStack Spacing=4>
-    <TempoPicker @bind-Tempo=Met.Data.TempoData.Tempo @bind-Tempo:after=Met.UpdateSettings />
+    <TempoPicker @bind-Tempo=Met.Data.TempoData.Tempo @bind-Tempo:after=Met.Update />
 
     <TimeSignaturePicker @bind-BeatsPerBar=Met.Data.NotesPerBar @bind-BeatsPerBar:after=Met.UpdateNotesPerBar
-                         @bind-NoteValue=Met.Data.NoteValue @bind-NoteValue:after=Met.UpdateSettings 
+                         @bind-NoteValue=Met.Data.NoteValue @bind-NoteValue:after=Met.Update 
                          @bind-Subdivisions=Met.Data.Subdivisions @bind-Subdivisions:after=Met.UpdateNotesPerBar/>
 
-    <BeatAccenting @bind-BeatAccents=Met.Data.BeatAccents @bind-BeatAccents:after=Met.UpdateSettings
+    <BeatAccenting @bind-BeatAccents=Met.Data.BeatAccents @bind-BeatAccents:after=Met.Update
                    NotesPerBar=Met.Data.NotesPerBar Label="Edit Accenting" DisableWhenMetronomeRunning=@false/>
 
     <PlayButton OnPlay=Play/>
@@ -20,7 +21,10 @@
 @code{
     private async Task Play()
     {
-        await Met.UpdateSettings();
+        await SoundSettings.InitializeAsync();
+        SoundData sound = SoundSettings.GetDefaultsSnapshot();
+        await Met.UpdateSound(sound.Volume * 0.01d, sound.Waveform, sound.OnBeatPitch, sound.OffBeatPitch);
+        await Met.Update();
         await Met.Start();
     }
 }

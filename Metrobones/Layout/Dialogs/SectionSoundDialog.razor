@@ -1,0 +1,65 @@
+@using Metrobones.Models
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing=2>
+            <MudSwitch @bind-Value=UseCustom Label="Use custom section sound" Color=@Color.Primary />
+
+            @if (UseCustom && Sound != null)
+            {
+                <MudSelect Label="Sound" @bind-Value=Sound.Waveform T=@string>
+                    @foreach (string sound in Sounds)
+                    {
+                        <MudSelectItem Value=@sound.ToLower()>@sound</MudSelectItem>
+                    }
+                </MudSelect>
+                <ValuePicker Label="Volume" AdornmentText="%" @bind-Value=Sound.Volume Min=0 Max=1000 Step=1 />
+                <ValuePicker Label="Accent frequency" AdornmentText="Hz" @bind-Value=Sound.OnBeatPitch Min=20 Max=20000 Logarithmic=true />
+                <ValuePicker Label="Beat frequency" AdornmentText="Hz" @bind-Value=Sound.OffBeatPitch Min=20 Max=20000 Logarithmic=true />
+            }
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick=@Cancel>Cancel</MudButton>
+        <MudButton Color=@Color.Primary OnClick=@Submit>OK</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter, EditorRequired]
+    private IMudDialogInstance MudDialog { get; set; } = null!;
+
+    [Parameter]
+    public SoundData? Sound { get; set; }
+
+    [Parameter]
+    public SoundData Defaults { get; set; } = new();
+
+    private static readonly string[] Sounds = { "Sine", "Square", "Sawtooth", "Triangle" };
+
+    private bool UseCustom { get; set; }
+
+    protected override void OnInitialized()
+    {
+        UseCustom = Sound != null;
+        if (UseCustom == false)
+            Sound = new SoundData(Defaults);
+    }
+
+    private void Submit()
+    {
+        MudDialog.Close(DialogResult.Ok(new Result
+        {
+            UseCustom = UseCustom,
+            Sound = UseCustom ? Sound : null,
+        }));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    public class Result
+    {
+        public bool UseCustom { get; set; }
+        public SoundData? Sound { get; set; }
+    }
+}

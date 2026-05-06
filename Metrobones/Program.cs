@@ -15,5 +15,7 @@ builder.Services.AddMudServices();
 builder.Services.AddScoped<Metronome>();
 builder.Services.AddScoped<LocalStorage>();
 builder.Services.AddScoped<ClickTrackStore>();
+builder.Services.AddScoped<ThemeManager>();
+builder.Services.AddScoped<SoundManager>();
 
 await builder.Build().RunAsync();

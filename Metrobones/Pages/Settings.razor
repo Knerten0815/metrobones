@@ -1,0 +1,86 @@
+@page "/settings"
+@inject Services.ThemeManager ThemeManager
+@inject Services.SoundManager SoundSettings
+@inherits MetronomePageBase
+
+@using Metrobones.Layout
+
+<PageTitle>Settings</PageTitle>
+
+@if (_isLoading)
+{
+    <MudProgressCircular Indeterminate="true" />
+    return;
+}
+
+<MudStack>
+    <MudText Typo=@Typo.h4 Class="my-4">Appearance</MudText>
+    <MudStack Row=true AlignItems=@AlignItems.Center>
+        <MudSelect Label="Color Theme" @bind-Value=@ThemeManager.Theme T=@MudTheme>
+            @foreach(KeyValuePair<string, MudBlazor.MudTheme> kvp in ThemeManager.ThemeDict)
+            {
+                <MudSelectItem Value=@kvp.Value>@kvp.Key</MudSelectItem>
+            }
+        </MudSelect>
+    </MudStack>
+    <MudStack Row=true AlignItems=@AlignItems.Center Justify=@Justify.Center>
+        <MudSwitch @bind-Value=@ThemeManager.UseDarkMode Label="Dark mode" LabelPlacement=@Placement.Start Color=@Color.Primary/>
+    </MudStack>
+</MudStack>
+
+<MudStack>
+    <MudText Typo=@Typo.h4 Class="my-4">Click</MudText>
+    <MudStack Row=true AlignItems=@AlignItems.Center>
+        <MudSelect Label="Sound" @bind-Value=@SoundSettings.Waveform @bind-Value:after=UpdateSound T=@string>
+            @foreach(string sound in _sounds)
+            {
+                <MudSelectItem Value=@sound.ToLower() >@sound</MudSelectItem>
+            }
+        </MudSelect>
+    </MudStack>
+    <ValuePicker Label="Volume" AdornmentText="%" @bind-Value=SoundSettings.Volume @bind-Value:after=UpdateSound Min=0 Max=1000 Step=1/>
+    <ValuePicker Label="Accent frequency" AdornmentText="Hz" @bind-Value=SoundSettings.OnBeatPitch @bind-Value:after=UpdateSound Min=20 Max=20000 Logarithmic=true/>
+    <ValuePicker Label="Beat frequency" AdornmentText="Hz" @bind-Value=SoundSettings.OffBeatPitch @bind-Value:after=UpdateSound Min=20 Max=20000 Logarithmic=true/>
+    <MudStack Row=true AlignItems=@AlignItems.Center Justify=@Justify.Center>
+        <MudText>Test click: </MudText>
+        <PlayButton OnPlay=@PlayTestClick />
+    </MudStack>
+    <MudButton OnClick=@ResetSound Variant=@Variant.Filled Color=@Color.Primary>Reset click sound</MudButton>
+</MudStack>
+
+@code
+{
+    private bool _isLoading = true;
+    private string[] _sounds = {"Sine", "Square", "Sawtooth", "Triangle"};
+    private MetronomeData _testMetronome = new MetronomeData();
+
+    protected override async Task OnInitializedAsync()
+    {
+        _isLoading = true;
+        await ThemeManager.InitializeAsync();
+        await SoundSettings.InitializeAsync();
+        await base.OnInitializedAsync();
+        _isLoading = false;
+    }
+
+    private async Task PlayTestClick()
+    {
+        await Met.Update(_testMetronome, sectionBeatCount: -1);
+        await Met.Start();
+    }
+
+    private async Task UpdateSound()
+    {
+        await Met.UpdateSound(
+            SoundSettings.Volume * 0.01d,
+            SoundSettings.Waveform,
+            SoundSettings.OnBeatPitch,
+            SoundSettings.OffBeatPitch);
+    }
+
+    private async Task ResetSound()
+    {
+        await SoundSettings.ResetToDefaults();
+        await UpdateSound();
+    }
+}

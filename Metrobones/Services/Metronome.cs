@@ -48,7 +48,7 @@ public class Metronome : IAsyncDisposable
     /// Used by Metronome. Updates the metronome on the next beat, without stopping or resetting the beat.
     /// </summary>
     /// <returns></returns>
-    public async Task UpdateSettings()
+    public async Task Update()
     {
         await _js.InvokeVoidAsync("metronome.setBpm", Data.TempoData.Tempo, Data.NotesPerBar, Data.NoteValue, Data.BeatAccents, Data.Subdivisions);
     }
@@ -56,7 +56,7 @@ public class Metronome : IAsyncDisposable
     /// <summary>
     /// Used by clicktracks. Updates the running metronome on the next beat  without stopping. Sets the next beat as the 1.
     /// </summary>
-    public async Task UpdateSettings(MetronomeData data, int sectionBeatCount)
+    public async Task Update(MetronomeData data, int sectionBeatCount)
     {
         if(data == null)
             return;
@@ -86,7 +86,12 @@ public class Metronome : IAsyncDisposable
     {
         Data.BeatAccents = new int[Data.Subdivisions > 0 ? Data.Subdivisions : Data.NotesPerBar];
         Data.BeatAccents[0] = 1;
-        await UpdateSettings();
+        await Update();
+    }
+
+    public async Task UpdateSound(double volume, string waveform, double onBeatPitch, double offBeatPitch)
+    {
+        await _js.InvokeVoidAsync("metronome.setClickSound", volume, waveform, onBeatPitch, offBeatPitch);
     }
 
     [JSInvokable]

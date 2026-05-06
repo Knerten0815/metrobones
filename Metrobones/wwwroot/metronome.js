@@ -15,10 +15,14 @@ let endTempo = -1;
 let beatCount = -1;
 let agogicCurrentBeat = 0;
 
+// sound
+let volume = 1.0;
+let onbeat_freq = 1500;
+let offbeat_freq = 1000;
+let waveform = "sine";
 
 const LOOKAHEAD_SEC = 0.1;
 const SCHEDULER_INTERVAL_MS = 25;
-const CLICK_FREQUENCY_HZ = 1000;
 const CLICK_DURATION_SEC = 0.025;
 
 
@@ -93,16 +97,16 @@ function createClickOscillator(isAccented, time) {
     osc.connect(gain);
     gain.connect(audioCtx.destination);
 
-    osc.type = 'sine';
+    osc.type = waveform;
     if (isAccented) {
-        osc.frequency.value = CLICK_FREQUENCY_HZ * 1.5;
+        osc.frequency.value = onbeat_freq;
     } else {
-        osc.frequency.value = CLICK_FREQUENCY_HZ;
+        osc.frequency.value = offbeat_freq;
     }
 
     // Envelope: full volume at beat time, fade out to avoid a pop on cutoff.
     // Exponential ramp cannot target exactly 0.
-    gain.gain.setValueAtTime(1, time);
+    gain.gain.setValueAtTime(volume, time);
     gain.gain.exponentialRampToValueAtTime(0.0001, time + CLICK_DURATION_SEC);
 
     osc.start(time);
@@ -167,6 +171,14 @@ function setBpm(newTempo, bpb, noteVal, newBeatAccents, newSubdivisions=-1, rese
 }
 
 
+function setClickSound(vol, sound, onbeatFrequency, offbeatFrequency) {
+    volume = vol;
+    waveform = sound;
+    onbeat_freq = onbeatFrequency;
+    offbeat_freq = offbeatFrequency;
+}
+
+
 function getIsRunning() {
     return isRunning;
 }
@@ -185,4 +197,4 @@ function setDotNetReference(ref) {
 
 
 // Expose public API to Blazor's string-based JS interop
-globalThis.metronome = { start, stop, setBpm, getIsRunning, setDotNetReference };
+globalThis.metronome = { start, stop, setBpm, getIsRunning, setDotNetReference, setClickSound };
