@@ -48,6 +48,8 @@
     [Parameter]
     public bool HasAgogicOption { get; set; } = false;
 
+    protected override void OnInitialized() => UpdateAgogics();
+
     private void UpdateAgogics() => Data.UpdateAgogics();
 
     private void Submit() => MudDialog.Close(DialogResult.Ok(result: Data));
