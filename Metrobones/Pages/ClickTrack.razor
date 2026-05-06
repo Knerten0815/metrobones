@@ -3,6 +3,7 @@
 @inherits Layout.MetronomePageBase
 @inject ClickTrackStore TrackStore
 @inject NavigationManager Navigation
+@inject SoundManager SoundSettings
 
 @if (_isLoading)
 {
@@ -196,6 +197,7 @@
         _currentSectionID = section.ID;
         _remainingBeats = section.Length * section.MetData.NotesPerBar;
 
+        await ApplySoundForSection(section);
         await Met.Update(section.MetData, _remainingBeats);
         await Met.Start();
         // update open sections, to disable drag handles
@@ -222,6 +224,7 @@
                 ClickTrackSectionData? nextSection = _track.Sections[nextSectionIndex];
                 _currentSectionID = nextSection.ID;
                 _remainingBeats = nextSection.Length * nextSection.MetData.NotesPerBar;
+                await ApplySoundForSection(nextSection);
                 await Met.Update(nextSection.MetData, _remainingBeats);
                 nextSection.IsOpen = true;
                 UpdateOpenSections(nextSection);
@@ -234,5 +237,17 @@
                 await Met.Stop();
             }
         }
+    }
+
+    private async Task ApplySoundForSection(ClickTrackSectionData section)
+    {
+        await SoundSettings.InitializeAsync();
+        SoundData soundData = section.SoundOverride ?? SoundSettings.GetDefaultsSnapshot();
+
+        await Met.UpdateSound(
+            soundData.Volume * 0.01d,
+            soundData.Waveform,
+            soundData.OnBeatPitch,
+            soundData.OffBeatPitch);
     }
 }

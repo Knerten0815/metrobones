@@ -1,6 +1,7 @@
 ﻿@page "/metronome"
 
 @inherits Layout.MetronomePageBase
+@inject SoundManager SoundSettings
 
 <PageTitle>Metronome</PageTitle>
 
@@ -20,6 +21,9 @@
 @code{
     private async Task Play()
     {
+        await SoundSettings.InitializeAsync();
+        SoundData sound = SoundSettings.GetDefaultsSnapshot();
+        await Met.UpdateSound(sound.Volume * 0.01d, sound.Waveform, sound.OnBeatPitch, sound.OffBeatPitch);
         await Met.Update();
         await Met.Start();
     }

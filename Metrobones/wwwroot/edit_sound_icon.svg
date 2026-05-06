@@ -1,0 +1,15 @@
+<svg height="24px" viewBox="0 0 24 24" width="24px" fill="#e3e3e3" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <mask id="cut">
+      <rect width="24" height="24" fill="white"/>
+      <rect x="12.68" y="16.15" width="10.32" height="7.85" fill="black"/>
+      <rect x="17.26" y="11.06" width="6.74" height="12.94" fill="black"/>
+    </mask>
+  </defs>
+
+  <!-- Volume icon with bottom-right corner masked out -->
+  <path mask="url(#cut)" d="M3,9v6h4l5,5V4L7,9Z M16.5,12c0-1.77-1.02-3.29-2.5-4.03v8.05C15.48,15.29,16.5,13.77,16.5,12Z M14,3.23v2.06c2.89,0.86,5,3.54,5,6.71c0,3.17-2.11,5.85-5,6.71v2.06C18.01,19.86,21,16.28,21,12C21,7.72,18.01,4.14,14,3.23Z"/>
+
+  <!-- Edit icon in bottom-right corner -->
+  <path d="M12.68,18.82v1.85h1.85l5.47-5.47l-1.85-1.85Z M21.43,13.77c0.19-0.19,0.19-0.5,0-0.7l-1.16-1.16c-0.19-0.19-0.5-0.19-0.7,0l-0.9,0.9l1.85,1.85Z"/>
+</svg>

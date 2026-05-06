@@ -1,12 +1,14 @@
 @inherits Layout.MetronomePageBase
 @using Metrobones.Layout.Dialogs
+
 @inject IDialogService DialogService
 @inject IScrollManager ScrollManager
+@inject SoundManager SoundSettings
 
 <MudStack Spacing=4>
     <MudStack Justify=@Justify.SpaceEvenly AlignItems=@AlignItems.Center Row=true>
-        <MudChip OnClick=OpenLengthDialogAsync Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string Disabled=@(Met.IsRunning)>@(Section.PlayForever ? "∞" : Section.Length) bars</MudChip>
-        <MudChip OnClick=OpenTimeSignatureDialogAsync Icon=@Icons.Material.Filled.MusicNote Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string Disabled=@(Met.IsRunning)>
+        <MudChip OnClick=OpenLengthDialogAsync Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string Disabled=@(Met.IsRunning) Class="mud-elevation-1">@(Section.PlayForever ? "∞" : Section.Length) bars</MudChip>
+        <MudChip OnClick=OpenTimeSignatureDialogAsync Icon=@Icons.Material.Filled.MusicNote Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string Disabled=@(Met.IsRunning) Class="mud-elevation-1">
             @if(Section.MetData.Subdivisions > 1)
             {
                 <span>@(Section.MetData.NotesPerBar)/@(Section.MetData.NoteValue) *@(Section.MetData.Subdivisions)</span>
@@ -16,7 +18,7 @@
                 <span>@(Section.MetData.NotesPerBar)/@(Section.MetData.NoteValue)</span>
             }
         </MudChip>
-        <MudChip OnClick=OpenTempoDialogAsync Icon=@Icons.Material.Filled.Speed Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string Disabled=@(Met.IsRunning)>
+        <MudChip OnClick=OpenTempoDialogAsync Icon=@Icons.Material.Filled.Speed Variant=@Variant.Text Color=@Color.Primary Size=@Size.Medium T=string Disabled=@(Met.IsRunning) Class="mud-elevation-1">
             @if(Section.MetData.TempoData.IsAgogic)
             {
                 <span>@(Section.MetData.TempoData.StartTempo) -> @(Section.MetData.TempoData.EndTempo)</span>
@@ -25,15 +27,15 @@
             {
                 <span>@(Section.MetData.TempoData.Tempo)</span>
             }
-            </MudChip>
+        </MudChip>
+        <MudChip OnClick=OpenSoundDialogAsync Icon=@CustomIcons.EditSound() Variant=@Variant.Text Color=@(Section.SoundOverride == null ? Color.Primary : Color.Secondary) Size=@Size.Medium T=string Disabled=@(Met.IsRunning) Class="mud-elevation-1 icon-chip-centered" />
     </MudStack>
 
     <BeatAccenting @bind-BeatAccents=Section.MetData.BeatAccents
                     DisableWhenMetronomeRunning=@true
                     NotesPerBar=Section.MetData.NotesPerBar/>
-
-    <MudStack Justify=@Justify.Center AlignItems=@AlignItems.Center Row=true Style="position:relative">
-        <MudChip Variant=@Variant.Outlined Color=@(CountInActive ? Color.Secondary : Color.Primary) Size=@Size.Medium T=string Style="position: absolute; left: 0; text-align: center">
+    <MudStack Justify=@Justify.SpaceBetween AlignItems=@AlignItems.Center Row=true>
+        <MudChip Variant=@Variant.Outlined Color=@(CountInActive ? Color.Secondary : Color.Primary) Size=@Size.Medium T=string Style="text-align: center">
             @if(CountInActive)
             {
                 <span>Count-in</span>
@@ -45,7 +47,7 @@
         </MudChip>
         <PlayButton OnPlay=OnPlaySection/>
         <MudIconButton OnClick=OpenDeleteSectionDialogAsync Color=@Color.Error Icon=@Icons.Material.Outlined.Delete Size=@Size.Medium
-                        Disabled=@Met.IsRunning Style="position: absolute; right: 0" aria-label="delete section" />
+                        Disabled=@Met.IsRunning aria-label="delete section" />
     </MudStack>
 </MudStack>
 
@@ -64,9 +66,7 @@
 
     [Parameter]
     public EventCallback<int> DeleteSection{ get; set; }
-
     private int _currentBar = 0;
-
     protected override bool ShouldRender()
     {
         return Section.IsOpen;
@@ -76,6 +76,12 @@
     {
         Met.OneCallback += IncrementCurrentBar;
         Met.StopCallback += ResetCurrentBar;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await SoundSettings.InitializeAsync();
+        await base.OnInitializedAsync();
     }
 
     public override async ValueTask DisposeAsync()
@@ -190,6 +196,25 @@
         if (result?.Canceled == false)
         {
             await DeleteSection.InvokeAsync(Section.ID);
+        }
+    }
+
+    private async Task OpenSoundDialogAsync()
+    {
+        DialogParameters<SectionSoundDialog>? parameters = new DialogParameters<SectionSoundDialog>{
+            { x => x.Sound, Section.SoundOverride == null ? null : new SoundData(Section.SoundOverride) },
+            { x => x.Defaults, SoundSettings.GetDefaultsSnapshot() }
+        };
+
+        IDialogReference? dialog = await DialogService.ShowAsync<SectionSoundDialog>(title: "Edit Section Sound", parameters);
+        DialogResult? result = await dialog.Result;
+
+        if (result?.Canceled == false && result.Data is SectionSoundDialog.Result soundResult)
+        {
+            Section.SoundOverride = soundResult.UseCustom && soundResult.Sound != null
+                ? new SoundData(soundResult.Sound)
+                : null;
+            await SectionChanged.InvokeAsync(Section);
         }
     }
 }

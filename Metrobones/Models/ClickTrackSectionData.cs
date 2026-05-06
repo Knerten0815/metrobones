@@ -10,6 +10,7 @@ public class ClickTrackSectionData
     public int Length {get; set;} = 4;
     public bool PlayForever { get; set; } = false;
     public MetronomeData MetData {get; set;} = new();
+    public SoundData? SoundOverride { get; set; }
     public string Title {get; set;} = "Intro";
     [JsonIgnore]
     public Action<bool>? OnTrackAgogicsChanged { get; set;}         // bool: isLastSectionOfTrack
@@ -29,6 +30,7 @@ public class ClickTrackSectionData
         Title = IncrementTrailingNumber(data.Title);
         Length = data.Length;
         MetData = new MetronomeData(data.MetData);
+        SoundOverride = data.SoundOverride == null ? null : new SoundData(data.SoundOverride);
     }
 
     public static string IncrementTrailingNumber(string input)
