@@ -1,4 +1,5 @@
 @inject Metronome Metronome
+@inject ISnackbar Snackbar
 
 <MudIconButton Icon=@GetIcon() Color=@(IsCurrentBeat ? Color.Secondary: Color.Primary) Size=@Size.Large Class=@(IsCurrentBeat ? "beat-animation" : "")
                aria-label="cycle beat accent" OnClick=@CycleBeatAccent/>
@@ -32,9 +33,13 @@
 
     private void CycleBeatAccent()
     {
-        // TODO: show a snackbar, that beat accents cant be edited when the metronome is running
-        if (DisableWhenMetronomeRunning && Metronome.IsRunning) 
+        if (DisableWhenMetronomeRunning && Metronome.IsRunning)
+        {
+            Snackbar.Clear();
+            Snackbar.Configuration.PositionClass = Defaults.Classes.Position.BottomStart;
+            Snackbar.Add("Can't change beat accents during playback.");
             return;
+        }
         
         BeatAccent = (BeatAccent + 1) % 3;
         BeatAccentChanged.InvokeAsync(BeatAccent);
