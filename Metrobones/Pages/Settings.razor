@@ -37,9 +37,9 @@
             }
         </MudSelect>
     </MudStack>
-    <ValuePicker Label="Gain" @bind-Value=_volume @bind-Value:after=UpdateSound Min=0 Max=2 Step=0.1/>
-    <ValuePicker Label="On-beat pitch" AdornmentText="Hz" @bind-Value=_onBeatPitch @bind-Value:after=UpdateSound Min=20 Max=20000 Logarithmic=true/>
-    <ValuePicker Label="Off-beat pitch" AdornmentText="Hz" @bind-Value=_offBeatPitch @bind-Value:after=UpdateSound Min=20 Max=20000 Logarithmic=true/>
+    <ValuePicker Label="Volume" AdornmentText="%" @bind-Value=_volume @bind-Value:after=UpdateSound Min=0 Max=1000 Step=1/>
+    <ValuePicker Label="Accent frequency" AdornmentText="Hz" @bind-Value=_onBeatPitch @bind-Value:after=UpdateSound Min=20 Max=20000 Logarithmic=true/>
+    <ValuePicker Label="Beat frequency" AdornmentText="Hz" @bind-Value=_offBeatPitch @bind-Value:after=UpdateSound Min=20 Max=20000 Logarithmic=true/>
     <MudStack Row=true AlignItems=@AlignItems.Center Justify=@Justify.Center>
         <MudText>Test click: </MudText>
         <PlayButton OnPlay=@PlayTestClick />
@@ -52,7 +52,7 @@
     private bool _isLoading = true;
     private string[] _sounds = {"Sine", "Square", "Sawtooth", "Triangle"};
     private string _currentSound = "sine";
-    private double _volume = 1;
+    private double _volume = 100;
     private double _onBeatPitch = 1500;
     private double _offBeatPitch = 1000;
     private MetronomeData _testMetronome = new MetronomeData();
@@ -73,7 +73,7 @@
 
     private async Task UpdateSound()
     {
-        await Met.UpdateSound(_volume, _currentSound, _onBeatPitch, _offBeatPitch);
+        await Met.UpdateSound(_volume * 0.01d, _currentSound, _onBeatPitch, _offBeatPitch);
     }
 
     private async Task ResetSound()
