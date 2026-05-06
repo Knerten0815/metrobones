@@ -6,6 +6,7 @@ namespace Metrobones.Models;
 public class ClickTrackSectionData
 {
     public int ID { get; set; }
+    [JsonIgnore]
     public bool IsOpen { get; set; } = false;
     public int Length {get; set;} = 4;
     public bool PlayForever { get; set; } = false;
@@ -14,8 +15,6 @@ public class ClickTrackSectionData
     public string Title {get; set;} = "Intro";
     [JsonIgnore]
     public Action<bool>? OnTrackAgogicsChanged { get; set;}         // bool: isLastSectionOfTrack
-    [JsonIgnore]
-    public Action<int, bool>? OnTrackSectionOpened { get; set;}     // int: sectionId, bool: isOpen
 
     public ClickTrackSectionData(){}
 
@@ -44,5 +43,17 @@ public class ClickTrackSectionData
         }
 
         return input + " 2";
+    }
+
+    public void UpdateOpenSection(int openSectionID, bool isOpen)
+    {
+        if(ID == openSectionID)
+        {
+            IsOpen = isOpen;
+        }
+        else
+        {
+            IsOpen = false;
+        }
     }
 }

@@ -92,7 +92,7 @@
         
         foreach (ClickTrackSectionData section in _track.Sections)
         {
-            section.OnTrackSectionOpened?.Invoke(openedSection.ID, openedSection.IsOpen);
+            section.UpdateOpenSection(openedSection.ID, openedSection.IsOpen);
         }
     }
 
