@@ -4,22 +4,51 @@ const TICK_MS = 16;
 
 let scrollInterval = null;
 let isTouchDrag = false;
+let fixElementFlag = false;
 
 // --- Pointer (touch/mobile) ---
 
 function onPointerMove(e) {
     e.preventDefault();
     isTouchDrag = true;
+    fixDraggedElement();
     handlePosition(e.clientY);
 }
 
 function onPointerUp() {
     stopScrolling();
     stopPointerTracking();
+    releaseDraggedElement();
 }
 
 function onTouchMove(e) {
     e.preventDefault(); // blocks native scroll during drag
+}
+
+function fixDraggedElement() {
+    if(fixElementFlag) return;
+    fixElementFlag = true;
+    const dragged = document.querySelector('.dragging-track-item');
+    if (!dragged) return;
+    const rect = dragged.getBoundingClientRect();
+    dragged.style.position = 'fixed';
+    dragged.style.top = `${rect.top}px`;
+    dragged.style.left = `${rect.left}px`;
+    dragged.style.width = `${rect.width}px`;
+    dragged.style.zIndex = '1000';
+    dragged.style.transform = 'none';
+}
+
+function releaseDraggedElement() {
+    fixElementFlag = false;
+    const dragged = document.querySelector('.dragging-track-item');
+    if (!dragged) return;
+    dragged.style.position = '';
+    dragged.style.top = '';
+    dragged.style.left = '';
+    dragged.style.width = '';
+    dragged.style.zIndex = '';
+    dragged.style.transform = '';
 }
 
 function startPointerTracking() {
@@ -74,18 +103,8 @@ function startScrolling(deltaY) {
         const maxScroll = document.body.scrollHeight - window.innerHeight;
         const current = window.scrollY;
         const clamped = Math.min(Math.max(current + deltaY, 0), maxScroll) - current;
-
         if (clamped === 0) return;
-
         window.scrollBy({ top: clamped, behavior: 'instant' });
-
-        if (isTouchDrag) {
-            const dragged = document.querySelector('.dragging-track-item');
-            if (dragged) {
-                const matrix = new DOMMatrix(getComputedStyle(dragged).transform);
-                dragged.style.transform = `translate(${matrix.m41}px, ${matrix.m42 + clamped}px)`;
-            }
-        }
     }, TICK_MS);
 }
 
