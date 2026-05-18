@@ -27,7 +27,13 @@ public class Metronome : IAsyncDisposable
     public async Task Initialize()
     {
         _dotNetRef = DotNetObjectReference.Create(this);
-        await _js.InvokeVoidAsync("metronome.setDotNetReference", _dotNetRef, Data.NotesPerBar);
+        await _js.InvokeVoidAsync("metronome.initialize", _dotNetRef, Data.NotesPerBar);
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        _dotNetRef?.Dispose();
+        return ValueTask.CompletedTask;
     }
 
     public async Task Start()
@@ -107,9 +113,15 @@ public class Metronome : IAsyncDisposable
         return Task.CompletedTask;
     }
 
-    public ValueTask DisposeAsync()
-    {
-        _dotNetRef?.Dispose();
-        return ValueTask.CompletedTask;
-    }
+    [JSInvokable]
+    public async Task OnMediaSessionPlay()
+        => await Start();
+
+    [JSInvokable]
+    public async Task OnMediaSessionPause()
+        => await Stop();
+
+    [JSInvokable]
+    public async Task OnMediaSessionStop()
+        => await Stop();
 }
