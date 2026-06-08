@@ -27,7 +27,7 @@ public class Metronome : IAsyncDisposable
     public async Task Initialize()
     {
         _dotNetRef = DotNetObjectReference.Create(this);
-        await _js.InvokeVoidAsync("metronome.initialize", _dotNetRef, Data.NotesPerBar);
+        await _js.InvokeVoidAsync("metronome.initialize", _dotNetRef);
     }
 
     public ValueTask DisposeAsync()
