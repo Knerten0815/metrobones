@@ -9,8 +9,6 @@ public class Metronome : IAsyncDisposable
     private readonly IJSRuntime _js;
     private DotNetObjectReference<Metronome>? _dotNetRef;
 
-    public ClickTrackSectionData Section { get; set; } = new(-1);
-
     public MetronomeData Data { get; set; } = new();
     public bool IsRunning { get; private set; }
     public int CurrentBeat { get; private set; }
@@ -18,6 +16,7 @@ public class Metronome : IAsyncDisposable
     public event Action<int>? BeatCallback;
     public event Action? OneCallback;
     public event Action? StopCallback;
+    public event Action? MediaSessionPlayCallback;
 
     public Metronome(IJSRuntime js)
     {
@@ -27,7 +26,13 @@ public class Metronome : IAsyncDisposable
     public async Task Initialize()
     {
         _dotNetRef = DotNetObjectReference.Create(this);
-        await _js.InvokeVoidAsync("metronome.setDotNetReference", _dotNetRef, Data.NotesPerBar);
+        await _js.InvokeVoidAsync("metronome.initialize", _dotNetRef);
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        _dotNetRef?.Dispose();
+        return ValueTask.CompletedTask;
     }
 
     public async Task Start()
@@ -107,9 +112,15 @@ public class Metronome : IAsyncDisposable
         return Task.CompletedTask;
     }
 
-    public ValueTask DisposeAsync()
+    [JSInvokable]
+    public async Task OnMediaSessionPlay()
     {
-        _dotNetRef?.Dispose();
-        return ValueTask.CompletedTask;
+        MediaSessionPlayCallback?.Invoke();
+    }
+
+    [JSInvokable]
+    public async Task OnMediaSessionStop()
+    {
+        await Stop();
     }
 }

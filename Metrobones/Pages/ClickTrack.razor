@@ -45,18 +45,21 @@
     private ClickTrackData _track { get; set; } = null!; // Initialized in OnInitializedAsync
     private bool _countInActive = false;
     private int _currentSectionID = -2; // -2 when no section is active, -1 when count-in section is active
+    private int _openSectionID = -1;
     private int _remainingBeats = -1;
 
     protected override void OnInitialized()
     {
-        Met.StopCallback += ResetCountInActive;
+        Met.StopCallback += OnStop;
         Met.BeatCallback += OnBeat;
+        Met.MediaSessionPlayCallback += OnMediaSessionPlay;
     }
 
     public override async ValueTask DisposeAsync()
     {
-        Met.StopCallback -= ResetCountInActive;
+        Met.StopCallback -= OnStop;
         Met.BeatCallback -= OnBeat;
+        Met.MediaSessionPlayCallback -= OnMediaSessionPlay;
         await JS.InvokeVoidAsync("DragScroll.dispose");
         await base.DisposeAsync();
     }
@@ -76,7 +79,7 @@
         if(_track.Sections.Count > 0)
         {
             _track.Sections[0].IsOpen = true;
-             UpdateOpenSections(_track.Sections[0]);
+            UpdateOpenSections(_track.Sections[0]);
         }
 
         _isLoading = false;
@@ -87,9 +90,13 @@
         await JS.InvokeVoidAsync("DragScroll.startPointerTracking");
     }
 
-    private void ResetCountInActive()
+    private void OnStop()
     {
         _countInActive = false;
+        if(_currentSectionID >= 0)
+        {
+            _remainingBeats = _track.Sections[_currentSectionID].Length * _track.Sections[_currentSectionID].MetData.NotesPerBar;
+        }
     }
 
     private void UpdateOpenSections(ClickTrackSectionData? openedSection)
@@ -100,6 +107,15 @@
         foreach (ClickTrackSectionData section in _track.Sections)
         {
             section.UpdateOpenSection(openedSection.ID, openedSection.IsOpen);
+        }
+
+        if(openedSection.IsOpen)
+        {
+            _openSectionID = openedSection.ID;
+        }
+        else
+        {
+            _openSectionID = -1;
         }
     }
 
@@ -256,5 +272,13 @@
             soundData.Waveform,
             soundData.OnBeatPitch,
             soundData.OffBeatPitch);
+    }
+
+    private async void OnMediaSessionPlay()
+    {
+        if(_openSectionID < 0)
+            return;
+
+        await StartClickTrack(_track.Sections[_openSectionID]);
     }
 }

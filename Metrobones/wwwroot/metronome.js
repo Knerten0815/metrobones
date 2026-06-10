@@ -1,4 +1,5 @@
 let dotNetReference = null;
+let mediaSessionAudio = null;
 let audioCtx = null;
 let schedulerHandle = null;
 let nextBeatTime = 0;
@@ -140,6 +141,7 @@ function start() {
     nextBeatTime = audioCtx.currentTime + 0.15;
 
     schedulerHandle = setInterval(scheduler, SCHEDULER_INTERVAL_MS);
+    startMediaSession();
     isRunning = true;
 }
 
@@ -148,8 +150,9 @@ function stop() {
     if (!isRunning) return;
     clearInterval(schedulerHandle);
     schedulerHandle = null;
-    isRunning = false;
     currentBeat = 0;
+    stopMediaSession();
+    isRunning = false;
 }
 
 
@@ -191,10 +194,65 @@ function resumeAudio() {
 }
 
 
-function setDotNetReference(ref) {
+function initialize(ref) {
     dotNetReference = ref;
+
+    mediaSessionAudio = new Audio('silent.mp3');
+    mediaSessionAudio.loop = true;
+
+    if (!('mediaSession' in navigator)) return;
+
+    try {
+        navigator.mediaSession.setPositionState({
+            duration: Infinity,
+            playbackRate: 1,
+            position: 0
+        });
+    } catch (e) {
+        // setPositionState not supported or duration must be finite on Firefox
+        // safe to ignore since Firefox won't show progress bar anyway.
+    }
+
+    navigator.mediaSession.setActionHandler('play', () => {
+        dotNetReference.invokeMethodAsync('OnMediaSessionPlay');
+    });
+    navigator.mediaSession.setActionHandler('pause', () => {
+        dotNetReference.invokeMethodAsync('OnMediaSessionStop');
+    });
+    navigator.mediaSession.setActionHandler('stop', () => {
+        dotNetReference.invokeMethodAsync('OnMediaSessionStop');
+    });
+    navigator.mediaSession.setActionHandler('previoustrack', null);
+    navigator.mediaSession.setActionHandler('nexttrack', null);
+}
+
+
+function startMediaSession() {
+    mediaSessionAudio?.play();
+
+    if (!('mediaSession' in navigator)) return;
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+        title: `Playing Click`,
+        artist: 'Metrobones',
+        artwork: [
+            { src: 'favicon.png', sizes: '32x32', type: 'image/png' },
+            { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
+            { src: 'icon-512.png', sizes: '512x512', type: 'image/png' }
+        ]
+    });
+
+    navigator.mediaSession.playbackState = 'playing';
+}
+
+
+function stopMediaSession() {
+    mediaSessionAudio?.pause();
+
+    if (!('mediaSession' in navigator)) return;
+    navigator.mediaSession.playbackState = 'none';
 }
 
 
 // Expose public API to Blazor's string-based JS interop
-globalThis.metronome = { start, stop, setBpm, getIsRunning, setDotNetReference, setClickSound };
+globalThis.metronome = { start, stop, setBpm, getIsRunning, initialize, setClickSound};
