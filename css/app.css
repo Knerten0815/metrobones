@@ -1,3 +1,64 @@
+:root {
+    --mud-palette-primary-background: color-mix(in srgb, var(--mud-palette-primary) 6%, transparent)
+}
+
+.tiny-icon-btn {
+    min-width: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0;
+    margin: 0;
+}
+
+.tiny-icon-btn .mud-icon-root {
+    font-size: 0.75rem ;
+    padding: 0.25rem 0;
+}
+
+.input-center-text input {
+    text-align: center;
+}
+
+.no-interact {
+    pointer-events: none;
+}
+
+.beat-animation .mud-icon-size-large {
+    animation: beatAnimation 0.25s ease-in-out;
+}
+
+@keyframes beatAnimation {
+    0%   { transform: scale(1); }
+    25%  { transform: scale(1.33); }
+    100% { transform: scale(1); }
+}
+
+.mud-list-item-clickable:hover {
+    background-color: var(--mud-palette-primary-background) !important;
+}
+
+.open-section{
+    background-color: var(--mud-palette-primary-background);
+    border-radius: 1rem;
+}
+
+.dragging-track-item {
+    background-color: var(--mud-palette-primary-background);
+    color: var(--mud-palette-primary);
+}
+
+.icon-chip-centered .mud-chip-icon {
+    margin-right: -0.25rem !important;
+}
+
+.dragging-track-item .mud-icon-root,
+.dragging-track-item .mud-icon-button,
+.dragging-track-item .mud-text,
+.dragging-track-item .mud-chip,
+.dragging-track-item .mud-input-control {
+    color: inherit;
+}
+
 #blazor-error-ui {
     color-scheme: light only;
     background: lightyellow;
