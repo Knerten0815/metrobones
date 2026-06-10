@@ -19,6 +19,22 @@
 </MudStack>
 
 @code{
+    protected override void OnInitialized()
+    {
+        Met.MediaSessionPlayCallback += OnMediaSessionPlay;
+    }
+
+    public override async ValueTask DisposeAsync()
+    {
+        Met.MediaSessionPlayCallback -= OnMediaSessionPlay;
+        await base.DisposeAsync();
+    }
+
+    private async void OnMediaSessionPlay()
+    {
+        await Play();
+    }
+
     private async Task Play()
     {
         await SoundSettings.InitializeAsync();
