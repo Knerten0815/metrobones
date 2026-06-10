@@ -7,7 +7,7 @@
     <MudSlider Value=@Tempo ValueChanged=@OnTempoChanged T=int Min=1 Max=420 />
     <MudStack Row=@true Spacing=2 Justify=@Justify.Center>
         <MudButton Variant=@Variant.Filled Color=@Color.Primary OnClick=@(() => IncrementTempo(-1))>-</MudButton>
-        <MudButton Variant=@Variant.Filled Color=@Color.Primary OnClick=@HandleTap>Tap</MudButton>
+        <MudButton Variant=@Variant.Filled Color=@Color.Primary FullWidth=true OnClick=@HandleTap>Tap</MudButton>
         <MudButton Variant=@Variant.Filled Color=@Color.Primary OnClick=@(() => IncrementTempo(+1))>+</MudButton>
     </MudStack>
 </MudStack>
