@@ -4,6 +4,7 @@
 @inject ClickTrackStore TrackStore
 @inject NavigationManager Navigation
 @inject SoundManager SoundSettings
+@inject IJSRuntime JS
 
 @if (_isLoading)
 {
@@ -20,7 +21,7 @@
     
     <MudDivider/>
 
-    <MudDropContainer T=@ClickTrackSectionData Items=@_track.Sections ItemsSelector=@((item,dropzone) => true) ItemDropped=@MoveSection Class="d-flex flex-wrap flex-grow-1">
+    <MudDropContainer T=@ClickTrackSectionData Items=@_track.Sections ItemsSelector=@((item,dropzone) => true) ItemDropped=@MoveSection Class="d-flex flex-wrap flex-grow-1" ItemPicked=@OnItemPicked >
         <ChildContent>
             <MudDropZone T=@ClickTrackSectionData Class="flex-grow-1" AllowReorder=true ItemDisabled=@(_ => Met.IsRunning) ItemDraggingClass="dragging-track-item"/>
         </ChildContent>
@@ -56,6 +57,7 @@
     {
         Met.StopCallback -= OnStop;
         Met.BeatCallback -= OnBeat;
+        await JS.InvokeVoidAsync("DragScroll.dispose");
         await base.DisposeAsync();
     }
 
@@ -78,6 +80,11 @@
         }
 
         _isLoading = false;
+    }
+
+    private async Task OnItemPicked(MudDragAndDropItemTransaction<ClickTrackSectionData> transaction)
+    {
+        await JS.InvokeVoidAsync("DragScroll.startPointerTracking");
     }
 
     private void OnStop()
