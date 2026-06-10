@@ -8,6 +8,7 @@ public class Metronome : IAsyncDisposable
 {
     private readonly IJSRuntime _js;
     private DotNetObjectReference<Metronome>? _dotNetRef;
+    private int _currentSectionsBeatCount;
 
     public ClickTrackSectionData Section { get; set; } = new(-1);
 
@@ -68,6 +69,7 @@ public class Metronome : IAsyncDisposable
             return;
         
         Data = data;
+        _currentSectionsBeatCount = sectionBeatCount;
 
         if(Data.Subdivisions < 0)
         {
@@ -115,13 +117,14 @@ public class Metronome : IAsyncDisposable
 
     [JSInvokable]
     public async Task OnMediaSessionPlay()
-        => await Start();
-
-    [JSInvokable]
-    public async Task OnMediaSessionPause()
-        => await Stop();
+    {
+        await Update(Data, _currentSectionsBeatCount);
+        await Start();
+    }
 
     [JSInvokable]
     public async Task OnMediaSessionStop()
-        => await Stop();
+    {
+        await Stop();
+    }
 }

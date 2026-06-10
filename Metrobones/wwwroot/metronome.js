@@ -197,21 +197,26 @@ function resumeAudio() {
 function initialize(ref) {
     dotNetReference = ref;
 
-    mediaSessionAudio = new Audio('Metrobones/wwwroot/silent.mp3');
+    mediaSessionAudio = new Audio('silent.mp3');
     mediaSessionAudio.loop = true;
-    mediaSessionAudio.volume = 0.001;
 
     if (!('mediaSession' in navigator)) return;
+
+    navigator.mediaSession.setPositionState({
+        duration: Infinity
+    });
 
     navigator.mediaSession.setActionHandler('play', () => {
         dotNetReference.invokeMethodAsync('OnMediaSessionPlay');
     });
-    // navigator.mediaSession.setActionHandler('pause', () => {
-    //     dotNetReference.invokeMethodAsync('OnMediaSessionPause');
-    // });
+    navigator.mediaSession.setActionHandler('pause', () => {
+        dotNetReference.invokeMethodAsync('OnMediaSessionStop');
+    });
     navigator.mediaSession.setActionHandler('stop', () => {
         dotNetReference.invokeMethodAsync('OnMediaSessionStop');
     });
+    navigator.mediaSession.setActionHandler('previoustrack', null);
+    navigator.mediaSession.setActionHandler('nexttrack', null);
 }
 
 
@@ -224,7 +229,9 @@ function startMediaSession() {
         title: `Playing Click`,
         artist: 'Metrobones',
         artwork: [
-            { src: 'Metrobones/wwwroot/icon-512.png', sizes: '512x512', type: 'image/png' }
+            { src: 'favicon.png', sizes: '32x32', type: 'image/png' },
+            { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
+            { src: 'icon-512.png', sizes: '512x512', type: 'image/png' }
         ]
     });
 

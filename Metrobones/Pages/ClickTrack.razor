@@ -48,13 +48,13 @@
 
     protected override void OnInitialized()
     {
-        Met.StopCallback += ResetCountInActive;
+        Met.StopCallback += OnStop;
         Met.BeatCallback += OnBeat;
     }
 
     public override async ValueTask DisposeAsync()
     {
-        Met.StopCallback -= ResetCountInActive;
+        Met.StopCallback -= OnStop;
         Met.BeatCallback -= OnBeat;
         await base.DisposeAsync();
     }
@@ -80,9 +80,13 @@
         _isLoading = false;
     }
 
-    private void ResetCountInActive()
+    private void OnStop()
     {
         _countInActive = false;
+        if(_currentSectionID >= 0)
+        {
+            _remainingBeats = _track.Sections[_currentSectionID].Length * _track.Sections[_currentSectionID].MetData.NotesPerBar;
+        }
     }
 
     private void UpdateOpenSections(ClickTrackSectionData? openedSection)
