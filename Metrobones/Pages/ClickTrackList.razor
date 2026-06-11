@@ -14,7 +14,10 @@
             <MudListItem Text=@track.Title Icon=@Icons.Material.Filled.ArrowForwardIos OnClick=@(() => OpenClickTrack(track.ID)) Style="border-radius: 1rem;">
                 <MudStack Row=true Justify=@Justify.SpaceBetween AlignItems=@AlignItems.Center Style="overflow: hidden;">
                     <MudText Style="overflow: hidden; text-overflow: ellipsis;">@track.Title</MudText>
-                    <MudIconButton OnClick=@(() => OpenEditTrackDialogAsync(track)) Color=@Color.Primary Icon=@Icons.Material.Outlined.Edit Size=@Size.Medium aria-label="edit click track" Style="flex-shrink: 0;" />
+                    <MudStack Row=true>
+                        <MudIconButton OnClick=@(async() => await TrackStore.DuplicateAsync(track.ID)) Color=@Color.Primary Icon=@Icons.Material.Outlined.LibraryAdd Size=@Size.Medium aria-label="edit click track" Style="flex-shrink: 0;" />
+                        <MudIconButton OnClick=@(async() => await OpenEditTrackDialogAsync(track)) Color=@Color.Primary Icon=@Icons.Material.Outlined.Edit Size=@Size.Medium aria-label="edit click track" Style="flex-shrink: 0;" />
+                    </MudStack>
                 </MudStack>
             </MudListItem>
             <MudDivider/>
@@ -22,9 +25,9 @@
     }
 </MudList>
 
-<MudStack Row=true Justify=@Justify.SpaceAround>
-    @* TODO: duplicate tracks or choose track as template *@
-    <MudIconButton OnClick=@TrackStore.AddAsync Color=@Color.Primary Icon=@Icons.Material.Filled.AddCircleOutline Size=@Size.Large aria-label="add click track" />
+<MudStack Row=true Justify=@Justify.Center>
+        <MudButton OnClick=@TrackStore.AddAsync Variant=@Variant.Outlined Color=@Color.Primary StartIcon=@Icons.Material.Filled.AddCircleOutline Size=@Size.Large aria-label="add new click track">New Track</MudButton>
+        <MudButton Variant=@Variant.Outlined Color=@Color.Primary StartIcon=@Icons.Material.Outlined.FileDownload Size=@Size.Large aria-label="add new click track">Import MIDI</MudButton>
 </MudStack>
 
 @code{

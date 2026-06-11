@@ -202,17 +202,6 @@ function initialize(ref) {
 
     if (!('mediaSession' in navigator)) return;
 
-    try {
-        navigator.mediaSession.setPositionState({
-            duration: Infinity,
-            playbackRate: 1,
-            position: 0
-        });
-    } catch (e) {
-        // setPositionState not supported or duration must be finite on Firefox
-        // safe to ignore since Firefox won't show progress bar anyway.
-    }
-
     navigator.mediaSession.setActionHandler('play', () => {
         dotNetReference.invokeMethodAsync('OnMediaSessionPlay');
     });
@@ -224,6 +213,17 @@ function initialize(ref) {
     });
     navigator.mediaSession.setActionHandler('previoustrack', null);
     navigator.mediaSession.setActionHandler('nexttrack', null);
+
+    try {
+        navigator.mediaSession.setPositionState({
+            duration: Infinity,
+            playbackRate: 1,
+            position: 0
+        });
+    } catch (e) {
+        // setPositionState not supported or duration must be finite on Firefox
+        // safe to ignore since Firefox won't show progress bar anyway.
+    }
 }
 
 

@@ -136,6 +136,7 @@
             }
 
             newSection = new ClickTrackSectionData(lastSection);
+            newSection.Title = ClickTrackStore.IncrementTrailingNumber(newSection.Title, _track.Sections.Select(s => s.Title));
         }
         
         _track.Sections.Add(newSection);

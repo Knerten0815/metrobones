@@ -1,4 +1,5 @@
 using Metrobones.Models;
+using System.Text.RegularExpressions;
 
 namespace Metrobones.Services;
 
@@ -73,6 +74,22 @@ public class ClickTrackStore(LocalStorage storage)
         var tracks = await EnsureLoaded();
         int newID = tracks.Max(s => s.ID) + 1;
         ClickTrackData newTrack = new ClickTrackData(){ID = newID};
+        newTrack.Title = IncrementTrailingNumber(newTrack.Title, tracks.Select(s => s.Title));
+        tracks.Add(newTrack);
+        await SaveAllAsync(tracks);
+    }
+
+    public async Task DuplicateAsync(int id)
+    {
+        var tracks = await EnsureLoaded();
+        var template = tracks.FirstOrDefault(t => t.ID == id);
+
+        if (template == null)
+            return;
+
+        int newID = tracks.Max(s => s.ID) + 1;
+        ClickTrackData newTrack = new ClickTrackData(template, newID);
+        newTrack.Title = IncrementTrailingNumber(newTrack.Title, tracks.Select(s => s.Title));
         tracks.Add(newTrack);
         await SaveAllAsync(tracks);
     }
@@ -92,5 +109,26 @@ public class ClickTrackStore(LocalStorage storage)
     {
         _tracks = tracks;
         await storage.SetAsync(Key, tracks);
+    }
+
+    public static string IncrementTrailingNumber(string input, IEnumerable<string> collection)
+    {
+        Match match;
+        while(collection.Any(title => title == input))
+        {
+            match = Regex.Match(input, @"(\d+)$");
+
+            if (match.Success)
+            {
+                int number = int.Parse(match.Value);
+                input = input[..match.Index] + (number + 1);
+            }
+            else
+            {
+                input = input + " 2";
+            }
+        }
+
+        return input;
     }
 }
