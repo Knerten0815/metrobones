@@ -1,6 +1,8 @@
 ﻿@page "/"
 @page "/clicktracks"
 @using Metrobones.Layout.Dialogs
+@using Melanchall.DryWetMidi.Core
+@using Melanchall.DryWetMidi.Interaction
 @inject ISnackbar Snackbar
 @inject ClickTrackStore TrackStore
 @inject NavigationManager Navigation
@@ -27,8 +29,8 @@
 </MudList>
 
 <MudStack Row=true Justify=@Justify.Center>
-        <MudButton OnClick=@TrackStore.AddAsync Variant=@Variant.Outlined Color=@Color.Primary StartIcon=@Icons.Material.Filled.AddCircleOutline Size=@Size.Large aria-label="add new click track">New Track</MudButton>
-        <MudFileUpload @bind-Files=_files AppendMultipleFiles=true Accept=".mid" OnFilesChanged=@ValidateMidiFiles >
+        <MudButton OnClick=@TrackStore.AddNewAsync Variant=@Variant.Outlined Color=@Color.Primary StartIcon=@Icons.Material.Filled.AddCircleOutline Size=@Size.Large aria-label="add new click track">New Track</MudButton>
+        <MudFileUpload @bind-Files=_files AppendMultipleFiles=true Accept=".mid" OnFilesChanged=@OnFilesChanged >
             <CustomContent>
                 <MudButton OnClick=@context.OpenFilePickerAsync
                            Variant=@Variant.Outlined 
@@ -63,35 +65,131 @@
 @code{
     public List<ClickTrackData> Tracks { get; set; } = new List<ClickTrackData>();
     private IReadOnlyList<IBrowserFile> _files = new List<IBrowserFile>();
-    List<IBrowserFile> _validFiles = new List<IBrowserFile>();
-    
-    private void ShowInvalidMidiSnackbar(string fileName)
+    private List<IBrowserFile> _validFiles = new List<IBrowserFile>();
+    private ReadingSettings _midiReadingSettings = new ReadingSettings
     {
-        Snackbar.Add("File " + fileName + " is not a valid MIDI file.", Severity.Error);
-    }
+        MissedEndOfTrackPolicy = MissedEndOfTrackPolicy.Ignore,
+        @* InvalidChannelEventParameterValuePolicy = InvalidChannelEventParameterValuePolicy.ReadValid,
+        InvalidChunkSizePolicy = InvalidChunkSizePolicy.Ignore,
+        InvalidMetaEventParameterValuePolicy = InvalidMetaEventParameterValuePolicy.SnapToLimits,
+        NoHeaderChunkPolicy = NoHeaderChunkPolicy.Ignore,
+        NotEnoughBytesPolicy = NotEnoughBytesPolicy.Ignore,
+        UnexpectedTrackChunksCountPolicy = UnexpectedTrackChunksCountPolicy.Ignore,
+        UnknownChannelEventPolicy = UnknownChannelEventPolicy.SkipStatusByteAndOneDataByte,
+        UnknownChunkIdPolicy = UnknownChunkIdPolicy.ReadAsUnknownChunk,
+        UnknownFileFormatPolicy = UnknownFileFormatPolicy.Ignore, *@
+    };
 
-    private async Task ValidateMidiFiles()
+    private async Task<Dictionary<string, MidiFile>> ValidateMidiFilesAsync()
     {
-        Console.WriteLine("Validating MIDI files...");
-        
+        Dictionary<string, MidiFile> validMidis = new Dictionary<string, MidiFile>();
         foreach (IBrowserFile file in _files)
         {
-            if (file.ContentType != "audio/midi" && !file.Name.EndsWith(".mid", StringComparison.OrdinalIgnoreCase))
+            if(file == null)
             {
-                Console.WriteLine("Calling Snackbar");
-                ShowInvalidMidiSnackbar(file.Name);
+                Console.Error.WriteLine("Null file encountered in file list.");
                 continue;
             }
-            _validFiles.Add(file);
+            
+            try
+            {
+                await using Stream sourceStream = file.OpenReadStream();
+                await using MemoryStream bufferedStream = new MemoryStream();
+                await sourceStream.CopyToAsync(bufferedStream);
+                bufferedStream.Position = 0;
+
+                MidiFile midiFile = MidiFile.Read(bufferedStream, _midiReadingSettings);
+
+                if(midiFile.OriginalFormat == MidiFileFormat.MultiSequence)
+                {
+                    Snackbar.Add("MIDI format 2 is not supported: " + file.Name, Severity.Error);
+                    continue;
+                }
+
+                validMidis[file.Name] = midiFile;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error reading MIDI file {file.Name}: \n{ex.Message}: \n{ex.StackTrace}");
+                Snackbar.Add("File " + file.Name + " is not a valid MIDI file.", Severity.Error);
+                continue;
+            }
         }
 
-        @* foreach (IBrowserFile file in _files)
-        {
-            using Stream stream = file.OpenReadStream();
-            await TrackStore.ImportFromMidiAsync(stream, file.Name);
-        } *@
+        return validMidis;
+    }
 
-        @* _files = new List<IBrowserFile>(); *@
+    private string GetMidiTitle(MidiFile midiFile)
+    {
+        ICollection<TimedEvent>? timedEvents = midiFile.GetTimedEvents();
+        foreach (TimedEvent timedEvent in timedEvents)
+        {
+            SequenceTrackNameEvent? nameEvent = timedEvent.Event as SequenceTrackNameEvent; 
+            if(nameEvent == null)
+                continue;
+            
+            return nameEvent.Text;
+        }
+
+        return string.Empty;
+    }
+
+    private ClickTrackData MidiToClickTrack(MidiFile midiFile)
+    {
+        ClickTrackData clickTrack = new ClickTrackData();
+        Dictionary<double, ClickTrackSectionData> sections = new Dictionary<double, ClickTrackSectionData>();
+        TempoMap map = midiFile.GetTempoMap();
+
+        ValueChange<Tempo>[] tempos = map.GetTempoChanges().ToArray();
+        foreach(ValueChange<Tempo> tempoChange in tempos)
+        {
+            ClickTrackSectionData tempoSection = new ClickTrackSectionData();
+            tempoSection.MetData.TempoData.Tempo = (int)Math.Round(tempoChange.Value.BeatsPerMinute, digits: 0);
+            sections[tempoChange.Time] = tempoSection;
+        }
+
+        ValueChange<TimeSignature>[] times = map.GetTimeSignatureChanges().ToArray();
+        foreach(ValueChange<TimeSignature> timeChange in times)
+        {
+            if(sections.TryGetValue(timeChange.Time, out ClickTrackSectionData? section))
+            {
+                section.MetData.NotesPerBar = timeChange.Value.Numerator;
+                section.MetData.NoteValue = timeChange.Value.Denominator;
+            }
+            else
+            {
+                ClickTrackSectionData timeSection = new ClickTrackSectionData();
+                timeSection.MetData.NotesPerBar = timeChange.Value.Numerator;
+                timeSection.MetData.NoteValue = timeChange.Value.Denominator;
+                sections[timeChange.Time] = timeSection;
+            }
+        }
+        
+        sections.Order();
+        clickTrack.Sections = sections.Values.ToList();
+        foreach(KeyValuePair<double, ClickTrackSectionData> kvp in sections)
+            Console.WriteLine(kvp.Key + ": Tempo="+kvp.Value.MetData.TempoData.Tempo+"; TS="+kvp.Value.MetData.NotesPerBar+"/"+kvp.Value.MetData.NoteValue);
+
+        return clickTrack;
+    }
+
+    private async Task OnFilesChanged()
+    {
+        // validate midi files
+        Dictionary<string, MidiFile> midiFiles = await ValidateMidiFilesAsync();
+        
+        foreach (KeyValuePair<string, MidiFile> kvp in midiFiles)
+        {
+            ClickTrackData clickTrack = MidiToClickTrack(kvp.Value);
+
+            // Get title, use filename as fallback
+            string title = GetMidiTitle(kvp.Value);
+            clickTrack.Title = string.IsNullOrWhiteSpace(title) ? kvp.Key : title;
+
+            await TrackStore.AddAsync(clickTrack);
+        }
+
+        _files = new List<IBrowserFile>();
     }
     
     protected override async Task OnInitializedAsync()

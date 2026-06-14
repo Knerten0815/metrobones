@@ -69,11 +69,21 @@ public class ClickTrackStore(LocalStorage storage)
         await storage.SetAsync(Key, tracks);
     }
 
-    public async Task AddAsync()
+    public async Task AddNewAsync()
     {
         var tracks = await EnsureLoaded();
         int newID = tracks.Max(s => s.ID) + 1;
         ClickTrackData newTrack = new ClickTrackData(){ID = newID};
+        newTrack.Title = IncrementTrailingNumber(newTrack.Title, tracks.Select(s => s.Title));
+        tracks.Add(newTrack);
+        await SaveAllAsync(tracks);
+    }
+
+    public async Task AddAsync(ClickTrackData newTrack)
+    {
+        var tracks = await EnsureLoaded();
+        int newID = tracks.Max(s => s.ID) + 1;
+        newTrack.ID = newID;
         newTrack.Title = IncrementTrailingNumber(newTrack.Title, tracks.Select(s => s.Title));
         tracks.Add(newTrack);
         await SaveAllAsync(tracks);
