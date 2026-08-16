@@ -1,8 +1,9 @@
 ﻿@page "/"
 @page "/clicktracks"
-@using Metrobones.Layout.Dialogs
+@using System.Globalization
 @using Melanchall.DryWetMidi.Core
 @using Melanchall.DryWetMidi.Interaction
+@using Metrobones.Layout.Dialogs
 @inject ISnackbar Snackbar
 @inject ClickTrackStore TrackStore
 @inject NavigationManager Navigation
@@ -90,7 +91,7 @@
                 Console.Error.WriteLine("Null file encountered in file list.");
                 continue;
             }
-            
+
             try
             {
                 await using Stream sourceStream = file.OpenReadStream();
@@ -127,7 +128,7 @@
             SequenceTrackNameEvent? nameEvent = timedEvent.Event as SequenceTrackNameEvent; 
             if(nameEvent == null)
                 continue;
-            
+
             return nameEvent.Text;
         }
 
@@ -136,103 +137,85 @@
 
     private ClickTrackData MidiToClickTrack(MidiFile midiFile)
     {
-        ClickTrackData clickTrack = new ClickTrackData();
-        Dictionary<BarBeatTicksTimeSpan, ClickTrackSectionData> sections = new Dictionary<BarBeatTicksTimeSpan, ClickTrackSectionData>();
+        TimedEventDetectionSettings settings = new();
+        TimedEvent[] midiEvents = [.. midiFile.GetTimedEvents()];
         TempoMap map = midiFile.GetTempoMap();
-
-        Dictionary<BarBeatTicksTimeSpan, BarBeatTicksTimeSpan> agogicSections = new Dictionary<BarBeatTicksTimeSpan, BarBeatTicksTimeSpan>();
-        BarBeatTicksTimeSpan? agogicSectionStart = null;
-        foreach(TimedEvent timedEvent in midiFile.GetTimedEvents())
+        ClickTrackData clickTrack = new ClickTrackData();
+        ClickTrackSectionData currentSection = new();
+        ClickTrackSectionData lastSection = new();
+        bool skipToAgogicsEnd = false;
+        BarBeatTicksTimeSpan lastTime = new();
+        BarBeatTicksTimeSpan currentTime = new();
+        int bpm = 120;
+        for(int i = 0; i < midiEvents.Length; i++)
         {
-            if(timedEvent.Event is not TextEvent textEvent)
-                continue;
-            
-            BarBeatTicksTimeSpan bbt = timedEvent.TimeAs<BarBeatTicksTimeSpan>(map);
-            if(textEvent.Text.Contains("gradual tempo change start"))
+            Console.WriteLine(midiEvents[i]);
+            MidiEvent midi = midiEvents[i].Event;
+            currentTime = midiEvents[i].TimeAs<BarBeatTicksTimeSpan>(map);
+
+            // check if we need a new section
+            if (lastTime != currentTime && !skipToAgogicsEnd)
             {
-                agogicSectionStart = bbt;
-                    continue;
+                // set length and add section
+                currentSection.Length = (int)(currentTime.Bars - lastTime.Bars);
+                clickTrack.Sections.Add(currentSection);
+
+                // reset algorithm
+                lastSection = currentSection;
+                currentSection = new(currentSection);
+                currentSection.MetData.TempoData.IsAgogic = false;
+                currentSection.Title = $"Bar {currentTime.Bars + 1}";
+                lastTime = currentTime;
             }
 
-            if(agogicSectionStart != null && textEvent.Text.Contains("gradual tempo change interpolation end"))
+            // parse midi event
+            if (midi is SequenceTrackNameEvent sequenceTrackNameEvent)
             {
-                agogicSections[agogicSectionStart] = bbt;
-                agogicSectionStart = null;
+                clickTrack.Title = sequenceTrackNameEvent.Text;
+            }
+            else if (midi is MarkerEvent markerEvent) // maybe think about markers creating new sections
+            {
+                currentSection.Title = markerEvent.Text;
+            }
+            else if(midi is TimeSignatureEvent timeSigEvent)
+            {
+                currentSection.MetData.NotesPerBar = timeSigEvent.Numerator;
+                currentSection.MetData.NoteValue = timeSigEvent.Denominator;
+                currentSection.MetData.BeatAccents = new int[timeSigEvent.Numerator];
+                currentSection.MetData.BeatAccents[0] = 1;
+            }
+            else if (midi is SetTempoEvent tempoEvent)
+            {
+                bpm = (int)Math.Round(60_000_000f / tempoEvent.MicrosecondsPerQuarterNote);
+                if (!skipToAgogicsEnd)
+                {
+                    currentSection.MetData.TempoData.Tempo = bpm;
+                    lastSection.MetData.TempoData.NextTempo = bpm;
+                    currentSection.MetData.TempoData.PreviousTempo = lastSection.MetData.TempoData.IsAgogic ? lastSection.MetData.TempoData.EndTempo : lastSection.MetData.TempoData.Tempo;
+                }
+            }
+            else if (midi is TextEvent textEvent && textEvent.Text.Contains("gradual tempo change"))
+            {
+                if (textEvent.Text.Contains("start ") && double.TryParse(textEvent.Text.Split("start ")[1], CultureInfo.InvariantCulture, out var bpmDouble))
+                {
+                    bpm = (int)Math.Round(bpmDouble);
+                    currentSection.MetData.TempoData.IsAgogic = true;
+                    currentSection.MetData.TempoData.StartTempo = bpm;
+                    currentSection.MetData.TempoData.Tempo = bpm;
+                    lastSection.MetData.TempoData.NextTempo = bpm;
+                    currentSection.MetData.TempoData.PreviousTempo = lastSection.MetData.TempoData.IsAgogic ? lastSection.MetData.TempoData.EndTempo : lastSection.MetData.TempoData.Tempo;
+                    skipToAgogicsEnd = true;
+                }
+                else if (textEvent.Text.Contains("end"))
+                {
+                    currentSection.MetData.TempoData.EndTempo = bpm;
+                    skipToAgogicsEnd = false;
+                }
             }
         }
 
-        Console.WriteLine("Parsing SetTempo events:");
-        ValueChange<Tempo>[] tempos = map.GetTempoChanges().ToArray();
-        Dictionary<BarBeatTicksTimeSpan, double> agogicDetections = new Dictionary<BarBeatTicksTimeSpan, double>();
-        BarBeatTicksTimeSpan? skipStart = null;
-        BarBeatTicksTimeSpan? skipEnd = null;
-        for(int i = 0; i < tempos.Length; i++)
-        {
-            BarBeatTicksTimeSpan bbt = tempos[i].TimeAs<BarBeatTicksTimeSpan>(map);
-            int tempo = (int)Math.Round(tempos[i].Value.BeatsPerMinute, digits: 0);
-            
-            if(skipEnd != null && bbt < skipEnd)
-                continue;
-            
-            if(skipStart != null && skipEnd != null)
-            {
-                sections[skipStart].MetData.TempoData.EndTempo = tempo;
-                skipStart = null;
-                skipEnd = null;
-            }
-
-            if(bbt.Beats != 0 || bbt.Ticks != 0)
-            {
-                agogicDetections[bbt] = tempos[i].Value.BeatsPerMinute;
-                continue;
-            }
-
-            Console.WriteLine("T: " + tempos[i].Time + "; M.B.T: " + bbt + "; BPM: " + tempos[i].Value.BeatsPerMinute);
-            ClickTrackSectionData tempoSection = new ClickTrackSectionData();
-            tempoSection.MetData.TempoData.Tempo = tempo;
-
-            if(agogicSections.ContainsKey(bbt))
-            {
-                tempoSection.MetData.TempoData.IsAgogic = true;
-                tempoSection.MetData.TempoData.StartTempo = tempo;
-                skipStart = bbt;
-                skipEnd = agogicSections[bbt];
-            }
-
-            sections[bbt] = tempoSection;
-        }
-
-        if(agogicDetections.Count != 0)
-        {
-            Console.WriteLine("Possible agogics detected!");
-            foreach(KeyValuePair<BarBeatTicksTimeSpan, double> kvp in agogicDetections)
-                Console.WriteLine(kvp.Key + ": " + kvp.Value + " bpm");
-
-        }
-
-        Console.WriteLine("Parsing SetTimeSignature events:");
-        ValueChange<TimeSignature>[] times = map.GetTimeSignatureChanges().ToArray();
-        foreach(ValueChange<TimeSignature> timeChange in times)
-        {
-            BarBeatTicksTimeSpan barBeatTicks = timeChange.TimeAs<BarBeatTicksTimeSpan>(map);
-            Console.WriteLine("T: " + timeChange.Time + "; M.B.T: " + timeChange.TimeAs<BarBeatTicksTimeSpan>(map) + "; Value: " + timeChange.Value.Numerator + "/" + timeChange.Value.Denominator);
-            if(sections.TryGetValue(barBeatTicks, out ClickTrackSectionData? section))
-            {
-                section.MetData.NotesPerBar = timeChange.Value.Numerator;
-                section.MetData.NoteValue = timeChange.Value.Denominator;
-            }
-            else
-            {
-                ClickTrackSectionData timeSection = new ClickTrackSectionData();
-                timeSection.MetData.NotesPerBar = timeChange.Value.Numerator;
-                timeSection.MetData.NoteValue = timeChange.Value.Denominator;
-                sections[barBeatTicks] = timeSection;
-            }
-        }
-        
-        sections.Order();
-        clickTrack.Sections = sections.Values.ToList();
-        
+        currentSection.Length = (int)(currentTime.Bars - lastTime.Bars);
+        clickTrack.Sections.Add(currentSection);
         return clickTrack;
     }
 
